@@ -766,7 +766,7 @@ export default function App() {
           {toast}
         </div>
       )}
-      {mode === "admin" ? <AdminView /> : <ClientView />}
+      {mode === "admin" ? AdminView() : ClientView()}
     </div>
   );
 }

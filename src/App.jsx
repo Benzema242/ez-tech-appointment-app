@@ -18,7 +18,7 @@ const SERVICES = [
 ];
 
 // ─── TIME SLOTS ────────────────────────────────────────────────────────────
-const TIMES = ["8:00 AM","9:00 AM","10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM"];
+const TIMES = ["8:00 AM","9:00 AM","10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM","6:00 PM","7:00 PM","8:00 PM"];
 
 // Client-facing hours only (10 AM – 6 PM, includes noon)
 const CLIENT_TIMES = ["10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM","6:00 PM"];
@@ -282,13 +282,13 @@ export default function App() {
         ))}
       </div>
 
-      <div style={{ flex:1, overflow:"hidden", display:"flex", minHeight:0, flexWrap:"wrap" }}>
+      <div style={{ flex:1, overflowY:"auto", minHeight:0, display:"flex", flexDirection:"column" }}>
         {adminTab === "bookings" ? (
 
           // ── Bookings Tab ──────────────────────────────────────────────
-          <>
+          <div style={{ display:"flex", flexWrap:"wrap", flex:1 }}>
             {/* Bookings List Panel */}
-            <div style={{ flex:"1 1 380px", padding:"16px 24px", overflowY:"auto", borderRight:"1px solid rgba(201,162,39,.1)", minHeight:300 }}>
+            <div style={{ flex:"1 1 340px", padding:"16px 24px", borderRight:"1px solid rgba(201,162,39,.1)" }}>
 
               {/* Filter Bar + Add Button */}
               <div style={{ display:"flex", gap:6, marginBottom:14, flexWrap:"wrap", alignItems:"center" }}>
@@ -323,9 +323,9 @@ export default function App() {
             </div>
 
             {/* Booking Detail Panel */}
-            <div style={{ flex:"1 1 380px", display:"flex", flexDirection:"column", minHeight:300 }}>
+            <div style={{ flex:"1 1 340px" }}>
               {!selected ? (
-                <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", color:"rgba(201,162,39,.3)", padding:30 }}>
+                <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", color:"rgba(201,162,39,.3)", padding:40 }}>
                   <div style={{ fontSize:56, marginBottom:14 }}>📋</div>
                   <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:2, textAlign:"center" }}>SELECT A BOOKING</div>
                 </div>
@@ -333,7 +333,7 @@ export default function App() {
                 const s = svc(selected.service);
                 const st = STATUS[selected.status];
                 return (
-                  <div style={{ padding:24, overflowY:"auto" }} className="slide-in">
+                  <div style={{ padding:24 }} className="slide-in">
 
                     {/* Client + Service Header */}
                     <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
@@ -408,7 +408,7 @@ export default function App() {
                 );
               })()}
             </div>
-          </>
+          </div>
 
         ) : (
 

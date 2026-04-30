@@ -208,6 +208,33 @@ export default function App() {
     .logo-circle{width:42px;height:42px;border-radius:50%;border:2px solid #c9a227;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;color:#fff;background:linear-gradient(135deg,#1e3a5f,#0a1628);box-shadow:0 0 12px rgba(201,162,39,.4);flex-shrink:0;}
   `;
 
+  // ── Shared Footer ──────────────────────────────────────────────────────
+  const SiteFooter = ({ light = false }) => (
+    <div style={{
+      borderTop: `1px solid ${light ? "rgba(201,162,39,.15)" : "rgba(201,162,39,.12)"}`,
+      padding: "clamp(18px,3vw,28px) clamp(16px,5vw,48px)",
+      textAlign: "center",
+      background: light ? "rgba(5,13,26,.85)" : "rgba(5,13,26,.6)",
+      backdropFilter: "blur(6px)",
+      WebkitBackdropFilter: "blur(6px)",
+    }}>
+      <div style={{ display:"flex", justifyContent:"center", gap:"clamp(20px,4vw,48px)", flexWrap:"wrap", marginBottom:14 }}>
+        {[
+          { label:"Phone", value:"(242) 805-0777", href:"tel:+12428050777" },
+          { label:"Email", value:"info@ez-techgroup.com", href:"mailto:info@ez-techgroup.com" },
+        ].map(({ label, value, href }) => (
+          <div key={label} style={{ textAlign:"center" }}>
+            <div style={{ fontSize:"clamp(8px,1.4vw,10px)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:"clamp(0.5px,0.2vw,1.5px)", marginBottom:4 }}>{label.toUpperCase()}</div>
+            <a href={href} style={{ fontSize:"clamp(11px,2vw,14px)", color:"#8899aa", textDecoration:"none" }}>{value}</a>
+          </div>
+        ))}
+      </div>
+      <div style={{ fontSize:"clamp(9px,1.5vw,11px)", color:"#445566", letterSpacing:"clamp(0.3px,0.1vw,1px)", fontFamily:"'Orbitron',sans-serif" }}>
+        © {new Date().getFullYear()} EZ Tech Solutions · All Rights Reserved
+      </div>
+    </div>
+  );
+
   // ── Admin View ─────────────────────────────────────────────────────────
   const AdminView = () => (
     <div style={{ display:"flex", flexDirection:"column", height:"100vh" }}>
@@ -612,6 +639,8 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {SiteFooter({ light: true })}
     </div>
   );
 
@@ -826,6 +855,9 @@ export default function App() {
             <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO BLACK.jpg`} alt="EZ Tech Solutions" style={{ height:"clamp(120px, 32vw, 200px)", width:"auto", objectFit:"contain", mixBlendMode:"screen", opacity:0.85 }} />
           </div>
         </div>
+
+        {/* Footer */}
+        {SiteFooter({})}
       </div>
     );
   };

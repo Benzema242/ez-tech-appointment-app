@@ -20,6 +20,9 @@ const SERVICES = [
 // ─── TIME SLOTS ────────────────────────────────────────────────────────────
 const TIMES = ["8:00 AM","9:00 AM","10:00 AM","11:00 AM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM"];
 
+// Client-facing hours only (10 AM – 6 PM, includes noon)
+const CLIENT_TIMES = ["10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM","6:00 PM"];
+
 // ─── BOOKING SOURCES ───────────────────────────────────────────────────────
 const SOURCES = [
   { id: "call",      label: "Call",      icon: "📞" },
@@ -78,6 +81,7 @@ export default function App() {
   const [selDay, setSelDay] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [adminForm, setAdminForm] = useState({ name:"", email:"", phone:"", service:"", date:"", time:"", source:"call", status:"pending", duration:1, notes:"" });
+  const [adminConfirmOverlap, setAdminConfirmOverlap] = useState(false);
 
   // ── Toast Notification ─────────────────────────────────────────────────
   const fire = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
@@ -111,6 +115,8 @@ export default function App() {
   };
 
   // ── Availability Helpers ───────────────────────────────────────────────
+
+  // Admin day-view: approved + pending bookings block slots
   const isBooked = (date, time) => {
     const slotH = timeToHour(time);
     return bookings.some(b => {
@@ -118,6 +124,30 @@ export default function App() {
       const bH = timeToHour(b.time);
       const dur = b.duration || 1;
       return slotH >= bH && slotH < bH + dur;
+    });
+  };
+
+  // Client booking: only approved bookings block slots (pending stays open)
+  const isClientBooked = (date, time) => {
+    const slotH = timeToHour(time);
+    return bookings.some(b => {
+      if (b.date !== date || b.status !== "approved") return false;
+      const bH = timeToHour(b.time);
+      const dur = b.duration || 1;
+      return slotH >= bH && slotH < bH + dur;
+    });
+  };
+
+  // Admin add: detect any time overlap with existing bookings
+  const hasAdminConflict = (date, time, duration) => {
+    if (!date || !time) return false;
+    const startH = timeToHour(time);
+    const endH = startH + (duration || 1);
+    return bookings.some(b => {
+      if (b.date !== date || (b.status !== "approved" && b.status !== "pending")) return false;
+      const bH = timeToHour(b.time);
+      const bEnd = bH + (b.duration || 1);
+      return startH < bEnd && endH > bH;
     });
   };
 
@@ -232,7 +262,7 @@ export default function App() {
                     <button key={k} onClick={() => setFilter(k)} className="btn" style={{ padding:"6px 11px", fontSize:10, background: filter===k ? "rgba(201,162,39,.2)" : "transparent", border:"1px solid rgba(201,162,39,.3)", color: filter===k ? "#f0c040" : "#7788aa" }}>{l}</button>
                   ))}
                 </div>
-                <button className="btn gold" style={{ padding:"7px 14px", fontSize:10, flexShrink:0 }} onClick={() => setShowAddModal(true)}>＋ ADD</button>
+                <button className="btn gold" style={{ padding:"7px 14px", fontSize:10, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋ ADD</button>
               </div>
 
               {/* Booking Rows */}
@@ -497,11 +527,11 @@ export default function App() {
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                 <div>
                   <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>DATE *</label>
-                  <input type="date" value={adminForm.date} onChange={e => setAdminForm({...adminForm, date:e.target.value})} style={{ colorScheme:"dark" }} />
+                  <input type="date" value={adminForm.date} onChange={e => { setAdminForm({...adminForm, date:e.target.value}); setAdminConfirmOverlap(false); }} style={{ colorScheme:"dark" }} />
                 </div>
                 <div>
                   <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>TIME *</label>
-                  <select value={adminForm.time} onChange={e => setAdminForm({...adminForm, time:e.target.value})}>
+                  <select value={adminForm.time} onChange={e => { setAdminForm({...adminForm, time:e.target.value}); setAdminConfirmOverlap(false); }}>
                     <option value="">Select time…</option>
                     {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -523,7 +553,7 @@ export default function App() {
                 <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:8 }}>DURATION *</label>
                 <div style={{ display:"flex", gap:5 }}>
                   {[1,2,3,4,5,6,7,8].map(h => (
-                    <button key={h} type="button" onClick={() => setAdminForm({...adminForm, duration:h})} className="btn" style={{ flex:1, padding:"7px 2px", fontSize:10, background: adminForm.duration === h ? "rgba(201,162,39,.25)" : "transparent", border: adminForm.duration === h ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.2)", color: adminForm.duration === h ? "#f0c040" : "#7788aa" }}>{h}h</button>
+                    <button key={h} type="button" onClick={() => { setAdminForm({...adminForm, duration:h}); setAdminConfirmOverlap(false); }} className="btn" style={{ flex:1, padding:"7px 2px", fontSize:10, background: adminForm.duration === h ? "rgba(201,162,39,.25)" : "transparent", border: adminForm.duration === h ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.2)", color: adminForm.duration === h ? "#f0c040" : "#7788aa" }}>{h}h</button>
                   ))}
                 </div>
               </div>
@@ -549,11 +579,36 @@ export default function App() {
               </div>
             </div>
 
-            {/* Modal Actions */}
-            <div style={{ display:"flex", gap:10, marginTop:20, justifyContent:"flex-end" }}>
-              <button className="btn ghost" onClick={() => setShowAddModal(false)}>CANCEL</button>
-              <button className="btn gold" disabled={!adminForm.name || !adminForm.phone || !adminForm.service || !adminForm.date || !adminForm.time || !adminForm.source} onClick={submitAdminBooking}>＋ ADD APPOINTMENT</button>
-            </div>
+            {/* Passive overlap indicator */}
+            {hasAdminConflict(adminForm.date, adminForm.time, adminForm.duration) && !adminConfirmOverlap && (
+              <div style={{ marginTop:12, padding:10, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:11, color:"#fca5a5" }}>
+                ⚠️ This time slot overlaps with an existing booking.
+              </div>
+            )}
+
+            {/* Modal Actions — confirmation step when overlap detected */}
+            {adminConfirmOverlap ? (
+              <div style={{ marginTop:16 }}>
+                <div style={{ padding:13, background:"rgba(239,68,68,.1)", border:"1px solid rgba(239,68,68,.35)", borderRadius:4, fontSize:12, color:"#fca5a5", marginBottom:12 }}>
+                  ⚠️ This appointment overlaps with an existing booking. Are you sure you want to add it anyway?
+                </div>
+                <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
+                  <button className="btn ghost" onClick={() => setAdminConfirmOverlap(false)}>NO, GO BACK</button>
+                  <button className="btn danger" onClick={submitAdminBooking}>YES, ADD ANYWAY</button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display:"flex", gap:10, marginTop:20, justifyContent:"flex-end" }}>
+                <button className="btn ghost" onClick={() => setShowAddModal(false)}>CANCEL</button>
+                <button className="btn gold" disabled={!adminForm.name || !adminForm.phone || !adminForm.service || !adminForm.date || !adminForm.time || !adminForm.source} onClick={() => {
+                  if (hasAdminConflict(adminForm.date, adminForm.time, adminForm.duration)) {
+                    setAdminConfirmOverlap(true);
+                  } else {
+                    submitAdminBooking();
+                  }
+                }}>＋ ADD APPOINTMENT</button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -697,8 +752,8 @@ export default function App() {
                       <div>
                         <div style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:8 }}>AVAILABLE TIMES · {form.date}</div>
                         <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6 }}>
-                          {TIMES.map(t => {
-                            const taken = isBooked(form.date, t);
+                          {CLIENT_TIMES.map(t => {
+                            const taken = isClientBooked(form.date, t);
                             return <div key={t} className={"timeslot " + (form.time === t ? "sel" : "") + (taken ? " taken" : "")} onClick={() => !taken && setForm({...form, time:t})}>{t}</div>;
                           })}
                         </div>

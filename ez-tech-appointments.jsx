@@ -823,7 +823,7 @@ export default function App() {
 
           {/* Bottom Brand Logo — screen blend removes the black background */}
           <div style={{ textAlign:"center", marginTop:28, paddingBottom:8 }}>
-            <img src="/assets/EZTECHLOGO BLACK.jpg" alt="EZ Tech Solutions" style={{ height:"clamp(120px, 32vw, 200px)", width:"auto", objectFit:"contain", mixBlendMode:"screen", opacity:0.85 }} />
+            <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO BLACK.jpg`} alt="EZ Tech Solutions" style={{ height:"clamp(120px, 32vw, 200px)", width:"auto", objectFit:"contain", mixBlendMode:"screen", opacity:0.85 }} />
           </div>
         </div>
       </div>

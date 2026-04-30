@@ -802,11 +802,16 @@ export default function App() {
               </div>
 
               {/* Footer */}
-              <div style={{ marginTop:20, textAlign:"center", fontSize:10, color:"#556677", letterSpacing:1 }}>
+              <div style={{ marginTop:20, textAlign:"center", fontSize:"clamp(13px, 3.5vw, 17px)", color:"#8899aa", letterSpacing:"0.5px" }}>
                 📞 (242) 805-0777 · ✉️ info@ez-techgroup.com
               </div>
             </>
           )}
+
+          {/* Bottom Brand Logo — screen blend removes the black background */}
+          <div style={{ textAlign:"center", marginTop:28, paddingBottom:8 }}>
+            <img src="/assets/EZTECHLOGO BLACK.jpg" alt="EZ Tech Solutions" style={{ height:"clamp(120px, 32vw, 200px)", width:"auto", objectFit:"contain", mixBlendMode:"screen", opacity:0.85 }} />
+          </div>
         </div>
       </div>
     );

@@ -850,11 +850,6 @@ export default function App() {
                   </div>
                 )}
               </div>
-
-              {/* Footer */}
-              <div style={{ marginTop:20, textAlign:"center", fontSize:"clamp(13px, 3.5vw, 17px)", color:"#8899aa", letterSpacing:"0.5px" }}>
-                📞 {CONTACT.phone} · ✉️ {CONTACT.email}
-              </div>
             </>
           )}
 

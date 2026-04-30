@@ -622,18 +622,31 @@ export default function App() {
     const canNext3 = form.date && form.time;
 
     return (
-      <div style={{ minHeight:"100vh", padding:"20px 16px" }} className="circuit">
-        <div style={{ maxWidth:560, margin:"0 auto" }}>
+      <div style={{ minHeight:"100vh" }} className="circuit">
 
-          {/* Client Header */}
-          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:24 }}>
-            <div className="logo-circle">EZ</div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:900, color:"#fff", letterSpacing:2 }}>EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span></div>
-              <div style={{ fontSize:10, color:"#c9a227", letterSpacing:1.5, marginTop:1, fontStyle:"italic" }}>Providing Fast and Quality Services</div>
+        {/* Client Header — full-width sticky website-style */}
+        <div style={{
+          position:"sticky", top:0, zIndex:100,
+          background:"linear-gradient(180deg,rgba(5,13,26,.97),rgba(10,22,40,.93))",
+          borderBottom:"1px solid rgba(201,162,39,.25)",
+          backdropFilter:"blur(10px)",
+          WebkitBackdropFilter:"blur(10px)",
+          padding:"clamp(10px,2vw,18px) clamp(16px,5vw,56px)",
+          display:"flex", alignItems:"center", gap:"clamp(10px,2vw,20px)"
+        }}>
+          <div className="logo-circle" style={{ width:"clamp(40px,6vw,54px)", height:"clamp(40px,6vw,54px)", fontSize:"clamp(14px,2.2vw,20px)", flexShrink:0 }}>EZ</div>
+          <div style={{ flex:1 }}>
+            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:"clamp(15px,3vw,24px)", fontWeight:900, color:"#fff", letterSpacing:"clamp(1px,0.4vw,3px)" }}>
+              EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span>
             </div>
-            <button className="btn ghost" style={{ padding:"7px 12px", fontSize:10 }} onClick={() => setMode("admin")}>ADMIN</button>
+            <div style={{ fontSize:"clamp(9px,1.6vw,12px)", color:"#c9a227", letterSpacing:"clamp(0.5px,0.2vw,1.5px)", marginTop:3, fontStyle:"italic" }}>
+              Providing Fast and Quality Services
+            </div>
           </div>
+          <button className="btn ghost" style={{ padding:"clamp(6px,1vw,10px) clamp(10px,1.8vw,16px)", fontSize:"clamp(9px,1.4vw,11px)", flexShrink:0 }} onClick={() => setMode("admin")}>ADMIN</button>
+        </div>
+
+        <div style={{ maxWidth:560, margin:"0 auto", padding:"24px 16px" }}>
 
           {submitted ? (
 

@@ -18,7 +18,7 @@ const SERVICES = [
 ];
 
 // ─── TIME SLOTS ────────────────────────────────────────────────────────────
-const TIMES = ["8:00 AM","9:00 AM","10:00 AM","11:00 AM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM"];
+const TIMES = ["8:00 AM","9:00 AM","10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM"];
 
 // Client-facing hours only (10 AM – 6 PM, includes noon)
 const CLIENT_TIMES = ["10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM","6:00 PM"];
@@ -49,6 +49,14 @@ const daysInMonth = (y, m) => new Date(y, m+1, 0).getDate();
 const firstDay = (y, m) => new Date(y, m, 1).getDay();
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAYNAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+// ─── CONTACT INFO ──────────────────────────────────────────────────────────
+const CONTACT = {
+  phone:     "(242) 805-0777",
+  phoneTel:  "tel:+12428050777",
+  email:     "info@ez-techgroup.com",
+  emailHref: "mailto:info@ez-techgroup.com",
+};
 
 // ─── LOOKUP HELPERS ────────────────────────────────────────────────────────
 const svc = id => SERVICES.find(s => s.id === id) || { label: id, icon: "⚙️", price: 0 };
@@ -220,8 +228,8 @@ export default function App() {
     }}>
       <div style={{ display:"flex", justifyContent:"center", gap:"clamp(20px,4vw,48px)", flexWrap:"wrap", marginBottom:14 }}>
         {[
-          { label:"Phone", value:"(242) 805-0777", href:"tel:+12428050777" },
-          { label:"Email", value:"info@ez-techgroup.com", href:"mailto:info@ez-techgroup.com" },
+          { label:"Phone", value:CONTACT.phone, href:CONTACT.phoneTel },
+          { label:"Email", value:CONTACT.email, href:CONTACT.emailHref },
         ].map(({ label, value, href }) => (
           <div key={label} style={{ textAlign:"center" }}>
             <div style={{ fontSize:"clamp(8px,1.4vw,10px)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:"clamp(0.5px,0.2vw,1.5px)", marginBottom:4 }}>{label.toUpperCase()}</div>
@@ -414,10 +422,10 @@ export default function App() {
                 <span style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040" }}>{MONTHS[calM]} {calY}</span>
                 <button className="btn ghost" style={{ padding:"5px 11px" }} onClick={() => { if(calM===11){setCalM(0);setCalY(y=>y+1);}else setCalM(m=>m+1); }}>›</button>
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(7,40px)", gap:3, marginBottom:4 }}>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(7,minmax(0,40px))", gap:3, marginBottom:4 }}>
                 {DAYNAMES.map(d => <div key={d} style={{ textAlign:"center", fontFamily:"'Orbitron',sans-serif", fontSize:9, letterSpacing:1, color:"#c9a227", padding:"5px 0" }}>{d}</div>)}
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(7,40px)", gap:3 }}>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(7,minmax(0,40px))", gap:3 }}>
                 {Array(firstDay(calY, calM)).fill(null).map((_,i) => <div key={`e${i}`} />)}
                 {Array(daysInMonth(calY, calM)).fill(null).map((_,i) => {
                   const d = i+1;
@@ -688,7 +696,7 @@ export default function App() {
               <div style={{ padding:14, background:"rgba(201,162,39,.08)", border:"1px solid rgba(201,162,39,.2)", borderRadius:4, marginBottom:18, fontSize:12, color:"#c8bfa8" }}>
                 Our team will review your request and contact you at <strong style={{ color:"#c9a227" }}>{form.phone}</strong> to <strong>approve</strong>, <strong>schedule a call</strong>, or <strong>follow up</strong>.
               </div>
-              <div style={{ fontSize:11, color:"#7788aa", marginBottom:18 }}>📞 (242) 805-0777 · ✉️ info@ez-techgroup.com</div>
+              <div style={{ fontSize:11, color:"#7788aa", marginBottom:18 }}>📞 {CONTACT.phone} · ✉️ {CONTACT.email}</div>
               <button className="btn gold" onClick={resetClient}>BOOK ANOTHER SERVICE</button>
             </div>
 
@@ -845,7 +853,7 @@ export default function App() {
 
               {/* Footer */}
               <div style={{ marginTop:20, textAlign:"center", fontSize:"clamp(13px, 3.5vw, 17px)", color:"#8899aa", letterSpacing:"0.5px" }}>
-                📞 (242) 805-0777 · ✉️ info@ez-techgroup.com
+                📞 {CONTACT.phone} · ✉️ {CONTACT.email}
               </div>
             </>
           )}

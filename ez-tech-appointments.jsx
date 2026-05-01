@@ -741,9 +741,6 @@ export default function App() {
                           <span style={{ fontSize:22 }}>{s.icon}</span>
                           <div style={{ flex:1 }}>
                             <div style={{ fontWeight:600, color:"#e8e0cc", fontSize:13 }}>{s.label}</div>
-                            <div style={{ fontSize:11, color: s.price === 0 ? "#4ade80" : "#c9a227", marginTop:2, fontFamily:"'Orbitron',sans-serif", letterSpacing:0.5 }}>
-                              {s.price === 0 ? (s.note || "FREE") : `$${s.price}`}
-                            </div>
                           </div>
                           {form.service === s.id && <span style={{ color:"#c9a227", fontSize:18 }}>✓</span>}
                         </div>
@@ -859,7 +856,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Footer */}
         {SiteFooter({})}
       </div>
     );

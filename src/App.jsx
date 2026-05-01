@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "./supabase";
 
 // ─── SERVICES CATALOG ──────────────────────────────────────────────────────
 const SERVICES = [
@@ -33,14 +34,6 @@ const SOURCES = [
   { id: "website",   label: "Website",   icon: "🌐" },
 ];
 
-// ─── SEED / DEMO DATA ──────────────────────────────────────────────────────
-const SEED = [
-  { id: 1, client: "Marcus Johnson", service: "cctv_assess", date: "2026-05-06", time: "10:00 AM", status: "approved", phone: "242-555-0101", email: "marcus@email.com", notes: "3 cameras front and back", source: "call" },
-  { id: 2, client: "Diana Price", service: "network", date: "2026-05-08", time: "2:00 PM", status: "pending", phone: "242-555-0102", email: "diana@email.com", notes: "Office of 12 workstations", source: "whatsapp" },
-  { id: 3, client: "Trevor Osei", service: "starlink", date: "2026-05-12", time: "9:00 AM", status: "pending", phone: "242-555-0103", email: "trevor@email.com", notes: "", source: "facebook" },
-  { id: 4, client: "Yolanda Cruz", service: "cctv_install", date: "2026-05-15", time: "11:00 AM", status: "approved", phone: "242-555-0104", email: "yolanda@email.com", notes: "8 camera system warehouse", source: "referred" },
-  { id: 5, client: "Andre Smith", service: "lighting", date: "2026-05-20", time: "10:00 AM", status: "pending", phone: "242-555-0105", email: "andre@email.com", notes: "Villa poolside lighting", source: "website" },
-];
 
 // ─── DATE & CALENDAR HELPERS ───────────────────────────────────────────────
 const pad = n => String(n).padStart(2, "0");
@@ -75,7 +68,8 @@ export default function App() {
 
   // ── State ──────────────────────────────────────────────────────────────
   const [mode, setMode] = useState("admin");
-  const [bookings, setBookings] = useState(SEED);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [filter, setFilter] = useState("all");
   const [toast, setToast] = useState(null);
@@ -91,32 +85,54 @@ export default function App() {
   const [adminForm, setAdminForm] = useState({ name:"", email:"", phone:"", service:"", date:"", time:"", source:"call", status:"pending", duration:1, notes:"" });
   const [adminConfirmOverlap, setAdminConfirmOverlap] = useState(false);
 
+  // ── Load bookings from Supabase ────────────────────────────────────────
+  useEffect(() => {
+    supabase
+      .from("bookings")
+      .select("*")
+      .order("date", { ascending: true })
+      .then(({ data, error }) => {
+        if (!error && data) setBookings(data);
+        setLoading(false);
+      });
+  }, []);
+
   // ── Toast Notification ─────────────────────────────────────────────────
   const fire = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
   // ── Booking Actions ────────────────────────────────────────────────────
-  const updateStatus = (id, status) => {
+  const updateStatus = async (id, status) => {
+    const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
+    if (error) { fire("❌ Error updating status"); return; }
     setBookings(p => p.map(b => b.id === id ? { ...b, status } : b));
     setSelected(p => p ? { ...p, status } : null);
     const m = { approved: "✅ Approved!", denied: "❌ Denied", scheduled_call: "📞 Call scheduled", pending: "↩ Reset to pending" };
     fire(m[status] || "Updated");
   };
 
-  const submitBooking = () => {
-    setBookings(p => [...p, { id: Date.now(), client: form.name, service: form.service, date: form.date, time: form.time, status: "pending", phone: form.phone, email: form.email, notes: form.notes, source: "website" }]);
+  const submitBooking = async () => {
+    const payload = { client: form.name, service: form.service, date: form.date, time: form.time, status: "pending", phone: form.phone, email: form.email, notes: form.notes, source: "website", duration: 1 };
+    const { data, error } = await supabase.from("bookings").insert(payload).select().single();
+    if (error) { fire("❌ Error submitting booking"); return; }
+    setBookings(p => [...p, data]);
     setSubmitted(true);
   };
 
   const resetClient = () => { setStep(1); setForm({ name:"", email:"", phone:"", service:"", date:"", time:"", notes:"" }); setSubmitted(false); };
 
-  const submitAdminBooking = () => {
-    setBookings(p => [...p, { id: Date.now(), client: adminForm.name, service: adminForm.service, date: adminForm.date, time: adminForm.time, status: adminForm.status, phone: adminForm.phone, email: adminForm.email, notes: adminForm.notes, source: adminForm.source, duration: adminForm.duration }]);
+  const submitAdminBooking = async () => {
+    const payload = { client: adminForm.name, service: adminForm.service, date: adminForm.date, time: adminForm.time, status: adminForm.status, phone: adminForm.phone, email: adminForm.email, notes: adminForm.notes, source: adminForm.source, duration: adminForm.duration };
+    const { data, error } = await supabase.from("bookings").insert(payload).select().single();
+    if (error) { fire("❌ Error adding appointment"); return; }
+    setBookings(p => [...p, data]);
     setShowAddModal(false);
     setAdminForm({ name:"", email:"", phone:"", service:"", date:"", time:"", source:"call", status:"pending", duration:1, notes:"" });
     fire("✅ Appointment added!");
   };
 
-  const updateBooking = (id, updates) => {
+  const updateBooking = async (id, updates) => {
+    const { error } = await supabase.from("bookings").update(updates).eq("id", id);
+    if (error) { fire("❌ Error saving changes"); return; }
     setBookings(p => p.map(b => b.id === id ? { ...b, ...updates } : b));
     setSelected(p => p ? { ...p, ...updates } : null);
     fire("✅ Updated!");
@@ -864,6 +880,14 @@ export default function App() {
   };
 
   // ── Root Render ────────────────────────────────────────────────────────
+  if (loading) return (
+    <div style={{ minHeight:"100vh", background:"#050d1a", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:16 }} className="circuit">
+      <style>{css}</style>
+      <div className="logo-circle" style={{ width:60, height:60, fontSize:22 }}>EZ</div>
+      <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:12, color:"#c9a227", letterSpacing:3 }} className="pulse">LOADING…</div>
+    </div>
+  );
+
   return (
     <div style={{ minHeight:"100vh", background:"#050d1a", color:"#e8e0cc" }} className="circuit">
       <style>{css}</style>

@@ -59,8 +59,8 @@ const STATUS = {
   denied:         { label: "DENIED",         color: "#ef4444", bg: "rgba(239,68,68,.15)",   border: "rgba(239,68,68,.4)" },
   scheduled_call: { label: "CALL SCHEDULED", color: "#3b82f6", bg: "rgba(59,130,246,.15)",  border: "rgba(59,130,246,.4)" },
 };
+const safeStatus = s => STATUS[s] || STATUS.pending;
 
-const ADMIN_PW = "RCNov2821#";
 const SESSION_KEY = "ez_admin_authed";
 
 // ─── APP COMPONENT ─────────────────────────────────────────────────────────
@@ -73,12 +73,11 @@ export default function App() {
   const [adminAuthed, setAdminAuthed] = useState(() => sessionStorage.getItem(SESSION_KEY) === "1");
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
   const pwRef = useRef(null);
 
   useEffect(() => {
-    const onHash = () => {
-      setMode(isAdminRoute() ? "admin" : "client");
-    };
+    const onHash = () => setMode(isAdminRoute() ? "admin" : "client");
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
@@ -86,22 +85,27 @@ export default function App() {
   const goAdmin = () => { window.location.hash = "#/admin"; };
   const goClient = () => { window.location.hash = ""; resetClient(); };
 
-  const tryLogin = () => {
-    if (pwInput === ADMIN_PW) {
+  const tryLogin = async () => {
+    if (loginLoading) return;
+    setLoginLoading(true);
+    const { data, error } = await supabase.rpc("verify_admin_password", { pw: pwInput });
+    setLoginLoading(false);
+    if (error || !data) {
+      setPwError(true);
+      setPwInput("");
+      setTimeout(() => pwRef.current?.focus(), 50);
+    } else {
       sessionStorage.setItem(SESSION_KEY, "1");
       setAdminAuthed(true);
       setPwError(false);
       setPwInput("");
-    } else {
-      setPwError(true);
-      setPwInput("");
-      setTimeout(() => pwRef.current?.focus(), 50);
     }
   };
 
   const logout = () => {
     sessionStorage.removeItem(SESSION_KEY);
     setAdminAuthed(false);
+    setShowChangePwModal(false);
     goClient();
   };
 
@@ -122,6 +126,10 @@ export default function App() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [adminForm, setAdminForm] = useState({ name:"", email:"", phone:"", service:"", date:"", time:"", source:"call", status:"pending", duration:1, notes:"" });
   const [adminConfirmOverlap, setAdminConfirmOverlap] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [showChangePwModal, setShowChangePwModal] = useState(false);
+  const [changePwForm, setChangePwForm] = useState({ old:"", newPw:"", confirm:"" });
+  const [changePwError, setChangePwError] = useState("");
 
   // ── Load bookings from Supabase ────────────────────────────────────────
   useEffect(() => {
@@ -176,16 +184,31 @@ export default function App() {
     fire("✅ Updated!");
   };
 
-  // ── Availability Helpers ───────────────────────────────────────────────
-  const isBooked = (date, time) => {
-    const slotH = timeToHour(time);
-    return bookings.some(b => {
-      if (b.date !== date || (b.status !== "approved" && b.status !== "pending")) return false;
-      const bH = timeToHour(b.time); const dur = b.duration || 1;
-      return slotH >= bH && slotH < bH + dur;
-    });
+  const deleteBooking = async (id) => {
+    const { error } = await supabase.from("bookings").delete().eq("id", id);
+    if (error) { fire("❌ Error deleting booking"); return; }
+    setBookings(p => p.filter(b => b.id !== id));
+    setSelected(null);
+    setDeleteConfirm(false);
+    fire("🗑 Booking deleted");
   };
 
+  const submitChangePassword = async () => {
+    if (!changePwForm.old) { setChangePwError("Enter your current password"); return; }
+    if (changePwForm.newPw.length < 6) { setChangePwError("New password must be at least 6 characters"); return; }
+    if (changePwForm.newPw !== changePwForm.confirm) { setChangePwError("New passwords don't match"); return; }
+    const { data, error } = await supabase.rpc("change_admin_password", { old_pw: changePwForm.old, new_pw: changePwForm.newPw });
+    if (error || !data) {
+      setChangePwError("Incorrect current password");
+    } else {
+      fire("✅ Password updated!");
+      setShowChangePwModal(false);
+      setChangePwForm({ old:"", newPw:"", confirm:"" });
+      setChangePwError("");
+    }
+  };
+
+  // ── Availability Helpers ───────────────────────────────────────────────
   const isClientBooked = (date, time) => {
     const slotH = timeToHour(time);
     return bookings.some(b => {
@@ -321,8 +344,13 @@ export default function App() {
           )}
         </div>
 
-        <button className="btn gold" style={{ width:"100%", padding:"13px", fontSize:12, letterSpacing:2 }} onClick={tryLogin}>
-          UNLOCK DASHBOARD
+        <button
+          className="btn gold"
+          style={{ width:"100%", padding:"13px", fontSize:12, letterSpacing:2 }}
+          onClick={tryLogin}
+          disabled={loginLoading}
+        >
+          {loginLoading ? "VERIFYING…" : "UNLOCK DASHBOARD"}
         </button>
 
         <div style={{ textAlign:"center", marginTop:16 }}>
@@ -339,13 +367,14 @@ export default function App() {
     <div style={{ display:"flex", flexDirection:"column", height:"100vh" }}>
 
       {/* Admin Header */}
-      <div style={{ padding:"16px 24px", borderBottom:"1px solid rgba(201,162,39,.2)", background:"linear-gradient(180deg,rgba(10,22,40,.95),rgba(10,22,40,.85))", display:"flex", alignItems:"center", gap:14 }}>
+      <div style={{ padding:"16px 24px", borderBottom:"1px solid rgba(201,162,39,.2)", background:"linear-gradient(180deg,rgba(10,22,40,.95),rgba(10,22,40,.85))", display:"flex", alignItems:"center", gap:14, flexWrap:"wrap" }}>
         <div className="logo-circle">EZ</div>
         <div style={{ flex:1 }}>
           <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:14, fontWeight:900, color:"#fff", letterSpacing:2 }}>EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span></div>
           <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, marginTop:1 }}>ADMIN DASHBOARD · BENZ</div>
         </div>
-        <div style={{ display:"flex", gap:8 }}>
+        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+          <button className="btn ghost" style={{ padding:"8px 12px", fontSize:10 }} onClick={() => { setShowChangePwModal(true); setChangePwError(""); setChangePwForm({ old:"", newPw:"", confirm:"" }); }}>🔑 CHANGE PW</button>
           <button className="btn ghost" onClick={goClient}>👤 CLIENT VIEW</button>
           <button className="btn danger" style={{ padding:"10px 14px", fontSize:10 }} onClick={logout}>LOGOUT</button>
         </div>
@@ -395,9 +424,9 @@ export default function App() {
               {filtered.length === 0 ? (
                 <div style={{ textAlign:"center", padding:40, color:"#556677" }}>No bookings</div>
               ) : filtered.map(b => {
-                const s = svc(b.service); const st = STATUS[b.status];
+                const s = svc(b.service); const st = safeStatus(b.status);
                 return (
-                  <div key={b.id} className={"row " + (selected?.id === b.id ? "active" : "")} onClick={() => setSelected(b)}>
+                  <div key={b.id} className={"row " + (selected?.id === b.id ? "active" : "")} onClick={() => { setSelected(b); setDeleteConfirm(false); }}>
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                       <span style={{ fontSize:20 }}>{s.icon}</span>
                       <div style={{ flex:1, minWidth:0 }}>
@@ -420,7 +449,7 @@ export default function App() {
                   <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:2, textAlign:"center" }}>SELECT A BOOKING</div>
                 </div>
               ) : (() => {
-                const s = svc(selected.service); const st = STATUS[selected.status];
+                const s = svc(selected.service); const st = safeStatus(selected.status);
                 return (
                   <div style={{ padding:24 }} className="slide-in">
                     <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
@@ -454,27 +483,38 @@ export default function App() {
                       </div>
                     )}
 
+                    {/* Reschedule Controls */}
                     <div style={{ marginTop:18, padding:14, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
                       <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:10, letterSpacing:2, color:"#c9a227", marginBottom:12 }}>RESCHEDULE</div>
                       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
+                        <div>
+                          <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:5 }}>DATE</div>
+                          <input
+                            type="date"
+                            value={selected.date}
+                            onChange={e => updateBooking(selected.id, { date: e.target.value })}
+                            style={{ fontSize:12, colorScheme:"dark" }}
+                          />
+                        </div>
                         <div>
                           <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:5 }}>START TIME</div>
                           <select value={selected.time} onChange={e => updateBooking(selected.id, { time: e.target.value })} style={{ fontSize:12 }}>
                             {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
                           </select>
                         </div>
-                        <div>
-                          <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:5 }}>DURATION</div>
-                          <div style={{ display:"flex", gap:4 }}>
-                            {[1,2,3,4,5,6,7,8].map(h => {
-                              const sel = (selected.duration || 1) === h;
-                              return <button key={h} type="button" onClick={() => updateBooking(selected.id, { duration: h })} className="btn" style={{ flex:1, padding:"6px 2px", fontSize:10, background: sel ? "rgba(201,162,39,.25)" : "transparent", border: sel ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.15)", color: sel ? "#f0c040" : "#556677" }}>{h}h</button>;
-                            })}
-                          </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>DURATION</div>
+                        <div style={{ display:"flex", gap:4 }}>
+                          {[1,2,3,4,5,6,7,8].map(h => {
+                            const sel = (selected.duration || 1) === h;
+                            return <button key={h} type="button" onClick={() => updateBooking(selected.id, { duration: h })} className="btn" style={{ flex:1, padding:"6px 2px", fontSize:10, background: sel ? "rgba(201,162,39,.25)" : "transparent", border: sel ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.15)", color: sel ? "#f0c040" : "#556677" }}>{h}h</button>;
+                          })}
                         </div>
                       </div>
                     </div>
 
+                    {/* Admin Actions */}
                     <div style={{ marginTop:14, display:"flex", flexDirection:"column", gap:8 }}>
                       <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:10, letterSpacing:2, color:"#c9a227", marginBottom:4 }}>ADMIN ACTIONS</div>
                       {selected.status === "pending" ? (
@@ -486,6 +526,23 @@ export default function App() {
                       ) : (
                         <button className="btn ghost" onClick={() => updateStatus(selected.id, "pending")}>↩ RESET TO PENDING</button>
                       )}
+
+                      {/* Delete Booking */}
+                      <div style={{ marginTop:4 }}>
+                        {deleteConfirm ? (
+                          <div>
+                            <div style={{ padding:10, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:11, color:"#fca5a5", marginBottom:8 }}>
+                              ⚠️ Permanently delete this booking?
+                            </div>
+                            <div style={{ display:"flex", gap:8 }}>
+                              <button className="btn ghost" style={{ flex:1, fontSize:10 }} onClick={() => setDeleteConfirm(false)}>CANCEL</button>
+                              <button className="btn danger" style={{ flex:1, fontSize:10 }} onClick={() => deleteBooking(selected.id)}>YES, DELETE</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button className="btn danger" style={{ width:"100%", opacity:.7 }} onClick={() => setDeleteConfirm(true)}>🗑 DELETE BOOKING</button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -546,7 +603,7 @@ export default function App() {
                       const isStart = b && timeToHour(b.time) === timeToHour(t);
                       const nextT = TIMES[idx + 1];
                       const isEnd = b && (!nextT || coveredSlots[nextT]?.id !== b.id);
-                      const st = b ? STATUS[b.status] : null;
+                      const st = b ? safeStatus(b.status) : null;
                       return (
                         <div key={t} style={{ display:"flex", gap:8, minHeight:46 }}>
                           <div style={{ width:62, paddingTop:14, fontSize:9, color: !b || isStart ? "#556677" : "transparent", textAlign:"right", flexShrink:0, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{t}</div>
@@ -562,7 +619,7 @@ export default function App() {
                                 borderTopLeftRadius: isStart ? 4 : 0, borderTopRightRadius: isStart ? 4 : 0,
                                 borderBottomLeftRadius: isEnd ? 4 : 0, borderBottomRightRadius: isEnd ? 4 : 0,
                                 padding: isStart ? "8px 10px 4px" : "0 10px", cursor:"pointer",
-                              }} onClick={() => { setSelected(b); setAdminTab("bookings"); }}>
+                              }} onClick={() => { setSelected(b); setDeleteConfirm(false); setAdminTab("bookings"); }}>
                                 {isStart && (
                                   <>
                                     <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:12, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.client}</div>
@@ -690,6 +747,63 @@ export default function App() {
                 }}>＋ ADD APPOINTMENT</button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {showChangePwModal && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.8)", zIndex:2000, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }} onClick={() => setShowChangePwModal(false)}>
+          <div className="card slide-in" style={{ width:"100%", maxWidth:400, padding:28 }} onClick={e => e.stopPropagation()}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:22 }}>
+              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>🔑 CHANGE PASSWORD</div>
+              <button className="btn ghost" style={{ padding:"4px 10px", fontSize:12 }} onClick={() => setShowChangePwModal(false)}>✕</button>
+            </div>
+
+            <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
+              <div>
+                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>CURRENT PASSWORD *</label>
+                <input
+                  type="password"
+                  value={changePwForm.old}
+                  onChange={e => { setChangePwForm(f => ({...f, old:e.target.value})); setChangePwError(""); }}
+                  placeholder="Enter current password"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>NEW PASSWORD *</label>
+                <input
+                  type="password"
+                  value={changePwForm.newPw}
+                  onChange={e => { setChangePwForm(f => ({...f, newPw:e.target.value})); setChangePwError(""); }}
+                  placeholder="Min. 6 characters"
+                />
+              </div>
+              <div>
+                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>CONFIRM NEW PASSWORD *</label>
+                <input
+                  type="password"
+                  value={changePwForm.confirm}
+                  onChange={e => { setChangePwForm(f => ({...f, confirm:e.target.value})); setChangePwError(""); }}
+                  placeholder="Re-enter new password"
+                  onKeyDown={e => e.key === "Enter" && submitChangePassword()}
+                />
+              </div>
+
+              {changePwError && (
+                <div style={{ padding:"9px 12px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:11, color:"#fca5a5" }}>
+                  ⚠️ {changePwError}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display:"flex", gap:10, marginTop:20, justifyContent:"flex-end" }}>
+              <button className="btn ghost" onClick={() => setShowChangePwModal(false)}>CANCEL</button>
+              <button className="btn gold" disabled={!changePwForm.old || !changePwForm.newPw || !changePwForm.confirm} onClick={submitChangePassword}>
+                UPDATE PASSWORD
+              </button>
+            </div>
           </div>
         </div>
       )}

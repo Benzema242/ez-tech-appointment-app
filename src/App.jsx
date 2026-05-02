@@ -49,7 +49,12 @@ const CONTACT = {
 };
 
 // ─── LOOKUP HELPERS ────────────────────────────────────────────────────────
-const svc = id => SERVICES.find(s => s.id === id) || { label: id, icon: "⚙️", price: 0 };
+const svc = id => SERVICES.find(s => s.id === id) || { id, label: id, icon: "⚙️", price: 0 };
+// Normalises service field: handles legacy text, text[], or empty
+const svcList = (service) => {
+  const arr = Array.isArray(service) ? service : (service ? [service] : []);
+  return arr.map(svc);
+};
 const timeToHour = t => { const [tp, ap] = t.split(" "); let h = parseInt(tp); if (ap === "PM" && h !== 12) h += 12; if (ap === "AM" && h === 12) h = 0; return h; };
 
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────
@@ -117,14 +122,14 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [adminTab, setAdminTab] = useState("bookings");
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({ name:"", email:"", phone:"", service:"", date:"", time:"", notes:"" });
+  const [form, setForm] = useState({ name:"", email:"", phone:"", services:[], date:"", time:"", notes:"" });
   const [submitted, setSubmitted] = useState(false);
   const now = new Date();
   const [calY, setCalY] = useState(now.getFullYear());
   const [calM, setCalM] = useState(now.getMonth());
   const [selDay, setSelDay] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [adminForm, setAdminForm] = useState({ name:"", email:"", phone:"", service:"", date:"", time:"", source:"call", status:"pending", duration:1, notes:"" });
+  const [adminForm, setAdminForm] = useState({ name:"", email:"", phone:"", services:[], date:"", time:"", source:"call", status:"pending", duration:1, notes:"" });
   const [adminConfirmOverlap, setAdminConfirmOverlap] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [showChangePwModal, setShowChangePwModal] = useState(false);
@@ -157,22 +162,22 @@ export default function App() {
   };
 
   const submitBooking = async () => {
-    const payload = { client: form.name, service: form.service, date: form.date, time: form.time, status: "pending", phone: form.phone, email: form.email, notes: form.notes, source: "website", duration: 1 };
+    const payload = { client: form.name, service: form.services, date: form.date, time: form.time, status: "pending", phone: form.phone, email: form.email, notes: form.notes, source: "website", duration: 1 };
     const { data, error } = await supabase.from("bookings").insert(payload).select().single();
     if (error) { fire("❌ Error submitting booking"); return; }
     setBookings(p => [...p, data]);
     setSubmitted(true);
   };
 
-  const resetClient = () => { setStep(1); setForm({ name:"", email:"", phone:"", service:"", date:"", time:"", notes:"" }); setSubmitted(false); };
+  const resetClient = () => { setStep(1); setForm({ name:"", email:"", phone:"", services:[], date:"", time:"", notes:"" }); setSubmitted(false); };
 
   const submitAdminBooking = async () => {
-    const payload = { client: adminForm.name, service: adminForm.service, date: adminForm.date, time: adminForm.time, status: adminForm.status, phone: adminForm.phone, email: adminForm.email, notes: adminForm.notes, source: adminForm.source, duration: adminForm.duration };
+    const payload = { client: adminForm.name, service: adminForm.services, date: adminForm.date, time: adminForm.time, status: adminForm.status, phone: adminForm.phone, email: adminForm.email, notes: adminForm.notes, source: adminForm.source, duration: adminForm.duration };
     const { data, error } = await supabase.from("bookings").insert(payload).select().single();
     if (error) { fire("❌ Error adding appointment"); return; }
     setBookings(p => [...p, data]);
     setShowAddModal(false);
-    setAdminForm({ name:"", email:"", phone:"", service:"", date:"", time:"", source:"call", status:"pending", duration:1, notes:"" });
+    setAdminForm({ name:"", email:"", phone:"", services:[], date:"", time:"", source:"call", status:"pending", duration:1, notes:"" });
     fire("✅ Appointment added!");
   };
 
@@ -207,6 +212,10 @@ export default function App() {
       setChangePwError("");
     }
   };
+
+  // ── Service toggle helpers ─────────────────────────────────────────────
+  const toggleService = (arr, id) =>
+    arr.includes(id) ? arr.filter(x => x !== id) : [...arr, id];
 
   // ── Availability Helpers ───────────────────────────────────────────────
   const isClientBooked = (date, time) => {
@@ -285,6 +294,7 @@ export default function App() {
     .logo-circle{width:42px;height:42px;border-radius:50%;border:2px solid #c9a227;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;color:#fff;background:linear-gradient(135deg,#1e3a5f,#0a1628);box-shadow:0 0 12px rgba(201,162,39,.4);flex-shrink:0;}
     .shake{animation:shake .4s ease;}
     @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+    .svc-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.25);border-radius:3px;font-size:11px;color:#c9a227;}
   `;
 
   // ── Shared Footer ──────────────────────────────────────────────────────
@@ -314,6 +324,44 @@ export default function App() {
     </div>
   );
 
+  // ── Shared multi-service selector ──────────────────────────────────────
+  // Used in both client step 2 and admin add modal
+  const ServiceSelector = ({ selected: sel, onChange, compact = false }) => (
+    <div style={{ display:"flex", flexDirection:"column", gap: compact ? 5 : 7 }}>
+      {SERVICES.map(s => {
+        const on = sel.includes(s.id);
+        return (
+          <div
+            key={s.id}
+            onClick={() => onChange(toggleService(sel, s.id))}
+            style={{
+              padding: compact ? "9px 12px" : "12px",
+              borderRadius:4, cursor:"pointer",
+              border: on ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.15)",
+              background: on ? "rgba(201,162,39,.12)" : "rgba(201,162,39,.03)",
+              display:"flex", alignItems:"center", gap: compact ? 10 : 12,
+              transition:"all .15s",
+            }}
+          >
+            <span style={{ fontSize: compact ? 18 : 22, flexShrink:0 }}>{s.icon}</span>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontWeight:600, color: on ? "#f0c040" : "#e8e0cc", fontSize: compact ? 12 : 13 }}>{s.label}</div>
+              {s.note && !compact && <div style={{ fontSize:11, color:"#c9a227", marginTop:2 }}>{s.note}</div>}
+            </div>
+            <div style={{
+              width:18, height:18, borderRadius:"50%", flexShrink:0,
+              border: on ? "none" : "1px solid rgba(201,162,39,.3)",
+              background: on ? "#c9a227" : "transparent",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              fontSize:11, color:"#050d1a", fontWeight:900,
+              transition:"all .15s",
+            }}>{on ? "✓" : ""}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   // ── Admin Password Gate ────────────────────────────────────────────────
   const AdminGate = () => (
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", padding:16 }} className="circuit">
@@ -325,7 +373,6 @@ export default function App() {
           </div>
           <div style={{ fontSize:11, color:"#7788aa", letterSpacing:2, marginTop:6, fontFamily:"'Orbitron',sans-serif" }}>ADMIN ACCESS</div>
         </div>
-
         <div style={{ marginBottom:14 }}>
           <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:6 }}>PASSWORD</label>
           <input
@@ -339,20 +386,11 @@ export default function App() {
             className={pwError ? "shake" : ""}
             style={ pwError ? { borderColor:"#ef4444", boxShadow:"0 0 0 2px rgba(239,68,68,.2)" } : {} }
           />
-          {pwError && (
-            <div style={{ fontSize:11, color:"#f87171", marginTop:6 }}>Incorrect password. Try again.</div>
-          )}
+          {pwError && <div style={{ fontSize:11, color:"#f87171", marginTop:6 }}>Incorrect password. Try again.</div>}
         </div>
-
-        <button
-          className="btn gold"
-          style={{ width:"100%", padding:"13px", fontSize:12, letterSpacing:2 }}
-          onClick={tryLogin}
-          disabled={loginLoading}
-        >
+        <button className="btn gold" style={{ width:"100%", padding:"13px", fontSize:12, letterSpacing:2 }} onClick={tryLogin} disabled={loginLoading}>
           {loginLoading ? "VERIFYING…" : "UNLOCK DASHBOARD"}
         </button>
-
         <div style={{ textAlign:"center", marginTop:16 }}>
           <button onClick={goClient} style={{ background:"none", border:"none", color:"#556677", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>
             ← Back to booking page
@@ -399,7 +437,7 @@ export default function App() {
       </div>
 
       {/* Tab Navigation */}
-      <div style={{ padding:"0 24px", display:"flex", gap:0, borderBottom:"1px solid rgba(201,162,39,.15)" }}>
+      <div style={{ padding:"0 24px", display:"flex", borderBottom:"1px solid rgba(201,162,39,.15)" }}>
         {[["bookings","📋 BOOKINGS"],["calendar","📅 CALENDAR"]].map(([k,l]) => (
           <button key={k} onClick={() => setAdminTab(k)} style={{ padding:"14px 20px", background:"transparent", border:"none", borderBottom: adminTab===k ? "2px solid #c9a227" : "2px solid transparent", color: adminTab===k ? "#c9a227" : "#7788aa", fontFamily:"'Orbitron',sans-serif", fontSize:11, fontWeight:700, letterSpacing:1.5, cursor:"pointer", transition:"all .2s" }}>{l}</button>
         ))}
@@ -410,6 +448,7 @@ export default function App() {
 
           // ── Bookings Tab ──────────────────────────────────────────────
           <div style={{ display:"flex", flexWrap:"wrap", flex:1 }}>
+
             {/* List Panel */}
             <div style={{ flex:"1 1 340px", padding:"16px 24px", borderRight:"1px solid rgba(201,162,39,.1)" }}>
               <div style={{ display:"flex", gap:6, marginBottom:14, flexWrap:"wrap", alignItems:"center" }}>
@@ -424,14 +463,20 @@ export default function App() {
               {filtered.length === 0 ? (
                 <div style={{ textAlign:"center", padding:40, color:"#556677" }}>No bookings</div>
               ) : filtered.map(b => {
-                const s = svc(b.service); const st = safeStatus(b.status);
+                const svcs = svcList(b.service);
+                const first = svcs[0] || { icon:"⚙️", label:"Unknown" };
+                const extra = svcs.length - 1;
+                const st = safeStatus(b.status);
                 return (
                   <div key={b.id} className={"row " + (selected?.id === b.id ? "active" : "")} onClick={() => { setSelected(b); setDeleteConfirm(false); }}>
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                      <span style={{ fontSize:20 }}>{s.icon}</span>
+                      <span style={{ fontSize:20 }}>{first.icon}</span>
                       <div style={{ flex:1, minWidth:0 }}>
                         <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:14, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.client}</div>
-                        <div style={{ fontSize:11, color:"#7788aa", marginTop:2 }}>{s.label}</div>
+                        <div style={{ fontSize:11, color:"#7788aa", marginTop:2, display:"flex", alignItems:"center", gap:6 }}>
+                          <span style={{ overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{first.label}</span>
+                          {extra > 0 && <span style={{ flexShrink:0, padding:"1px 6px", background:"rgba(201,162,39,.15)", border:"1px solid rgba(201,162,39,.3)", borderRadius:3, fontSize:9, color:"#c9a227" }}>+{extra} more</span>}
+                        </div>
                         <div style={{ fontSize:11, color:"#c9a227", marginTop:3, fontFamily:"'Orbitron',sans-serif" }}>{b.date} · {b.time}</div>
                       </div>
                       <span style={{ padding:"3px 8px", borderRadius:3, fontSize:9, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:st.color, background:st.bg, border:`1px solid ${st.border}`, whiteSpace:"nowrap" }}>{st.label}</span>
@@ -449,16 +494,26 @@ export default function App() {
                   <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:2, textAlign:"center" }}>SELECT A BOOKING</div>
                 </div>
               ) : (() => {
-                const s = svc(selected.service); const st = safeStatus(selected.status);
+                const svcs = svcList(selected.service);
+                const first = svcs[0] || { icon:"⚙️", label:"Unknown", price:0 };
+                const st = safeStatus(selected.status);
+                const totalPrice = svcs.reduce((sum, s) => sum + (s.price || 0), 0);
+                const priceDisplay = totalPrice === 0 ? (svcs.some(s => s.note) ? svcs.map(s=>s.note).filter(Boolean)[0] : "Free") : `$${totalPrice}`;
                 return (
                   <div style={{ padding:24 }} className="slide-in">
-                    <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
-                      <span style={{ fontSize:32 }}>{s.icon}</span>
-                      <div style={{ flex:1 }}>
+
+                    {/* Header */}
+                    <div style={{ display:"flex", alignItems:"flex-start", gap:12, marginBottom:20 }}>
+                      <span style={{ fontSize:32, flexShrink:0 }}>{first.icon}</span>
+                      <div style={{ flex:1, minWidth:0 }}>
                         <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040" }}>{selected.client}</div>
-                        <div style={{ fontSize:13, color:"#8899aa", marginTop:2 }}>{s.label}</div>
+                        <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginTop:6 }}>
+                          {svcs.map(s => (
+                            <span key={s.id} className="svc-chip">{s.icon} {s.label}</span>
+                          ))}
+                        </div>
                       </div>
-                      <span style={{ padding:"4px 10px", borderRadius:3, fontSize:10, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:st.color, background:st.bg, border:`1px solid ${st.border}` }}>{st.label}</span>
+                      <span style={{ padding:"4px 10px", borderRadius:3, fontSize:10, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:st.color, background:st.bg, border:`1px solid ${st.border}`, whiteSpace:"nowrap", flexShrink:0 }}>{st.label}</span>
                     </div>
 
                     {[
@@ -466,7 +521,7 @@ export default function App() {
                       ["🕐 Time",       selected.time],
                       ["📞 Phone",      selected.phone],
                       ["✉️ Email",      selected.email],
-                      ["💰 Est. Price", s.price === 0 ? (s.note || "Free") : `$${s.price}`],
+                      ["💰 Est. Price", priceDisplay],
                       ["📡 Source",     (() => { const src = SOURCES.find(s2 => s2.id === selected.source); return src ? `${src.icon} ${src.label}` : "🌐 Website"; })()],
                       ["⏱ Duration",   `${selected.duration || 1} hour${(selected.duration || 1) !== 1 ? "s" : ""}`],
                     ].map(([l,v]) => (
@@ -483,18 +538,13 @@ export default function App() {
                       </div>
                     )}
 
-                    {/* Reschedule Controls */}
+                    {/* Reschedule */}
                     <div style={{ marginTop:18, padding:14, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
                       <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:10, letterSpacing:2, color:"#c9a227", marginBottom:12 }}>RESCHEDULE</div>
                       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
                         <div>
                           <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:5 }}>DATE</div>
-                          <input
-                            type="date"
-                            value={selected.date}
-                            onChange={e => updateBooking(selected.id, { date: e.target.value })}
-                            style={{ fontSize:12, colorScheme:"dark" }}
-                          />
+                          <input type="date" value={selected.date} onChange={e => updateBooking(selected.id, { date: e.target.value })} style={{ fontSize:12, colorScheme:"dark" }} />
                         </div>
                         <div>
                           <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:5 }}>START TIME</div>
@@ -507,8 +557,8 @@ export default function App() {
                         <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>DURATION</div>
                         <div style={{ display:"flex", gap:4 }}>
                           {[1,2,3,4,5,6,7,8].map(h => {
-                            const sel = (selected.duration || 1) === h;
-                            return <button key={h} type="button" onClick={() => updateBooking(selected.id, { duration: h })} className="btn" style={{ flex:1, padding:"6px 2px", fontSize:10, background: sel ? "rgba(201,162,39,.25)" : "transparent", border: sel ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.15)", color: sel ? "#f0c040" : "#556677" }}>{h}h</button>;
+                            const isSel = (selected.duration || 1) === h;
+                            return <button key={h} type="button" onClick={() => updateBooking(selected.id, { duration: h })} className="btn" style={{ flex:1, padding:"6px 2px", fontSize:10, background: isSel ? "rgba(201,162,39,.25)" : "transparent", border: isSel ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.15)", color: isSel ? "#f0c040" : "#556677" }}>{h}h</button>;
                           })}
                         </div>
                       </div>
@@ -526,8 +576,6 @@ export default function App() {
                       ) : (
                         <button className="btn ghost" onClick={() => updateStatus(selected.id, "pending")}>↩ RESET TO PENDING</button>
                       )}
-
-                      {/* Delete Booking */}
                       <div style={{ marginTop:4 }}>
                         {deleteConfirm ? (
                           <div>
@@ -568,10 +616,10 @@ export default function App() {
                 {Array(daysInMonth(calY, calM)).fill(null).map((_,i) => {
                   const d = i+1; const ds = fmtDate(calY, calM, d); const mark = dayMark(ds);
                   let cls = "cell";
-                  if (ds === todayStr)        cls += " today";
-                  if (mark === "approved")    cls += " has-app";
+                  if (ds === todayStr)         cls += " today";
+                  if (mark === "approved")     cls += " has-app";
                   else if (mark === "pending") cls += " has-pen";
-                  if (selDay === ds)          cls += " sel-day";
+                  if (selDay === ds)           cls += " sel-day";
                   return <div key={d} className={cls} onClick={() => setSelDay(ds === selDay ? null : ds)}>{d}</div>;
                 })}
               </div>
@@ -620,13 +668,20 @@ export default function App() {
                                 borderBottomLeftRadius: isEnd ? 4 : 0, borderBottomRightRadius: isEnd ? 4 : 0,
                                 padding: isStart ? "8px 10px 4px" : "0 10px", cursor:"pointer",
                               }} onClick={() => { setSelected(b); setDeleteConfirm(false); setAdminTab("bookings"); }}>
-                                {isStart && (
-                                  <>
-                                    <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:12, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.client}</div>
-                                    <div style={{ fontSize:10, color:st.color, marginTop:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{svc(b.service).label}</div>
-                                    {(b.duration || 1) > 1 && <div style={{ fontSize:9, color:"#7788aa", marginTop:2 }}>⏱ {b.duration}h</div>}
-                                  </>
-                                )}
+                                {isStart && (() => {
+                                  const svcs = svcList(b.service);
+                                  const first = svcs[0] || { label:"Unknown" };
+                                  const extra = svcs.length - 1;
+                                  return (
+                                    <>
+                                      <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:12, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.client}</div>
+                                      <div style={{ fontSize:10, color:st.color, marginTop:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                                        {first.label}{extra > 0 ? ` +${extra}` : ""}
+                                      </div>
+                                      {(b.duration || 1) > 1 && <div style={{ fontSize:9, color:"#7788aa", marginTop:2 }}>⏱ {b.duration}h</div>}
+                                    </>
+                                  );
+                                })()}
                               </div>
                             )}
                           </div>
@@ -644,7 +699,7 @@ export default function App() {
       {/* Add Appointment Modal */}
       {showAddModal && (
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.75)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }} onClick={() => setShowAddModal(false)}>
-          <div className="card slide-in" style={{ width:"100%", maxWidth:500, maxHeight:"90vh", overflowY:"auto", padding:24 }} onClick={e => e.stopPropagation()}>
+          <div className="card slide-in" style={{ width:"100%", maxWidth:520, maxHeight:"90vh", overflowY:"auto", padding:24 }} onClick={e => e.stopPropagation()}>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
               <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>ADD APPOINTMENT</div>
               <button className="btn ghost" style={{ padding:"4px 10px", fontSize:12 }} onClick={() => setShowAddModal(false)}>✕</button>
@@ -665,13 +720,20 @@ export default function App() {
                   <input type="email" value={adminForm.email} onChange={e => setAdminForm({...adminForm, email:e.target.value})} placeholder="email@example.com" />
                 </div>
               </div>
+
+              {/* Multi-service selector */}
               <div>
-                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>SERVICE *</label>
-                <select value={adminForm.service} onChange={e => setAdminForm({...adminForm, service:e.target.value})}>
-                  <option value="">Select a service…</option>
-                  {SERVICES.map(s => <option key={s.id} value={s.id}>{s.icon} {s.label}</option>)}
-                </select>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
+                  <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif" }}>SERVICES *</label>
+                  {adminForm.services.length > 0 && (
+                    <span style={{ fontSize:10, color:"#c9a227", fontFamily:"'Orbitron',sans-serif" }}>{adminForm.services.length} selected</span>
+                  )}
+                </div>
+                <div style={{ maxHeight:220, overflowY:"auto", paddingRight:2 }}>
+                  {ServiceSelector({ selected: adminForm.services, onChange: v => setAdminForm({...adminForm, services:v}), compact: true })}
+                </div>
               </div>
+
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                 <div>
                   <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>DATE *</label>
@@ -728,7 +790,7 @@ export default function App() {
             {adminConfirmOverlap ? (
               <div style={{ marginTop:16 }}>
                 <div style={{ padding:13, background:"rgba(239,68,68,.1)", border:"1px solid rgba(239,68,68,.35)", borderRadius:4, fontSize:12, color:"#fca5a5", marginBottom:12 }}>
-                  ⚠️ This appointment overlaps with an existing booking. Are you sure you want to add it anyway?
+                  ⚠️ This appointment overlaps with an existing booking. Are you sure?
                 </div>
                 <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
                   <button className="btn ghost" onClick={() => setAdminConfirmOverlap(false)}>NO, GO BACK</button>
@@ -738,7 +800,7 @@ export default function App() {
             ) : (
               <div style={{ display:"flex", gap:10, marginTop:20, justifyContent:"flex-end" }}>
                 <button className="btn ghost" onClick={() => setShowAddModal(false)}>CANCEL</button>
-                <button className="btn gold" disabled={!adminForm.name || !adminForm.phone || !adminForm.service || !adminForm.date || !adminForm.time || !adminForm.source} onClick={() => {
+                <button className="btn gold" disabled={!adminForm.name || !adminForm.phone || !adminForm.services.length || !adminForm.date || !adminForm.time || !adminForm.source} onClick={() => {
                   if (hasAdminConflict(adminForm.date, adminForm.time, adminForm.duration)) {
                     setAdminConfirmOverlap(true);
                   } else {
@@ -759,50 +821,28 @@ export default function App() {
               <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>🔑 CHANGE PASSWORD</div>
               <button className="btn ghost" style={{ padding:"4px 10px", fontSize:12 }} onClick={() => setShowChangePwModal(false)}>✕</button>
             </div>
-
             <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
               <div>
                 <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>CURRENT PASSWORD *</label>
-                <input
-                  type="password"
-                  value={changePwForm.old}
-                  onChange={e => { setChangePwForm(f => ({...f, old:e.target.value})); setChangePwError(""); }}
-                  placeholder="Enter current password"
-                  autoFocus
-                />
+                <input type="password" value={changePwForm.old} onChange={e => { setChangePwForm(f => ({...f, old:e.target.value})); setChangePwError(""); }} placeholder="Enter current password" autoFocus />
               </div>
               <div>
                 <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>NEW PASSWORD *</label>
-                <input
-                  type="password"
-                  value={changePwForm.newPw}
-                  onChange={e => { setChangePwForm(f => ({...f, newPw:e.target.value})); setChangePwError(""); }}
-                  placeholder="Min. 6 characters"
-                />
+                <input type="password" value={changePwForm.newPw} onChange={e => { setChangePwForm(f => ({...f, newPw:e.target.value})); setChangePwError(""); }} placeholder="Min. 6 characters" />
               </div>
               <div>
                 <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>CONFIRM NEW PASSWORD *</label>
-                <input
-                  type="password"
-                  value={changePwForm.confirm}
-                  onChange={e => { setChangePwForm(f => ({...f, confirm:e.target.value})); setChangePwError(""); }}
-                  placeholder="Re-enter new password"
-                  onKeyDown={e => e.key === "Enter" && submitChangePassword()}
-                />
+                <input type="password" value={changePwForm.confirm} onChange={e => { setChangePwForm(f => ({...f, confirm:e.target.value})); setChangePwError(""); }} placeholder="Re-enter new password" onKeyDown={e => e.key === "Enter" && submitChangePassword()} />
               </div>
-
               {changePwError && (
                 <div style={{ padding:"9px 12px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:11, color:"#fca5a5" }}>
                   ⚠️ {changePwError}
                 </div>
               )}
             </div>
-
             <div style={{ display:"flex", gap:10, marginTop:20, justifyContent:"flex-end" }}>
               <button className="btn ghost" onClick={() => setShowChangePwModal(false)}>CANCEL</button>
-              <button className="btn gold" disabled={!changePwForm.old || !changePwForm.newPw || !changePwForm.confirm} onClick={submitChangePassword}>
-                UPDATE PASSWORD
-              </button>
+              <button className="btn gold" disabled={!changePwForm.old || !changePwForm.newPw || !changePwForm.confirm} onClick={submitChangePassword}>UPDATE PASSWORD</button>
             </div>
           </div>
         </div>
@@ -815,7 +855,7 @@ export default function App() {
   // ── Client View ────────────────────────────────────────────────────────
   const ClientView = () => {
     const canNext1 = form.name && form.email && form.phone;
-    const canNext2 = form.service;
+    const canNext2 = form.services.length > 0;
     const canNext3 = form.date && form.time;
 
     return (
@@ -826,8 +866,7 @@ export default function App() {
           position:"sticky", top:0, zIndex:100,
           background:"linear-gradient(180deg,rgba(5,13,26,.97),rgba(10,22,40,.93))",
           borderBottom:"1px solid rgba(201,162,39,.25)",
-          backdropFilter:"blur(10px)",
-          WebkitBackdropFilter:"blur(10px)",
+          backdropFilter:"blur(10px)", WebkitBackdropFilter:"blur(10px)",
           padding:"clamp(10px,2vw,18px) clamp(16px,5vw,56px)",
           display:"flex", alignItems:"center", gap:"clamp(10px,2vw,20px)"
         }}>
@@ -849,7 +888,11 @@ export default function App() {
               <div style={{ fontSize:60, marginBottom:14 }}>✅</div>
               <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:18, fontWeight:900, color:"#f0c040", marginBottom:10, letterSpacing:1.5 }}>BOOKING RECEIVED</div>
               <div style={{ color:"#c8bfa8", marginBottom:8, fontSize:14 }}>Thank you, <span style={{ color:"#c9a227", fontWeight:700 }}>{form.name}</span>!</div>
-              <div style={{ color:"#7788aa", fontSize:13, marginBottom:18 }}>Your request for <strong style={{ color:"#e8e0cc" }}>{svc(form.service).label}</strong> on <strong style={{ color:"#e8e0cc" }}>{form.date}</strong> at <strong style={{ color:"#e8e0cc" }}>{form.time}</strong> has been submitted.</div>
+              <div style={{ color:"#7788aa", fontSize:13, marginBottom:18 }}>
+                Your request for{" "}
+                <strong style={{ color:"#e8e0cc" }}>{form.services.map(id => svc(id).label).join(", ")}</strong>
+                {" "}on <strong style={{ color:"#e8e0cc" }}>{form.date}</strong> at <strong style={{ color:"#e8e0cc" }}>{form.time}</strong> has been submitted.
+              </div>
               <div style={{ padding:14, background:"rgba(201,162,39,.08)", border:"1px solid rgba(201,162,39,.2)", borderRadius:4, marginBottom:18, fontSize:12, color:"#c8bfa8" }}>
                 Our team will review your request and contact you at <strong style={{ color:"#c9a227" }}>{form.phone}</strong> to <strong>approve</strong>, <strong>schedule a call</strong>, or <strong>follow up</strong>.
               </div>
@@ -858,6 +901,7 @@ export default function App() {
             </div>
           ) : (
             <>
+              {/* Step Progress */}
               <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:20, justifyContent:"center" }}>
                 {[1,2,3,4].map(n => (
                   <div key={n} style={{ display:"flex", alignItems:"center", gap:6 }}>
@@ -869,6 +913,7 @@ export default function App() {
 
               <div className="card" style={{ padding:22 }}>
 
+                {/* Step 1 — Contact Info */}
                 {step === 1 && (
                   <div className="slide-in">
                     <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>YOUR INFORMATION</div>
@@ -884,28 +929,34 @@ export default function App() {
                   </div>
                 )}
 
+                {/* Step 2 — Service Multi-Select */}
                 {step === 2 && (
                   <div className="slide-in">
-                    <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>SELECT SERVICE</div>
-                    <div style={{ fontSize:12, color:"#7788aa", marginBottom:16 }}>Step 2 of 4 · What do you need?</div>
-                    <div style={{ display:"flex", flexDirection:"column", gap:7, maxHeight:400, overflowY:"auto" }}>
-                      {SERVICES.map(s => (
-                        <div key={s.id} onClick={() => setForm({...form, service:s.id})} style={{ padding:12, borderRadius:4, cursor:"pointer", border: form.service === s.id ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.15)", background: form.service === s.id ? "rgba(201,162,39,.12)" : "rgba(201,162,39,.03)", display:"flex", alignItems:"center", gap:12, transition:"all .15s" }}>
-                          <span style={{ fontSize:22 }}>{s.icon}</span>
-                          <div style={{ flex:1 }}>
-                            <div style={{ fontWeight:600, color:"#e8e0cc", fontSize:13 }}>{s.label}</div>
-                          </div>
-                          {form.service === s.id && <span style={{ color:"#c9a227", fontSize:18 }}>✓</span>}
-                        </div>
-                      ))}
+                    <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>SELECT SERVICES</div>
+                    <div style={{ fontSize:12, color:"#7788aa", marginBottom:16 }}>Step 2 of 4 · Select one or more services</div>
+
+                    <div style={{ maxHeight:420, overflowY:"auto", paddingRight:2 }}>
+                      {ServiceSelector({ selected: form.services, onChange: v => setForm({...form, services:v}) })}
                     </div>
-                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:18 }}>
+
+                    {/* Selected summary bar */}
+                    {form.services.length > 0 && (
+                      <div style={{ marginTop:12, padding:"9px 13px", background:"rgba(201,162,39,.08)", border:"1px solid rgba(201,162,39,.25)", borderRadius:4, display:"flex", alignItems:"center", gap:8 }}>
+                        <span style={{ fontSize:11, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", flexShrink:0 }}>{form.services.length} SELECTED</span>
+                        <div style={{ flex:1, fontSize:11, color:"#8899aa", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                          {form.services.map(id => svc(id).label).join(" · ")}
+                        </div>
+                      </div>
+                    )}
+
+                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:14 }}>
                       <button className="btn ghost" onClick={() => setStep(1)}>← BACK</button>
                       <button className="btn gold" disabled={!canNext2} onClick={() => setStep(3)}>NEXT →</button>
                     </div>
                   </div>
                 )}
 
+                {/* Step 3 — Date & Time */}
                 {step === 3 && (
                   <div className="slide-in">
                     <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>PICK A DATE & TIME</div>
@@ -925,11 +976,11 @@ export default function App() {
                           const d = i+1; const ds = fmtDate(calY, calM, d); const mark = dayMark(ds);
                           const isPast = ds < todayStr;
                           let cls = "cell";
-                          if (ds === todayStr)        cls += " today";
-                          if (mark === "approved")    cls += " has-app";
+                          if (ds === todayStr)         cls += " today";
+                          if (mark === "approved")     cls += " has-app";
                           else if (mark === "pending") cls += " has-pen";
-                          if (isPast)                 cls += " disabled-past";
-                          if (form.date === ds)       cls += " sel-day";
+                          if (isPast)                  cls += " disabled-past";
+                          if (form.date === ds)        cls += " sel-day";
                           return <div key={d} className={cls} onClick={() => !isPast && setForm({...form, date:ds, time:""})}>{d}</div>;
                         })}
                       </div>
@@ -957,24 +1008,39 @@ export default function App() {
                   </div>
                 )}
 
+                {/* Step 4 — Review & Submit */}
                 {step === 4 && (
                   <div className="slide-in">
                     <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>REVIEW & SUBMIT</div>
                     <div style={{ fontSize:12, color:"#7788aa", marginBottom:16 }}>Step 4 of 4 · Confirm your booking</div>
                     <div style={{ background:"rgba(201,162,39,.05)", border:"1px solid rgba(201,162,39,.2)", borderRadius:4, padding:16, marginBottom:14 }}>
                       {[
-                        ["NAME",    form.name],
-                        ["EMAIL",   form.email],
-                        ["PHONE",   form.phone],
-                        ["SERVICE", svc(form.service).label],
-                        ["DATE",    form.date],
-                        ["TIME",    form.time],
+                        ["NAME",  form.name],
+                        ["EMAIL", form.email],
+                        ["PHONE", form.phone],
+                        ["DATE",  form.date],
+                        ["TIME",  form.time],
                       ].map(([l,v]) => (
                         <div key={l} style={{ display:"flex", justifyContent:"space-between", padding:"7px 0", borderBottom:"1px solid rgba(201,162,39,.1)", gap:10 }}>
                           <span style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif" }}>{l}</span>
                           <span style={{ fontSize:13, color:"#e8e0cc", fontWeight:500, textAlign:"right" }}>{v}</span>
                         </div>
                       ))}
+                      {/* Services block */}
+                      <div style={{ padding:"7px 0" }}>
+                        <span style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:6 }}>SERVICES</span>
+                        <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+                          {form.services.map(id => {
+                            const s = svc(id);
+                            return (
+                              <div key={id} style={{ display:"flex", alignItems:"center", gap:8 }}>
+                                <span style={{ fontSize:14 }}>{s.icon}</span>
+                                <span style={{ fontSize:13, color:"#e8e0cc", fontWeight:500 }}>{s.label}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
                     <div>
                       <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>ADDITIONAL NOTES (OPTIONAL)</label>

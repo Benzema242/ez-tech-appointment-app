@@ -907,8 +907,8 @@ export default function App() {
         </div>
       )}
       {mode === "admin"
-        ? (adminAuthed ? <AdminView /> : <AdminGate />)
-        : <ClientView />
+        ? (adminAuthed ? AdminView() : AdminGate())
+        : ClientView()
       }
     </div>
   );

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "./supabase";
 
 // ─── SERVICES CATALOG ──────────────────────────────────────────────────────
@@ -20,20 +20,17 @@ const SERVICES = [
 
 // ─── TIME SLOTS ────────────────────────────────────────────────────────────
 const TIMES = ["8:00 AM","9:00 AM","10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM","6:00 PM","7:00 PM","8:00 PM"];
-
-// Client-facing hours only (10 AM – 6 PM, includes noon)
 const CLIENT_TIMES = ["10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM","6:00 PM"];
 
 // ─── BOOKING SOURCES ───────────────────────────────────────────────────────
 const SOURCES = [
-  { id: "call",      label: "Call",      icon: "📞" },
-  { id: "whatsapp",  label: "WhatsApp",  icon: "💬" },
-  { id: "facebook",  label: "Facebook",  icon: "📘" },
-  { id: "referred",  label: "Referred",  icon: "🤝" },
-  { id: "walkin",    label: "Walk-in",   icon: "🚶" },
-  { id: "website",   label: "Website",   icon: "🌐" },
+  { id: "call",     label: "Call",     icon: "📞" },
+  { id: "whatsapp", label: "WhatsApp", icon: "💬" },
+  { id: "facebook", label: "Facebook", icon: "📘" },
+  { id: "referred", label: "Referred", icon: "🤝" },
+  { id: "walkin",   label: "Walk-in",  icon: "🚶" },
+  { id: "website",  label: "Website",  icon: "🌐" },
 ];
-
 
 // ─── DATE & CALENDAR HELPERS ───────────────────────────────────────────────
 const pad = n => String(n).padStart(2, "0");
@@ -57,17 +54,58 @@ const timeToHour = t => { const [tp, ap] = t.split(" "); let h = parseInt(tp); i
 
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────
 const STATUS = {
-  pending:        { label: "PENDING",        color: "#f59e0b", bg: "rgba(245,158,11,.15)", border: "rgba(245,158,11,.4)" },
-  approved:       { label: "APPROVED",       color: "#22c55e", bg: "rgba(34,197,94,.15)",  border: "rgba(34,197,94,.4)" },
-  denied:         { label: "DENIED",         color: "#ef4444", bg: "rgba(239,68,68,.15)",  border: "rgba(239,68,68,.4)" },
-  scheduled_call: { label: "CALL SCHEDULED", color: "#3b82f6", bg: "rgba(59,130,246,.15)", border: "rgba(59,130,246,.4)" },
+  pending:        { label: "PENDING",        color: "#f59e0b", bg: "rgba(245,158,11,.15)",  border: "rgba(245,158,11,.4)" },
+  approved:       { label: "APPROVED",       color: "#22c55e", bg: "rgba(34,197,94,.15)",   border: "rgba(34,197,94,.4)" },
+  denied:         { label: "DENIED",         color: "#ef4444", bg: "rgba(239,68,68,.15)",   border: "rgba(239,68,68,.4)" },
+  scheduled_call: { label: "CALL SCHEDULED", color: "#3b82f6", bg: "rgba(59,130,246,.15)",  border: "rgba(59,130,246,.4)" },
 };
+
+const ADMIN_PW = "RCNov2821#";
+const SESSION_KEY = "ez_admin_authed";
 
 // ─── APP COMPONENT ─────────────────────────────────────────────────────────
 export default function App() {
 
-  // ── State ──────────────────────────────────────────────────────────────
-  const [mode, setMode] = useState("admin");
+  // ── Routing & Auth ─────────────────────────────────────────────────────
+  const getHash = () => window.location.hash;
+  const isAdminRoute = () => getHash() === "#/admin";
+  const [mode, setMode] = useState(() => isAdminRoute() ? "admin" : "client");
+  const [adminAuthed, setAdminAuthed] = useState(() => sessionStorage.getItem(SESSION_KEY) === "1");
+  const [pwInput, setPwInput] = useState("");
+  const [pwError, setPwError] = useState(false);
+  const pwRef = useRef(null);
+
+  useEffect(() => {
+    const onHash = () => {
+      setMode(isAdminRoute() ? "admin" : "client");
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+  const goAdmin = () => { window.location.hash = "#/admin"; };
+  const goClient = () => { window.location.hash = ""; resetClient(); };
+
+  const tryLogin = () => {
+    if (pwInput === ADMIN_PW) {
+      sessionStorage.setItem(SESSION_KEY, "1");
+      setAdminAuthed(true);
+      setPwError(false);
+      setPwInput("");
+    } else {
+      setPwError(true);
+      setPwInput("");
+      setTimeout(() => pwRef.current?.focus(), 50);
+    }
+  };
+
+  const logout = () => {
+    sessionStorage.removeItem(SESSION_KEY);
+    setAdminAuthed(false);
+    goClient();
+  };
+
+  // ── Core State ─────────────────────────────────────────────────────────
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -97,7 +135,7 @@ export default function App() {
       });
   }, []);
 
-  // ── Toast Notification ─────────────────────────────────────────────────
+  // ── Toast ──────────────────────────────────────────────────────────────
   const fire = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
   // ── Booking Actions ────────────────────────────────────────────────────
@@ -139,38 +177,30 @@ export default function App() {
   };
 
   // ── Availability Helpers ───────────────────────────────────────────────
-
-  // Admin day-view: approved + pending bookings block slots
   const isBooked = (date, time) => {
     const slotH = timeToHour(time);
     return bookings.some(b => {
       if (b.date !== date || (b.status !== "approved" && b.status !== "pending")) return false;
-      const bH = timeToHour(b.time);
-      const dur = b.duration || 1;
+      const bH = timeToHour(b.time); const dur = b.duration || 1;
       return slotH >= bH && slotH < bH + dur;
     });
   };
 
-  // Client booking: only approved bookings block slots (pending stays open)
   const isClientBooked = (date, time) => {
     const slotH = timeToHour(time);
     return bookings.some(b => {
       if (b.date !== date || b.status !== "approved") return false;
-      const bH = timeToHour(b.time);
-      const dur = b.duration || 1;
+      const bH = timeToHour(b.time); const dur = b.duration || 1;
       return slotH >= bH && slotH < bH + dur;
     });
   };
 
-  // Admin add: detect any time overlap with existing bookings
   const hasAdminConflict = (date, time, duration) => {
     if (!date || !time) return false;
-    const startH = timeToHour(time);
-    const endH = startH + (duration || 1);
+    const startH = timeToHour(time); const endH = startH + (duration || 1);
     return bookings.some(b => {
       if (b.date !== date || (b.status !== "approved" && b.status !== "pending")) return false;
-      const bH = timeToHour(b.time);
-      const bEnd = bH + (b.duration || 1);
+      const bH = timeToHour(b.time); const bEnd = bH + (b.duration || 1);
       return startH < bEnd && endH > bH;
     });
   };
@@ -230,6 +260,8 @@ export default function App() {
     .row:hover{background:rgba(201,162,39,.08);border-color:rgba(201,162,39,.3);}
     .row.active{background:rgba(201,162,39,.12);border-color:rgba(201,162,39,.5);}
     .logo-circle{width:42px;height:42px;border-radius:50%;border:2px solid #c9a227;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;color:#fff;background:linear-gradient(135deg,#1e3a5f,#0a1628);box-shadow:0 0 12px rgba(201,162,39,.4);flex-shrink:0;}
+    .shake{animation:shake .4s ease;}
+    @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
   `;
 
   // ── Shared Footer ──────────────────────────────────────────────────────
@@ -259,6 +291,49 @@ export default function App() {
     </div>
   );
 
+  // ── Admin Password Gate ────────────────────────────────────────────────
+  const AdminGate = () => (
+    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", padding:16 }} className="circuit">
+      <div className="card slide-in" style={{ width:"100%", maxWidth:380, padding:"36px 32px" }}>
+        <div style={{ textAlign:"center", marginBottom:28 }}>
+          <div className="logo-circle" style={{ width:56, height:56, fontSize:20, margin:"0 auto 14px" }}>EZ</div>
+          <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:900, color:"#fff", letterSpacing:2 }}>
+            EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span>
+          </div>
+          <div style={{ fontSize:11, color:"#7788aa", letterSpacing:2, marginTop:6, fontFamily:"'Orbitron',sans-serif" }}>ADMIN ACCESS</div>
+        </div>
+
+        <div style={{ marginBottom:14 }}>
+          <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:6 }}>PASSWORD</label>
+          <input
+            ref={pwRef}
+            type="password"
+            value={pwInput}
+            onChange={e => { setPwInput(e.target.value); setPwError(false); }}
+            onKeyDown={e => e.key === "Enter" && tryLogin()}
+            placeholder="Enter admin password"
+            autoFocus
+            className={pwError ? "shake" : ""}
+            style={ pwError ? { borderColor:"#ef4444", boxShadow:"0 0 0 2px rgba(239,68,68,.2)" } : {} }
+          />
+          {pwError && (
+            <div style={{ fontSize:11, color:"#f87171", marginTop:6 }}>Incorrect password. Try again.</div>
+          )}
+        </div>
+
+        <button className="btn gold" style={{ width:"100%", padding:"13px", fontSize:12, letterSpacing:2 }} onClick={tryLogin}>
+          UNLOCK DASHBOARD
+        </button>
+
+        <div style={{ textAlign:"center", marginTop:16 }}>
+          <button onClick={goClient} style={{ background:"none", border:"none", color:"#556677", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>
+            ← Back to booking page
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   // ── Admin View ─────────────────────────────────────────────────────────
   const AdminView = () => (
     <div style={{ display:"flex", flexDirection:"column", height:"100vh" }}>
@@ -270,15 +345,18 @@ export default function App() {
           <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:14, fontWeight:900, color:"#fff", letterSpacing:2 }}>EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span></div>
           <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, marginTop:1 }}>ADMIN DASHBOARD · BENZ</div>
         </div>
-        <button className="btn ghost" onClick={() => { setMode("client"); resetClient(); }}>👤 CLIENT VIEW</button>
+        <div style={{ display:"flex", gap:8 }}>
+          <button className="btn ghost" onClick={goClient}>👤 CLIENT VIEW</button>
+          <button className="btn danger" style={{ padding:"10px 14px", fontSize:10 }} onClick={logout}>LOGOUT</button>
+        </div>
       </div>
 
       {/* Stats Bar */}
       <div style={{ padding:"16px 24px", display:"flex", gap:12, flexWrap:"wrap", borderBottom:"1px solid rgba(201,162,39,.1)" }}>
         {[
-          { l:"TOTAL",    v:bookings.length,                                      c:"#c9a227" },
-          { l:"PENDING",  v:pendingCount,                                          c:"#f59e0b" },
-          { l:"APPROVED", v:bookings.filter(b=>b.status==="approved").length,      c:"#22c55e" },
+          { l:"TOTAL",    v:bookings.length,                                       c:"#c9a227" },
+          { l:"PENDING",  v:pendingCount,                                           c:"#f59e0b" },
+          { l:"APPROVED", v:bookings.filter(b=>b.status==="approved").length,       c:"#22c55e" },
           { l:"CALLS",    v:bookings.filter(b=>b.status==="scheduled_call").length, c:"#3b82f6" },
         ].map(s => (
           <div key={s.l} className="card" style={{ padding:"12px 18px", flex:"1 1 120px" }}>
@@ -303,10 +381,8 @@ export default function App() {
 
           // ── Bookings Tab ──────────────────────────────────────────────
           <div style={{ display:"flex", flexWrap:"wrap", flex:1 }}>
-            {/* Bookings List Panel */}
+            {/* List Panel */}
             <div style={{ flex:"1 1 340px", padding:"16px 24px", borderRight:"1px solid rgba(201,162,39,.1)" }}>
-
-              {/* Filter Bar + Add Button */}
               <div style={{ display:"flex", gap:6, marginBottom:14, flexWrap:"wrap", alignItems:"center" }}>
                 <div style={{ display:"flex", gap:6, flexWrap:"wrap", flex:1 }}>
                   {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"]].map(([k,l]) => (
@@ -316,12 +392,10 @@ export default function App() {
                 <button className="btn gold" style={{ padding:"7px 14px", fontSize:10, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋ ADD</button>
               </div>
 
-              {/* Booking Rows */}
               {filtered.length === 0 ? (
                 <div style={{ textAlign:"center", padding:40, color:"#556677" }}>No bookings</div>
               ) : filtered.map(b => {
-                const s = svc(b.service);
-                const st = STATUS[b.status];
+                const s = svc(b.service); const st = STATUS[b.status];
                 return (
                   <div key={b.id} className={"row " + (selected?.id === b.id ? "active" : "")} onClick={() => setSelected(b)}>
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
@@ -338,7 +412,7 @@ export default function App() {
               })}
             </div>
 
-            {/* Booking Detail Panel */}
+            {/* Detail Panel */}
             <div style={{ flex:"1 1 340px" }}>
               {!selected ? (
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", color:"rgba(201,162,39,.3)", padding:40 }}>
@@ -346,12 +420,9 @@ export default function App() {
                   <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:2, textAlign:"center" }}>SELECT A BOOKING</div>
                 </div>
               ) : (() => {
-                const s = svc(selected.service);
-                const st = STATUS[selected.status];
+                const s = svc(selected.service); const st = STATUS[selected.status];
                 return (
                   <div style={{ padding:24 }} className="slide-in">
-
-                    {/* Client + Service Header */}
                     <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
                       <span style={{ fontSize:32 }}>{s.icon}</span>
                       <div style={{ flex:1 }}>
@@ -361,7 +432,6 @@ export default function App() {
                       <span style={{ padding:"4px 10px", borderRadius:3, fontSize:10, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:st.color, background:st.bg, border:`1px solid ${st.border}` }}>{st.label}</span>
                     </div>
 
-                    {/* Appointment Details */}
                     {[
                       ["📅 Date",       selected.date],
                       ["🕐 Time",       selected.time],
@@ -377,7 +447,6 @@ export default function App() {
                       </div>
                     ))}
 
-                    {/* Notes */}
                     {selected.notes && (
                       <div style={{ marginTop:14, padding:12, background:"rgba(201,162,39,.05)", border:"1px solid rgba(201,162,39,.15)", borderRadius:4 }}>
                         <div style={{ fontSize:10, color:"#7788aa", marginBottom:5, fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>NOTES</div>
@@ -385,7 +454,6 @@ export default function App() {
                       </div>
                     )}
 
-                    {/* Reschedule Controls */}
                     <div style={{ marginTop:18, padding:14, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
                       <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:10, letterSpacing:2, color:"#c9a227", marginBottom:12 }}>RESCHEDULE</div>
                       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
@@ -407,7 +475,6 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Admin Actions */}
                     <div style={{ marginTop:14, display:"flex", flexDirection:"column", gap:8 }}>
                       <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:10, letterSpacing:2, color:"#c9a227", marginBottom:4 }}>ADMIN ACTIONS</div>
                       {selected.status === "pending" ? (
@@ -430,8 +497,6 @@ export default function App() {
 
           // ── Calendar Tab ──────────────────────────────────────────────
           <div style={{ flex:1, padding:24, overflowY:"auto", display:"flex", gap:20, flexWrap:"wrap" }}>
-
-            {/* Month Grid */}
             <div className="card" style={{ padding:18, minWidth:300, flex:"0 0 auto" }}>
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
                 <button className="btn ghost" style={{ padding:"5px 11px" }} onClick={() => { if(calM===0){setCalM(11);setCalY(y=>y-1);}else setCalM(m=>m-1); }}>‹</button>
@@ -444,18 +509,15 @@ export default function App() {
               <div style={{ display:"grid", gridTemplateColumns:"repeat(7,minmax(0,40px))", gap:3 }}>
                 {Array(firstDay(calY, calM)).fill(null).map((_,i) => <div key={`e${i}`} />)}
                 {Array(daysInMonth(calY, calM)).fill(null).map((_,i) => {
-                  const d = i+1;
-                  const ds = fmtDate(calY, calM, d);
-                  const mark = dayMark(ds);
+                  const d = i+1; const ds = fmtDate(calY, calM, d); const mark = dayMark(ds);
                   let cls = "cell";
-                  if (ds === todayStr)          cls += " today";
-                  if (mark === "approved")       cls += " has-app";
-                  else if (mark === "pending")   cls += " has-pen";
-                  if (selDay === ds)             cls += " sel-day";
+                  if (ds === todayStr)        cls += " today";
+                  if (mark === "approved")    cls += " has-app";
+                  else if (mark === "pending") cls += " has-pen";
+                  if (selDay === ds)          cls += " sel-day";
                   return <div key={d} className={cls} onClick={() => setSelDay(ds === selDay ? null : ds)}>{d}</div>;
                 })}
               </div>
-              {/* Legend */}
               <div style={{ display:"flex", gap:14, marginTop:16, justifyContent:"center", flexWrap:"wrap" }}>
                 {[["#4ade80","Approved"],["#fbbf24","Pending"]].map(([c,l]) => (
                   <div key={l} style={{ display:"flex", alignItems:"center", gap:5, fontSize:10, color:"#7788aa" }}>
@@ -465,52 +527,41 @@ export default function App() {
               </div>
             </div>
 
-            {/* Day Timeline */}
             <div className="card" style={{ flex:"1 1 240px", padding:18, minWidth:260, overflowY:"auto" }}>
               <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:2, color:"#c9a227", marginBottom:14 }}>
                 {selDay ? `📅 ${selDay}` : "SELECT A DAY"}
               </div>
               {selDay ? (() => {
-                // Build a map of which TIMES slots each booking covers
                 const coveredSlots = {};
                 bookings
                   .filter(b => b.date === selDay && (b.status === "approved" || b.status === "pending" || b.status === "scheduled_call"))
                   .forEach(b => {
-                    const startH = timeToHour(b.time);
-                    const dur = b.duration || 1;
+                    const startH = timeToHour(b.time); const dur = b.duration || 1;
                     TIMES.forEach(t => { const h = timeToHour(t); if (h >= startH && h < startH + dur) coveredSlots[t] = b; });
                   });
                 return (
                   <div>
                     {TIMES.map((t, idx) => {
-                      const b       = coveredSlots[t];
+                      const b = coveredSlots[t];
                       const isStart = b && timeToHour(b.time) === timeToHour(t);
-                      const nextT   = TIMES[idx + 1];
-                      const isEnd   = b && (!nextT || coveredSlots[nextT]?.id !== b.id);
-                      const st      = b ? STATUS[b.status] : null;
+                      const nextT = TIMES[idx + 1];
+                      const isEnd = b && (!nextT || coveredSlots[nextT]?.id !== b.id);
+                      const st = b ? STATUS[b.status] : null;
                       return (
                         <div key={t} style={{ display:"flex", gap:8, minHeight:46 }}>
-                          {/* Time label — only shown on empty slots or booking start */}
                           <div style={{ width:62, paddingTop:14, fontSize:9, color: !b || isStart ? "#556677" : "transparent", textAlign:"right", flexShrink:0, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{t}</div>
                           <div style={{ flex:1 }}>
                             {!b ? (
-                              // Empty slot
                               <div style={{ height:46, borderTop:"1px solid rgba(201,162,39,.07)" }} />
                             ) : (
-                              // Booking block — top/bottom border only on start/end rows
                               <div style={{
                                 height:"100%", minHeight:46,
-                                background:           st.bg,
-                                borderLeft:           `2px solid ${st.border}`,
-                                borderRight:          `1px solid ${st.border}`,
-                                borderTop:            isStart ? `1px solid ${st.border}` : "none",
-                                borderBottom:         isEnd   ? `1px solid ${st.border}` : "none",
-                                borderTopLeftRadius:  isStart ? 4 : 0,
-                                borderTopRightRadius: isStart ? 4 : 0,
-                                borderBottomLeftRadius:  isEnd ? 4 : 0,
-                                borderBottomRightRadius: isEnd ? 4 : 0,
-                                padding: isStart ? "8px 10px 4px" : "0 10px",
-                                cursor:"pointer",
+                                background: st.bg, borderLeft: `2px solid ${st.border}`, borderRight: `1px solid ${st.border}`,
+                                borderTop: isStart ? `1px solid ${st.border}` : "none",
+                                borderBottom: isEnd ? `1px solid ${st.border}` : "none",
+                                borderTopLeftRadius: isStart ? 4 : 0, borderTopRightRadius: isStart ? 4 : 0,
+                                borderBottomLeftRadius: isEnd ? 4 : 0, borderBottomRightRadius: isEnd ? 4 : 0,
+                                padding: isStart ? "8px 10px 4px" : "0 10px", cursor:"pointer",
                               }} onClick={() => { setSelected(b); setAdminTab("bookings"); }}>
                                 {isStart && (
                                   <>
@@ -537,23 +588,16 @@ export default function App() {
       {showAddModal && (
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.75)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }} onClick={() => setShowAddModal(false)}>
           <div className="card slide-in" style={{ width:"100%", maxWidth:500, maxHeight:"90vh", overflowY:"auto", padding:24 }} onClick={e => e.stopPropagation()}>
-
-            {/* Modal Header */}
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
               <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>ADD APPOINTMENT</div>
               <button className="btn ghost" style={{ padding:"4px 10px", fontSize:12 }} onClick={() => setShowAddModal(false)}>✕</button>
             </div>
 
-            {/* Modal Form Fields */}
             <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-
-              {/* Client Name */}
               <div>
                 <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FULL NAME *</label>
                 <input value={adminForm.name} onChange={e => setAdminForm({...adminForm, name:e.target.value})} placeholder="Client name" />
               </div>
-
-              {/* Phone + Email */}
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                 <div>
                   <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE *</label>
@@ -564,8 +608,6 @@ export default function App() {
                   <input type="email" value={adminForm.email} onChange={e => setAdminForm({...adminForm, email:e.target.value})} placeholder="email@example.com" />
                 </div>
               </div>
-
-              {/* Service */}
               <div>
                 <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>SERVICE *</label>
                 <select value={adminForm.service} onChange={e => setAdminForm({...adminForm, service:e.target.value})}>
@@ -573,8 +615,6 @@ export default function App() {
                   {SERVICES.map(s => <option key={s.id} value={s.id}>{s.icon} {s.label}</option>)}
                 </select>
               </div>
-
-              {/* Date + Time */}
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                 <div>
                   <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>DATE *</label>
@@ -588,8 +628,6 @@ export default function App() {
                   </select>
                 </div>
               </div>
-
-              {/* Source */}
               <div>
                 <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:8 }}>SOURCE *</label>
                 <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
@@ -598,8 +636,6 @@ export default function App() {
                   ))}
                 </div>
               </div>
-
-              {/* Duration */}
               <div>
                 <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:8 }}>DURATION *</label>
                 <div style={{ display:"flex", gap:5 }}>
@@ -608,8 +644,6 @@ export default function App() {
                   ))}
                 </div>
               </div>
-
-              {/* Initial Status */}
               <div>
                 <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:8 }}>INITIAL STATUS</label>
                 <div style={{ display:"flex", gap:6 }}>
@@ -622,22 +656,18 @@ export default function App() {
                   ))}
                 </div>
               </div>
-
-              {/* Notes */}
               <div>
                 <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>NOTES</label>
                 <textarea rows={2} value={adminForm.notes} onChange={e => setAdminForm({...adminForm, notes:e.target.value})} placeholder="Additional notes, location, or special requirements…" />
               </div>
             </div>
 
-            {/* Passive overlap indicator */}
             {hasAdminConflict(adminForm.date, adminForm.time, adminForm.duration) && !adminConfirmOverlap && (
               <div style={{ marginTop:12, padding:10, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:11, color:"#fca5a5" }}>
                 ⚠️ This time slot overlaps with an existing booking.
               </div>
             )}
 
-            {/* Modal Actions — confirmation step when overlap detected */}
             {adminConfirmOverlap ? (
               <div style={{ marginTop:16 }}>
                 <div style={{ padding:13, background:"rgba(239,68,68,.1)", border:"1px solid rgba(239,68,68,.35)", borderRadius:4, fontSize:12, color:"#fca5a5", marginBottom:12 }}>
@@ -677,7 +707,7 @@ export default function App() {
     return (
       <div style={{ minHeight:"100vh" }} className="circuit">
 
-        {/* Client Header — full-width sticky website-style */}
+        {/* Client Header */}
         <div style={{
           position:"sticky", top:0, zIndex:100,
           background:"linear-gradient(180deg,rgba(5,13,26,.97),rgba(10,22,40,.93))",
@@ -696,14 +726,11 @@ export default function App() {
               Providing Fast and Quality Services
             </div>
           </div>
-          <button className="btn ghost" style={{ padding:"clamp(6px,1vw,10px) clamp(10px,1.8vw,16px)", fontSize:"clamp(9px,1.4vw,11px)", flexShrink:0 }} onClick={() => setMode("admin")}>ADMIN</button>
         </div>
 
         <div style={{ maxWidth:560, margin:"0 auto", padding:"24px 16px" }}>
 
           {submitted ? (
-
-            // ── Success Screen ──────────────────────────────────────────
             <div className="card" style={{ padding:30, textAlign:"center" }}>
               <div style={{ fontSize:60, marginBottom:14 }}>✅</div>
               <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:18, fontWeight:900, color:"#f0c040", marginBottom:10, letterSpacing:1.5 }}>BOOKING RECEIVED</div>
@@ -715,10 +742,8 @@ export default function App() {
               <div style={{ fontSize:11, color:"#7788aa", marginBottom:18 }}>📞 {CONTACT.phone} · ✉️ {CONTACT.email}</div>
               <button className="btn gold" onClick={resetClient}>BOOK ANOTHER SERVICE</button>
             </div>
-
           ) : (
             <>
-              {/* Step Progress Indicator */}
               <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:20, justifyContent:"center" }}>
                 {[1,2,3,4].map(n => (
                   <div key={n} style={{ display:"flex", alignItems:"center", gap:6 }}>
@@ -730,7 +755,6 @@ export default function App() {
 
               <div className="card" style={{ padding:22 }}>
 
-                {/* Step 1 — Contact Info */}
                 {step === 1 && (
                   <div className="slide-in">
                     <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>YOUR INFORMATION</div>
@@ -746,7 +770,6 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Step 2 — Service Selection */}
                 {step === 2 && (
                   <div className="slide-in">
                     <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>SELECT SERVICE</div>
@@ -769,13 +792,10 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Step 3 — Date & Time */}
                 {step === 3 && (
                   <div className="slide-in">
                     <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>PICK A DATE & TIME</div>
                     <div style={{ fontSize:12, color:"#7788aa", marginBottom:16 }}>Step 3 of 4 · Select a date, then pick an available time slot</div>
-
-                    {/* Calendar Picker */}
                     <div style={{ marginBottom:16 }}>
                       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
                         <button className="btn ghost" style={{ padding:"5px 10px" }} onClick={() => { if(calM===0){setCalM(11);setCalY(y=>y-1);}else setCalM(m=>m-1); }}>‹</button>
@@ -788,29 +808,23 @@ export default function App() {
                       <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:3 }}>
                         {Array(firstDay(calY, calM)).fill(null).map((_,i) => <div key={`e${i}`} />)}
                         {Array(daysInMonth(calY, calM)).fill(null).map((_,i) => {
-                          const d = i+1;
-                          const ds = fmtDate(calY, calM, d);
-                          const mark = dayMark(ds);
+                          const d = i+1; const ds = fmtDate(calY, calM, d); const mark = dayMark(ds);
                           const isPast = ds < todayStr;
-                          const blocked = isPast;
                           let cls = "cell";
                           if (ds === todayStr)        cls += " today";
-                          if (mark === "approved")     cls += " has-app";
+                          if (mark === "approved")    cls += " has-app";
                           else if (mark === "pending") cls += " has-pen";
-                          if (isPast)                  cls += " disabled-past";
-                          if (form.date === ds)        cls += " sel-day";
-                          return <div key={d} className={cls} onClick={() => !blocked && setForm({...form, date:ds, time:""})}>{d}</div>;
+                          if (isPast)                 cls += " disabled-past";
+                          if (form.date === ds)       cls += " sel-day";
+                          return <div key={d} className={cls} onClick={() => !isPast && setForm({...form, date:ds, time:""})}>{d}</div>;
                         })}
                       </div>
-                      {/* Calendar Legend */}
                       <div style={{ display:"flex", gap:12, marginTop:10, justifyContent:"center", flexWrap:"wrap", fontSize:10, color:"#7788aa" }}>
                         <div style={{ display:"flex", alignItems:"center", gap:5 }}><div style={{ width:9, height:9, background:"#4ade80", borderRadius:2 }} />Booked</div>
                         <div style={{ display:"flex", alignItems:"center", gap:5 }}><div style={{ width:9, height:9, background:"#fbbf24", borderRadius:2 }} />Pending</div>
                         <div style={{ display:"flex", alignItems:"center", gap:5 }}><div style={{ width:9, height:9, border:"1px solid #c9a227", borderRadius:2 }} />Today</div>
                       </div>
                     </div>
-
-                    {/* Time Slot Picker */}
                     {form.date && (
                       <div>
                         <div style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:8 }}>AVAILABLE TIMES · {form.date}</div>
@@ -829,7 +843,6 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Step 4 — Review & Submit */}
                 {step === 4 && (
                   <div className="slide-in">
                     <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>REVIEW & SUBMIT</div>
@@ -863,17 +876,14 @@ export default function App() {
                   </div>
                 )}
               </div>
-
             </>
           )}
 
-          {/* Bottom Brand Logo — screen blend removes the black background */}
           <div style={{ textAlign:"center", marginTop:28, paddingBottom:8 }}>
             <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO BLACK.jpg`} alt="EZ Tech Solutions" style={{ height:"clamp(120px, 32vw, 200px)", width:"auto", objectFit:"contain", mixBlendMode:"screen", opacity:0.85 }} />
           </div>
         </div>
 
-        {/* Footer */}
         {SiteFooter({})}
       </div>
     );
@@ -896,7 +906,10 @@ export default function App() {
           {toast}
         </div>
       )}
-      {mode === "admin" ? AdminView() : ClientView()}
+      {mode === "admin"
+        ? (adminAuthed ? <AdminView /> : <AdminGate />)
+        : <ClientView />
+      }
     </div>
   );
 }

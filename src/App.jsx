@@ -298,6 +298,9 @@ export default function App() {
     @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
     .svc-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.25);border-radius:3px;font-size:11px;color:#c9a227;}
     .fs-error{font-size:11px;color:#f87171;margin-top:5px;display:block;}
+    .side-col{width:190px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;position:sticky;top:20px;align-self:flex-start;}
+    .side-photo{width:100%;border-radius:6px;object-fit:cover;border:1px solid rgba(201,162,39,.2);display:block;}
+    @media(max-width:960px){.side-col{display:none;}}
   `;
 
   // ── Shared Footer ──────────────────────────────────────────────────────
@@ -884,7 +887,16 @@ export default function App() {
           </div>
         </div>
 
-        <div style={{ maxWidth:560, margin:"0 auto", padding:"24px 16px" }}>
+        <div style={{ display:"flex", gap:16, alignItems:"flex-start", maxWidth:1260, margin:"0 auto", padding:"24px 16px" }}>
+
+          {/* Left photo column */}
+          <div className="side-col">
+            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-lukasz-klimkiewicz-42373578-7364948.jpg`} alt="Security camera on ceiling" style={{ aspectRatio:"16/9" }} />
+            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-life-7463021.jpg`} alt="Security camera on wall" style={{ aspectRatio:"4/3" }} />
+            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-atypeek-5966513.jpg`} alt="Dome security camera" style={{ aspectRatio:"1" }} />
+          </div>
+
+          <div style={{ flex:1, maxWidth:560, minWidth:0, margin:"0 auto" }}>
 
           {submitted ? (
             <div className="card" style={{ padding:30, textAlign:"center" }}>
@@ -1138,7 +1150,15 @@ export default function App() {
           <div style={{ textAlign:"center", marginTop:28, paddingBottom:8 }}>
             <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO BLACK.jpg`} alt="EZ Tech Solutions" style={{ height:"clamp(120px, 32vw, 200px)", width:"auto", objectFit:"contain", mixBlendMode:"screen", opacity:0.85 }} />
           </div>
-        </div>
+          </div>{/* end center column */}
+
+          {/* Right photo column */}
+          <div className="side-col">
+            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-brett-sayles-2881224.jpg`} alt="Network switch with cables" style={{ aspectRatio:"16/9" }} />
+            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-vladimirsrajber-13963756.jpg`} alt="Network switch with LEDs" style={{ aspectRatio:"4/3" }} />
+          </div>
+
+        </div>{/* end 3-col wrapper */}
 
         {SiteFooter({})}
       </div>

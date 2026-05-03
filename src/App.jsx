@@ -904,6 +904,18 @@ export default function App() {
             </div>
           ) : (
             <>
+              {/* Hero CTA */}
+              <div style={{ textAlign:"center", marginBottom:28 }}>
+                <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:"clamp(22px,6vw,36px)", fontWeight:900, color:"#fff", letterSpacing:"clamp(1px,0.4vw,3px)", lineHeight:1.15, marginBottom:10 }}>
+                  APPOINTMENT <span style={{ color:"#c9a227" }}>BOOKING</span>
+                </div>
+                <div style={{ width:48, height:3, background:"linear-gradient(90deg,#c9a227,#f0c040)", borderRadius:2, margin:"0 auto 14px" }} />
+                <div style={{ fontSize:"clamp(13px,2.5vw,15px)", color:"#8899aa", lineHeight:1.6 }}>
+                  Book your tech service in minutes.<br />
+                  <span style={{ color:"#c9a227", fontStyle:"italic" }}>Select a service · Pick a time · We confirm.</span>
+                </div>
+              </div>
+
               {/* Step Progress */}
               <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:20, justifyContent:"center" }}>
                 {[1,2,3,4].map(n => (

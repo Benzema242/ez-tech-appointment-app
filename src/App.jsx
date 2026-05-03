@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useRef } from "react";
+import { useForm, ValidationError } from '@formspree/react';
 import { supabase } from "./supabase";
 
 // ─── SERVICES CATALOG ──────────────────────────────────────────────────────
@@ -80,6 +81,7 @@ export default function App() {
   const [pwError, setPwError] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const pwRef = useRef(null);
+  const [contactState, handleContactSubmit] = useForm('mlgzgnvp');
 
   useEffect(() => {
     const onHash = () => setMode(isAdminRoute() ? "admin" : "client");
@@ -295,6 +297,7 @@ export default function App() {
     .shake{animation:shake .4s ease;}
     @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
     .svc-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.25);border-radius:3px;font-size:11px;color:#c9a227;}
+    .fs-error{font-size:11px;color:#f87171;margin-top:5px;display:block;}
   `;
 
   // ── Shared Footer ──────────────────────────────────────────────────────
@@ -1058,6 +1061,67 @@ export default function App() {
               </div>
             </>
           )}
+
+          {/* ── Contact Form ─────────────────────────────────────────── */}
+          <div style={{ marginTop:28 }}>
+            {/* Divider */}
+            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:22 }}>
+              <div style={{ flex:1, height:1, background:"rgba(201,162,39,.2)" }} />
+              <span style={{ fontFamily:"'Orbitron',sans-serif", fontSize:9, letterSpacing:2.5, color:"#556677", whiteSpace:"nowrap" }}>OR SEND US A MESSAGE</span>
+              <div style={{ flex:1, height:1, background:"rgba(201,162,39,.2)" }} />
+            </div>
+
+            <div className="card" style={{ padding:22 }}>
+              {contactState.succeeded ? (
+                <div style={{ textAlign:"center", padding:"20px 0" }}>
+                  <div style={{ fontSize:52, marginBottom:12 }}>✉️</div>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:900, color:"#f0c040", letterSpacing:1.5, marginBottom:8 }}>MESSAGE SENT</div>
+                  <div style={{ fontSize:13, color:"#c8bfa8" }}>Thanks! We'll get back to you shortly.</div>
+                </div>
+              ) : (
+                <>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>CONTACT US</div>
+                  <div style={{ fontSize:12, color:"#7788aa", marginBottom:18 }}>Have a question or need a quote? Drop us a message.</div>
+
+                  <form onSubmit={handleContactSubmit} style={{ display:"flex", flexDirection:"column", gap:12 }}>
+                    <div>
+                      <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FULL NAME *</label>
+                      <input type="text" name="name" placeholder="John Smith" required />
+                      <ValidationError field="name" errors={contactState.errors} className="fs-error" />
+                    </div>
+
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                      <div>
+                        <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL *</label>
+                        <input type="email" name="email" placeholder="you@email.com" required />
+                        <ValidationError field="email" errors={contactState.errors} className="fs-error" />
+                      </div>
+                      <div>
+                        <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE</label>
+                        <input type="tel" name="phone" placeholder="(242) 555-0000" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>MESSAGE *</label>
+                      <textarea name="message" rows={4} placeholder="Tell us how we can help…" required />
+                      <ValidationError field="message" errors={contactState.errors} className="fs-error" />
+                    </div>
+
+                    {contactState.errors?.length > 0 && !contactState.errors.some(e => e.field) && (
+                      <div style={{ padding:"9px 12px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:11, color:"#fca5a5" }}>
+                        ⚠️ Something went wrong. Please try again.
+                      </div>
+                    )}
+
+                    <button type="submit" className="btn gold" style={{ padding:"13px", fontSize:12, letterSpacing:2 }} disabled={contactState.submitting}>
+                      {contactState.submitting ? "SENDING…" : "SEND MESSAGE →"}
+                    </button>
+                  </form>
+                </>
+              )}
+            </div>
+          </div>
 
           <div style={{ textAlign:"center", marginTop:28, paddingBottom:8 }}>
             <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO BLACK.jpg`} alt="EZ Tech Solutions" style={{ height:"clamp(120px, 32vw, 200px)", width:"auto", objectFit:"contain", mixBlendMode:"screen", opacity:0.85 }} />

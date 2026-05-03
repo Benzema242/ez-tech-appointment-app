@@ -298,9 +298,9 @@ export default function App() {
     @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
     .svc-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.25);border-radius:3px;font-size:11px;color:#c9a227;}
     .fs-error{font-size:11px;color:#f87171;margin-top:5px;display:block;}
-    .side-col{width:190px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;position:sticky;top:20px;align-self:flex-start;}
-    .side-photo{width:100%;border-radius:6px;object-fit:cover;border:1px solid rgba(201,162,39,.2);display:block;}
-    @media(max-width:960px){.side-col{display:none;}}
+    .side-col{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;position:sticky;top:20px;align-self:flex-start;}
+    .side-photo{width:100%;border-radius:8px;object-fit:cover;border:1px solid rgba(201,162,39,.25);display:block;box-shadow:0 4px 18px rgba(0,0,0,.5);}
+    @media(max-width:1080px){.side-col{display:none;}}
   `;
 
   // ── Shared Footer ──────────────────────────────────────────────────────
@@ -891,9 +891,9 @@ export default function App() {
 
           {/* Left photo column */}
           <div className="side-col">
-            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-lukasz-klimkiewicz-42373578-7364948.jpg`} alt="Security camera on ceiling" style={{ aspectRatio:"16/9" }} />
-            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-life-7463021.jpg`} alt="Security camera on wall" style={{ aspectRatio:"4/3" }} />
-            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-atypeek-5966513.jpg`} alt="Dome security camera" style={{ aspectRatio:"1" }} />
+            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-lukasz-klimkiewicz-42373578-7364948.jpg`} alt="Security camera on ceiling" style={{ height:200 }} />
+            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-life-7463021.jpg`} alt="Security camera on wall" style={{ height:260 }} />
+            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-atypeek-5966513.jpg`} alt="Dome security camera" style={{ height:220 }} />
           </div>
 
           <div style={{ flex:1, maxWidth:560, minWidth:0, margin:"0 auto" }}>
@@ -1154,8 +1154,8 @@ export default function App() {
 
           {/* Right photo column */}
           <div className="side-col">
-            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-brett-sayles-2881224.jpg`} alt="Network switch with cables" style={{ aspectRatio:"16/9" }} />
-            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-vladimirsrajber-13963756.jpg`} alt="Network switch with LEDs" style={{ aspectRatio:"4/3" }} />
+            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-brett-sayles-2881224.jpg`} alt="Network switch with cables" style={{ height:240 }} />
+            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-vladimirsrajber-13963756.jpg`} alt="Network switch with LEDs" style={{ height:240 }} />
           </div>
 
         </div>{/* end 3-col wrapper */}

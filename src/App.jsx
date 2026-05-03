@@ -1154,8 +1154,9 @@ export default function App() {
 
           {/* Right photo column */}
           <div className="side-col">
-            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-brett-sayles-2881224.jpg`} alt="Network switch with cables" style={{ height:240 }} />
-            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-vladimirsrajber-13963756.jpg`} alt="Network switch with LEDs" style={{ height:240 }} />
+            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/architectural-lighting.png`} alt="Architectural lighting" style={{ height:220 }} />
+            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-brett-sayles-2881224.jpg`} alt="Network switch with cables" style={{ height:220 }} />
+            <img className="side-photo" src={`${import.meta.env.BASE_URL}assets/pexels-vladimirsrajber-13963756.jpg`} alt="Network switch with LEDs" style={{ height:220 }} />
           </div>
 
         </div>{/* end 3-col wrapper */}

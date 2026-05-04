@@ -169,6 +169,20 @@ export default function App() {
     if (error) { fire("❌ Error submitting booking"); return; }
     setBookings(p => [...p, data]);
     setSubmitted(true);
+    fetch("https://formspree.io/f/mdabeayy", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        subject: `New Booking — ${form.name}`,
+        name: form.name,
+        email: form.email || "Not provided",
+        phone: form.phone,
+        services: form.services.map(id => svc(id).label).join(", "),
+        date: form.date,
+        time: form.time,
+        notes: form.notes || "None",
+      }),
+    }).catch(() => {});
   };
 
   const resetClient = () => { setStep(1); setForm({ name:"", email:"", phone:"", services:[], date:"", time:"", notes:"" }); setSubmitted(false); };

@@ -381,6 +381,26 @@ export default function App() {
     .side-col{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;position:sticky;top:20px;align-self:flex-start;}
     .side-photo{width:100%;border-radius:8px;object-fit:cover;border:1px solid rgba(201,162,39,.25);display:block;box-shadow:0 4px 18px rgba(0,0,0,.5);}
     @media(max-width:1080px){.side-col{display:none;}}
+    .mobile-back{display:none;}
+    .admin-detail{flex:1 1 340px;}
+    @media(max-width:768px){
+      .mobile-back{display:block;}
+      .admin-panels{flex-direction:column!important;}
+      .admin-list{border-right:none!important;}
+      .admin-detail{display:none;}
+      .admin-panels.has-sel .admin-list{display:none;}
+      .admin-panels.has-sel .admin-detail{display:block!important;width:100%;}
+      .filter-row{overflow-x:auto;flex-wrap:nowrap!important;-webkit-overflow-scrolling:touch;padding-bottom:6px;}
+      .filter-row .btn{flex-shrink:0;}
+      .stats-bar{padding:10px 14px!important;gap:8px!important;}
+      .stat-card{padding:10px 12px!important;flex:1 1 80px!important;}
+      .stat-val{font-size:18px!important;}
+      .admin-hdr-btns .btn{padding:7px 8px!important;font-size:9px!important;letter-spacing:1px!important;}
+    }
+    @media(max-width:480px){
+      .admin-list,.admin-detail{padding:12px 14px!important;}
+      .contact-grid{grid-template-columns:1fr!important;}
+    }
   `;
 
   // ── Shared Footer ──────────────────────────────────────────────────────
@@ -497,7 +517,7 @@ export default function App() {
           <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:14, fontWeight:900, color:"#fff", letterSpacing:2 }}>EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span></div>
           <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, marginTop:1 }}>ADMIN DASHBOARD · BENZ</div>
         </div>
-        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+        <div className="admin-hdr-btns" style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
           <button className="btn ghost" style={{ padding:"8px 12px", fontSize:10 }} onClick={() => { setShowChangePwModal(true); setChangePwError(""); setChangePwForm({ old:"", newPw:"", confirm:"" }); }}>🔑 CHANGE PW</button>
           <button className="btn ghost" onClick={goClient}>👤 CLIENT VIEW</button>
           <button className="btn danger" style={{ padding:"10px 14px", fontSize:10 }} onClick={logout}>LOGOUT</button>
@@ -505,7 +525,7 @@ export default function App() {
       </div>
 
       {/* Stats Bar */}
-      <div style={{ padding:"16px 24px", display:"flex", gap:12, flexWrap:"wrap", borderBottom:"1px solid rgba(201,162,39,.1)" }}>
+      <div className="stats-bar" style={{ padding:"16px 24px", display:"flex", gap:12, flexWrap:"wrap", borderBottom:"1px solid rgba(201,162,39,.1)" }}>
         {[
           { l:"TODAY",    v:todayCount,                                              c:"#a78bfa" },
           { l:"TOTAL",    v:bookings.length,                                         c:"#c9a227" },
@@ -514,9 +534,9 @@ export default function App() {
           { l:"CALLS",    v:bookings.filter(b=>b.status==="scheduled_call").length,  c:"#3b82f6" },
           { l:"REVENUE",  v:`$${revenue}`,                                           c:"#34d399" },
         ].map(s => (
-          <div key={s.l} className="card" style={{ padding:"12px 18px", flex:"1 1 100px" }}>
+          <div key={s.l} className="card stat-card" style={{ padding:"12px 18px", flex:"1 1 100px" }}>
             <div style={{ fontSize:9, letterSpacing:2, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:4 }}>{s.l}</div>
-            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:22, fontWeight:900, color:s.c }}>
+            <div className="stat-val" style={{ fontFamily:"'Orbitron',sans-serif", fontSize:22, fontWeight:900, color:s.c }}>
               {s.v}
               {s.l==="PENDING" && pendingCount > 0 && <span className="pulse" style={{ marginLeft:6, fontSize:14 }}>●</span>}
               {s.l==="TODAY" && todayCount > 0 && <span className="pulse" style={{ marginLeft:6, fontSize:14 }}>●</span>}
@@ -536,10 +556,10 @@ export default function App() {
         {adminTab === "bookings" ? (
 
           // ── Bookings Tab ──────────────────────────────────────────────
-          <div style={{ display:"flex", flexWrap:"wrap", flex:1 }}>
+          <div className={`admin-panels${selected ? " has-sel" : ""}`} style={{ display:"flex", flexWrap:"wrap", flex:1 }}>
 
             {/* List Panel */}
-            <div style={{ flex:"1 1 340px", padding:"16px 24px", borderRight:"1px solid rgba(201,162,39,.1)" }}>
+            <div className="admin-list" style={{ flex:"1 1 340px", padding:"16px 24px", borderRight:"1px solid rgba(201,162,39,.1)" }}>
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
@@ -547,7 +567,7 @@ export default function App() {
                 style={{ marginBottom:10, fontSize:12, padding:"9px 12px" }}
               />
               <div style={{ display:"flex", gap:6, marginBottom:14, flexWrap:"wrap", alignItems:"center" }}>
-                <div style={{ display:"flex", gap:6, flexWrap:"wrap", flex:1 }}>
+                <div className="filter-row" style={{ display:"flex", gap:6, flexWrap:"wrap", flex:1 }}>
                   {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"]].map(([k,l]) => (
                     <button key={k} onClick={() => setFilter(k)} className="btn" style={{ padding:"6px 11px", fontSize:10, background: filter===k ? "rgba(201,162,39,.2)" : "transparent", border:"1px solid rgba(201,162,39,.3)", color: filter===k ? "#f0c040" : "#7788aa" }}>{l}</button>
                   ))}
@@ -621,7 +641,7 @@ export default function App() {
             </div>
 
             {/* Detail Panel */}
-            <div style={{ flex:"1 1 340px" }}>
+            <div className="admin-detail">
               {!selected ? (
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", color:"rgba(201,162,39,.3)", padding:40 }}>
                   <div style={{ fontSize:56, marginBottom:14 }}>📋</div>
@@ -635,6 +655,13 @@ export default function App() {
                 const priceDisplay = totalPrice === 0 ? (svcs.some(s => s.note) ? svcs.map(s=>s.note).filter(Boolean)[0] : "Free") : `$${totalPrice}`;
                 return (
                   <div style={{ padding:24 }} className="slide-in">
+
+                    {/* Mobile back button */}
+                    <div className="mobile-back" style={{ marginBottom:14 }}>
+                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:12, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
+                        ← Back to list
+                      </button>
+                    </div>
 
                     {/* Header */}
                     <div style={{ display:"flex", alignItems:"flex-start", gap:12, marginBottom:20 }}>
@@ -1292,7 +1319,7 @@ export default function App() {
                       <ValidationError field="name" errors={contactState.errors} className="fs-error" />
                     </div>
 
-                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                    <div className="contact-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                       <div>
                         <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL *</label>
                         <input type="email" name="email" placeholder="you@email.com" required />

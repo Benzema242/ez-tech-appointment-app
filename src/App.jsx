@@ -400,6 +400,7 @@ export default function App() {
     @media(max-width:480px){
       .admin-list,.admin-detail{padding:12px 14px!important;}
       .contact-grid{grid-template-columns:1fr!important;}
+      .reschedule-grid{grid-template-columns:1fr!important;}
     }
   `;
 
@@ -752,7 +753,7 @@ export default function App() {
                     {/* Reschedule */}
                     <div style={{ marginTop:18, padding:14, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
                       <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:10, letterSpacing:2, color:"#c9a227", marginBottom:12 }}>RESCHEDULE</div>
-                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
+                      <div className="reschedule-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
                         <div>
                           <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:5 }}>DATE</div>
                           <input type="date" value={selected.date} onChange={e => updateBooking(selected.id, { date: e.target.value })} style={{ fontSize:12, colorScheme:"dark" }} />

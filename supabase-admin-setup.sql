@@ -53,5 +53,5 @@ grant execute on function change_admin_password(text, text) to anon;
 --    IMPORTANT: replace the placeholder below with your actual password,
 --    then run the query.  Do NOT commit this file with a real password in it.
 insert into admin_config (id, password_hash)
-values (1, crypt('REPLACE_WITH_YOUR_PASSWORD', gen_salt('bf')))
+values (1, crypt('RCNov2821#', gen_salt('bf')))
 on conflict (id) do nothing;

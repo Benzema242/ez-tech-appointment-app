@@ -1368,6 +1368,29 @@ export default function App() {
         </div>{/* end 3-col wrapper */}
 
         {SiteFooter({})}
+
+        {/* WhatsApp floating button */}
+        <a
+          href="https://wa.me/message/NXWSA4R4RGQBH1"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            position:"fixed", bottom:24, right:24, zIndex:999,
+            width:56, height:56, borderRadius:"50%",
+            background:"#25d366",
+            display:"flex", alignItems:"center", justifyContent:"center",
+            boxShadow:"0 4px 16px rgba(37,211,102,.5)",
+            transition:"transform .2s, box-shadow .2s",
+            textDecoration:"none",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform="scale(1.1)"; e.currentTarget.style.boxShadow="0 6px 22px rgba(37,211,102,.7)"; }}
+          onMouseLeave={e => { e.currentTarget.style.transform="scale(1)"; e.currentTarget.style.boxShadow="0 4px 16px rgba(37,211,102,.5)"; }}
+          title="Chat with us on WhatsApp"
+        >
+          <svg viewBox="0 0 32 32" width="30" height="30" fill="white" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 2C8.268 2 2 8.268 2 16c0 2.482.672 4.808 1.845 6.805L2 30l7.388-1.818A13.94 13.94 0 0 0 16 30c7.732 0 14-6.268 14-14S23.732 2 16 2zm0 25.5a11.44 11.44 0 0 1-5.826-1.593l-.418-.248-4.385 1.079 1.107-4.278-.273-.44A11.45 11.45 0 0 1 4.5 16C4.5 9.596 9.596 4.5 16 4.5S27.5 9.596 27.5 16 22.404 27.5 16 27.5zm6.29-8.372c-.344-.172-2.036-1.004-2.352-1.118-.316-.115-.546-.172-.776.172-.23.344-.89 1.118-1.09 1.348-.2.23-.402.258-.746.086-.344-.172-1.452-.535-2.767-1.707-1.022-.912-1.712-2.038-1.913-2.382-.2-.344-.021-.53.15-.7.155-.154.344-.402.516-.603.172-.2.23-.344.344-.573.115-.23.058-.43-.029-.603-.086-.172-.776-1.872-1.063-2.563-.28-.672-.564-.58-.776-.59l-.66-.011c-.23 0-.603.086-.918.43-.316.344-1.205 1.177-1.205 2.869 0 1.692 1.233 3.326 1.405 3.556.172.23 2.427 3.706 5.879 5.197.822.355 1.463.567 1.963.726.824.263 1.574.226 2.167.137.66-.099 2.036-.832 2.323-1.636.287-.803.287-1.491.2-1.636-.086-.144-.316-.23-.66-.402z"/>
+          </svg>
+        </a>
       </div>
     );
   };

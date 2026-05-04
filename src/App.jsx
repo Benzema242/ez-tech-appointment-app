@@ -169,7 +169,7 @@ export default function App() {
     if (error) { fire("❌ Error submitting booking"); return; }
     setBookings(p => [...p, data]);
     setSubmitted(true);
-    fetch("https://formspree.io/f/mdabeayy", {
+    fetch("https://formspree.io/f/xkoyjodg", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify({

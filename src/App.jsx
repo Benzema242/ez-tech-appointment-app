@@ -137,6 +137,9 @@ export default function App() {
   const [showChangePwModal, setShowChangePwModal] = useState(false);
   const [changePwForm, setChangePwForm] = useState({ old:"", newPw:"", confirm:"" });
   const [changePwError, setChangePwError] = useState("");
+  const [search, setSearch] = useState("");
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesInput, setNotesInput] = useState("");
 
   // ── Load bookings from Supabase ────────────────────────────────────────
   useEffect(() => {
@@ -275,9 +278,23 @@ export default function App() {
     return null;
   };
 
-  const filtered = bookings.filter(b => filter === "all" || b.status === filter).sort((a,b) => a.date.localeCompare(b.date));
-  const pendingCount = bookings.filter(b => b.status === "pending").length;
   const todayStr = fmtDate(now.getFullYear(), now.getMonth(), now.getDate());
+  const pendingCount = bookings.filter(b => b.status === "pending").length;
+  const todayCount = bookings.filter(b => b.date === todayStr).length;
+  const revenue = bookings
+    .filter(b => b.status === "approved")
+    .reduce((sum, b) => sum + svcList(b.service).reduce((s2, sv) => s2 + (sv.price || 0), 0), 0);
+  const relativeDate = (ds) => {
+    const diff = Math.round((new Date(ds + "T00:00:00") - new Date(todayStr + "T00:00:00")) / 86400000);
+    if (diff === 0) return "Today";
+    if (diff === 1) return "Tomorrow";
+    if (diff === -1) return "Yesterday";
+    return ds;
+  };
+  const filtered = bookings
+    .filter(b => filter === "all" || b.status === filter)
+    .filter(b => !search.trim() || b.client.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   // ── Global Styles ──────────────────────────────────────────────────────
   const css = `
@@ -456,16 +473,19 @@ export default function App() {
       {/* Stats Bar */}
       <div style={{ padding:"16px 24px", display:"flex", gap:12, flexWrap:"wrap", borderBottom:"1px solid rgba(201,162,39,.1)" }}>
         {[
-          { l:"TOTAL",    v:bookings.length,                                       c:"#c9a227" },
-          { l:"PENDING",  v:pendingCount,                                           c:"#f59e0b" },
-          { l:"APPROVED", v:bookings.filter(b=>b.status==="approved").length,       c:"#22c55e" },
-          { l:"CALLS",    v:bookings.filter(b=>b.status==="scheduled_call").length, c:"#3b82f6" },
+          { l:"TODAY",    v:todayCount,                                              c:"#a78bfa" },
+          { l:"TOTAL",    v:bookings.length,                                         c:"#c9a227" },
+          { l:"PENDING",  v:pendingCount,                                            c:"#f59e0b" },
+          { l:"APPROVED", v:bookings.filter(b=>b.status==="approved").length,        c:"#22c55e" },
+          { l:"CALLS",    v:bookings.filter(b=>b.status==="scheduled_call").length,  c:"#3b82f6" },
+          { l:"REVENUE",  v:`$${revenue}`,                                           c:"#34d399" },
         ].map(s => (
-          <div key={s.l} className="card" style={{ padding:"12px 18px", flex:"1 1 120px" }}>
+          <div key={s.l} className="card" style={{ padding:"12px 18px", flex:"1 1 100px" }}>
             <div style={{ fontSize:9, letterSpacing:2, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:4 }}>{s.l}</div>
-            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:24, fontWeight:900, color:s.c }}>
+            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:22, fontWeight:900, color:s.c }}>
               {s.v}
               {s.l==="PENDING" && pendingCount > 0 && <span className="pulse" style={{ marginLeft:6, fontSize:14 }}>●</span>}
+              {s.l==="TODAY" && todayCount > 0 && <span className="pulse" style={{ marginLeft:6, fontSize:14 }}>●</span>}
             </div>
           </div>
         ))}
@@ -486,6 +506,12 @@ export default function App() {
 
             {/* List Panel */}
             <div style={{ flex:"1 1 340px", padding:"16px 24px", borderRight:"1px solid rgba(201,162,39,.1)" }}>
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search by client name…"
+                style={{ marginBottom:10, fontSize:12, padding:"9px 12px" }}
+              />
               <div style={{ display:"flex", gap:6, marginBottom:14, flexWrap:"wrap", alignItems:"center" }}>
                 <div style={{ display:"flex", gap:6, flexWrap:"wrap", flex:1 }}>
                   {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"]].map(([k,l]) => (
@@ -503,7 +529,7 @@ export default function App() {
                 const extra = svcs.length - 1;
                 const st = safeStatus(b.status);
                 return (
-                  <div key={b.id} className={"row " + (selected?.id === b.id ? "active" : "")} onClick={() => { setSelected(b); setDeleteConfirm(false); }}>
+                  <div key={b.id} className={"row " + (selected?.id === b.id ? "active" : "")} onClick={() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); }}>
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                       <span style={{ fontSize:20 }}>{first.icon}</span>
                       <div style={{ flex:1, minWidth:0 }}>
@@ -512,7 +538,7 @@ export default function App() {
                           <span style={{ overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{first.label}</span>
                           {extra > 0 && <span style={{ flexShrink:0, padding:"1px 6px", background:"rgba(201,162,39,.15)", border:"1px solid rgba(201,162,39,.3)", borderRadius:3, fontSize:9, color:"#c9a227" }}>+{extra} more</span>}
                         </div>
-                        <div style={{ fontSize:11, color:"#c9a227", marginTop:3, fontFamily:"'Orbitron',sans-serif" }}>{b.date} · {b.time}</div>
+                        <div style={{ fontSize:11, color:"#c9a227", marginTop:3, fontFamily:"'Orbitron',sans-serif" }}>{relativeDate(b.date)} · {b.time}</div>
                       </div>
                       <span style={{ padding:"3px 8px", borderRadius:3, fontSize:9, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:st.color, background:st.bg, border:`1px solid ${st.border}`, whiteSpace:"nowrap" }}>{st.label}</span>
                     </div>
@@ -566,12 +592,27 @@ export default function App() {
                       </div>
                     ))}
 
-                    {selected.notes && (
-                      <div style={{ marginTop:14, padding:12, background:"rgba(201,162,39,.05)", border:"1px solid rgba(201,162,39,.15)", borderRadius:4 }}>
-                        <div style={{ fontSize:10, color:"#7788aa", marginBottom:5, fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>NOTES</div>
-                        <div style={{ fontSize:13, color:"#c8bfa8" }}>{selected.notes}</div>
+                    <div style={{ marginTop:14, padding:12, background:"rgba(201,162,39,.05)", border:"1px solid rgba(201,162,39,.15)", borderRadius:4 }}>
+                      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6 }}>
+                        <div style={{ fontSize:10, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>NOTES</div>
+                        {!editingNotes && (
+                          <button onClick={() => { setNotesInput(selected.notes || ""); setEditingNotes(true); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>✏️ Edit</button>
+                        )}
                       </div>
-                    )}
+                      {editingNotes ? (
+                        <>
+                          <textarea value={notesInput} onChange={e => setNotesInput(e.target.value)} rows={3} style={{ fontSize:12, resize:"vertical" }} placeholder="Add notes…" />
+                          <div style={{ display:"flex", gap:8, marginTop:8 }}>
+                            <button className="btn gold" style={{ padding:"6px 14px", fontSize:10 }} onClick={() => { updateBooking(selected.id, { notes: notesInput }); setEditingNotes(false); }}>SAVE</button>
+                            <button className="btn ghost" style={{ padding:"6px 14px", fontSize:10 }} onClick={() => setEditingNotes(false)}>CANCEL</button>
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{ fontSize:13, color: selected.notes ? "#c8bfa8" : "#445566", fontStyle: selected.notes ? "normal" : "italic" }}>
+                          {selected.notes || "No notes — click Edit to add"}
+                        </div>
+                      )}
+                    </div>
 
                     {/* Reschedule */}
                     <div style={{ marginTop:18, padding:14, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>

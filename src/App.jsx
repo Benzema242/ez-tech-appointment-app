@@ -140,6 +140,8 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [editingNotes, setEditingNotes] = useState(false);
   const [notesInput, setNotesInput] = useState("");
+  const [editingPrice, setEditingPrice] = useState(false);
+  const [priceInput, setPriceInput] = useState("");
 
   // ── Load bookings from Supabase ────────────────────────────────────────
   useEffect(() => {
@@ -283,7 +285,10 @@ export default function App() {
   const todayCount = bookings.filter(b => b.date === todayStr).length;
   const revenue = bookings
     .filter(b => b.status === "approved")
-    .reduce((sum, b) => sum + svcList(b.service).reduce((s2, sv) => s2 + (sv.price || 0), 0), 0);
+    .reduce((sum, b) => {
+      if (b.price != null) return sum + b.price;
+      return sum + svcList(b.service).reduce((s2, sv) => s2 + (sv.price || 0), 0);
+    }, 0);
   const relativeDate = (ds) => {
     const diff = Math.round((new Date(ds + "T00:00:00") - new Date(todayStr + "T00:00:00")) / 86400000);
     if (diff === 0) return "Today";
@@ -529,7 +534,7 @@ export default function App() {
                 const extra = svcs.length - 1;
                 const st = safeStatus(b.status);
                 return (
-                  <div key={b.id} className={"row " + (selected?.id === b.id ? "active" : "")} onClick={() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); }}>
+                  <div key={b.id} className={"row " + (selected?.id === b.id ? "active" : "")} onClick={() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); }}>
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                       <span style={{ fontSize:20 }}>{first.icon}</span>
                       <div style={{ flex:1, minWidth:0 }}>
@@ -578,19 +583,54 @@ export default function App() {
                     </div>
 
                     {[
-                      ["📅 Date",       selected.date],
-                      ["🕐 Time",       selected.time],
-                      ["📞 Phone",      selected.phone],
-                      ["✉️ Email",      selected.email],
-                      ["💰 Est. Price", priceDisplay],
-                      ["📡 Source",     (() => { const src = SOURCES.find(s2 => s2.id === selected.source); return src ? `${src.icon} ${src.label}` : "🌐 Website"; })()],
-                      ["⏱ Duration",   `${selected.duration || 1} hour${(selected.duration || 1) !== 1 ? "s" : ""}`],
+                      ["📅 Date",     selected.date],
+                      ["🕐 Time",     selected.time],
+                      ["📞 Phone",    selected.phone],
+                      ["✉️ Email",    selected.email],
+                      ["📡 Source",   (() => { const src = SOURCES.find(s2 => s2.id === selected.source); return src ? `${src.icon} ${src.label}` : "🌐 Website"; })()],
+                      ["⏱ Duration", `${selected.duration || 1} hour${(selected.duration || 1) !== 1 ? "s" : ""}`],
                     ].map(([l,v]) => (
                       <div key={l} style={{ display:"flex", justifyContent:"space-between", padding:"10px 0", borderBottom:"1px solid rgba(201,162,39,.1)", gap:10 }}>
                         <span style={{ fontSize:13, color:"#7788aa" }}>{l}</span>
                         <span style={{ fontSize:13, color:"#e8e0cc", fontWeight:500, textAlign:"right" }}>{v}</span>
                       </div>
                     ))}
+
+                    {/* Editable Price */}
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid rgba(201,162,39,.1)", gap:10 }}>
+                      <span style={{ fontSize:13, color:"#7788aa", flexShrink:0 }}>
+                        💰 {selected.price != null ? "Price" : "Est. Price"}
+                      </span>
+                      {editingPrice ? (
+                        <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                          <span style={{ fontSize:13, color:"#e8e0cc" }}>$</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={priceInput}
+                            onChange={e => setPriceInput(e.target.value)}
+                            style={{ width:90, fontSize:12, padding:"5px 8px" }}
+                            autoFocus
+                            onKeyDown={e => {
+                              if (e.key === "Enter") { updateBooking(selected.id, { price: priceInput === "" ? null : Number(priceInput) }); setEditingPrice(false); }
+                              if (e.key === "Escape") setEditingPrice(false);
+                            }}
+                          />
+                          <button className="btn gold" style={{ padding:"5px 10px", fontSize:10 }} onClick={() => { updateBooking(selected.id, { price: priceInput === "" ? null : Number(priceInput) }); setEditingPrice(false); }}>SAVE</button>
+                          <button className="btn ghost" style={{ padding:"5px 10px", fontSize:10 }} onClick={() => setEditingPrice(false)}>✕</button>
+                        </div>
+                      ) : (
+                        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                          <span style={{ fontSize:13, fontWeight:500, color: selected.price != null ? "#34d399" : "#e8e0cc" }}>
+                            {selected.price != null ? `$${selected.price}` : priceDisplay}
+                          </span>
+                          {selected.price != null && (
+                            <button onClick={() => { updateBooking(selected.id, { price: null }); }} style={{ background:"none", border:"none", color:"#556677", fontSize:10, cursor:"pointer" }} title="Clear custom price">✕</button>
+                          )}
+                          <button onClick={() => { setPriceInput(selected.price != null ? String(selected.price) : ""); setEditingPrice(true); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>✏️ Edit</button>
+                        </div>
+                      )}
+                    </div>
 
                     <div style={{ marginTop:14, padding:12, background:"rgba(201,162,39,.05)", border:"1px solid rgba(201,162,39,.15)", borderRadius:4 }}>
                       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6 }}>

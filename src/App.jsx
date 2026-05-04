@@ -142,6 +142,9 @@ export default function App() {
   const [notesInput, setNotesInput] = useState("");
   const [editingPrice, setEditingPrice] = useState(false);
   const [priceInput, setPriceInput] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
 
   // ── Load bookings from Supabase ────────────────────────────────────────
   useEffect(() => {
@@ -232,6 +235,32 @@ export default function App() {
     setSelected(null);
     setDeleteConfirm(false);
     fire("🗑 Booking deleted");
+  };
+
+  const bulkDelete = async () => {
+    const ids = [...selectedIds];
+    const { error } = await supabase.from("bookings").delete().in("id", ids);
+    if (error) { fire("❌ Error deleting bookings"); return; }
+    setBookings(p => p.filter(b => !selectedIds.has(b.id)));
+    if (selected && selectedIds.has(selected.id)) setSelected(null);
+    setSelectedIds(new Set());
+    setEditMode(false);
+    setBulkDeleteConfirm(false);
+    fire(`🗑 ${ids.length} booking${ids.length !== 1 ? "s" : ""} deleted`);
+  };
+
+  const toggleEditMode = () => {
+    setEditMode(p => !p);
+    setSelectedIds(new Set());
+    setBulkDeleteConfirm(false);
+  };
+
+  const toggleSelectId = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
   };
 
   const submitChangePassword = async () => {
@@ -523,8 +552,18 @@ export default function App() {
                     <button key={k} onClick={() => setFilter(k)} className="btn" style={{ padding:"6px 11px", fontSize:10, background: filter===k ? "rgba(201,162,39,.2)" : "transparent", border:"1px solid rgba(201,162,39,.3)", color: filter===k ? "#f0c040" : "#7788aa" }}>{l}</button>
                   ))}
                 </div>
-                <button className="btn gold" style={{ padding:"7px 14px", fontSize:10, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋ ADD</button>
+                <button className="btn ghost" style={{ padding:"7px 12px", fontSize:10, flexShrink:0, color: editMode ? "#f0c040" : "#7788aa" }} onClick={toggleEditMode}>{editMode ? "DONE" : "SELECT"}</button>
+                {!editMode && <button className="btn gold" style={{ padding:"7px 14px", fontSize:10, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋ ADD</button>}
               </div>
+
+              {editMode && filtered.length > 0 && (
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10, padding:"6px 4px" }}>
+                  <button onClick={() => setSelectedIds(selectedIds.size === filtered.length ? new Set() : new Set(filtered.map(b => b.id)))} style={{ background:"none", border:"none", color:"#c9a227", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>
+                    {selectedIds.size === filtered.length ? "Deselect All" : "Select All"}
+                  </button>
+                  <span style={{ fontSize:11, color:"#7788aa" }}>{selectedIds.size} selected</span>
+                </div>
+              )}
 
               {filtered.length === 0 ? (
                 <div style={{ textAlign:"center", padding:40, color:"#556677" }}>No bookings</div>
@@ -534,9 +573,19 @@ export default function App() {
                 const extra = svcs.length - 1;
                 const st = safeStatus(b.status);
                 return (
-                  <div key={b.id} className={"row " + (selected?.id === b.id ? "active" : "")} onClick={() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); }}>
+                  <div
+                    key={b.id}
+                    className={"row " + (!editMode && selected?.id === b.id ? "active" : "") + (editMode && selectedIds.has(b.id) ? " active" : "")}
+                    onClick={() => editMode ? toggleSelectId(b.id) : (() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); })()}
+                  >
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                      <span style={{ fontSize:20 }}>{first.icon}</span>
+                      {editMode ? (
+                        <div style={{ width:20, height:20, borderRadius:"50%", flexShrink:0, border: selectedIds.has(b.id) ? "none" : "1px solid rgba(201,162,39,.4)", background: selectedIds.has(b.id) ? "#c9a227" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, color:"#050d1a", fontWeight:900, transition:"all .15s" }}>
+                          {selectedIds.has(b.id) ? "✓" : ""}
+                        </div>
+                      ) : (
+                        <span style={{ fontSize:20 }}>{first.icon}</span>
+                      )}
                       <div style={{ flex:1, minWidth:0 }}>
                         <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:14, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.client}</div>
                         <div style={{ fontSize:11, color:"#7788aa", marginTop:2, display:"flex", alignItems:"center", gap:6 }}>
@@ -550,6 +599,25 @@ export default function App() {
                   </div>
                 );
               })}
+
+              {/* Bulk delete bar */}
+              {editMode && selectedIds.size > 0 && (
+                <div style={{ marginTop:14, padding:12, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4 }}>
+                  {bulkDeleteConfirm ? (
+                    <>
+                      <div style={{ fontSize:12, color:"#fca5a5", marginBottom:10 }}>⚠️ Permanently delete {selectedIds.size} booking{selectedIds.size !== 1 ? "s" : ""}?</div>
+                      <div style={{ display:"flex", gap:8 }}>
+                        <button className="btn danger" style={{ flex:1, padding:"8px", fontSize:10 }} onClick={bulkDelete}>YES, DELETE</button>
+                        <button className="btn ghost" style={{ flex:1, padding:"8px", fontSize:10 }} onClick={() => setBulkDeleteConfirm(false)}>CANCEL</button>
+                      </div>
+                    </>
+                  ) : (
+                    <button className="btn danger" style={{ width:"100%", padding:"10px", fontSize:11 }} onClick={() => setBulkDeleteConfirm(true)}>
+                      🗑 DELETE {selectedIds.size} BOOKING{selectedIds.size !== 1 ? "S" : ""}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Detail Panel */}

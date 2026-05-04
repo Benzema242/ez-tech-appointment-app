@@ -169,6 +169,7 @@ export default function App() {
     if (error) { fire("❌ Error submitting booking"); return; }
     setBookings(p => [...p, data]);
     setSubmitted(true);
+    // Notify EZ Tech of new booking
     fetch("https://formspree.io/f/xkoyjodg", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -183,6 +184,20 @@ export default function App() {
         notes: form.notes || "None",
       }),
     }).catch(() => {});
+    // Send confirmation to client (only if they provided an email)
+    if (form.email) {
+      fetch("https://formspree.io/f/xykoeebn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          _replyto: form.email,
+          email: form.email,
+          subject: `Booking Confirmation — EZ Tech Solutions`,
+          name: form.name,
+          message: `Hi ${form.name}, your booking request has been received!\n\nServices: ${form.services.map(id => svc(id).label).join(", ")}\nDate: ${form.date}\nTime: ${form.time}\n\nOur team will review your request and contact you at ${form.phone} to confirm. If you have any questions, reach us at ${CONTACT.phone} or ${CONTACT.email}.\n\n— EZ Tech Solutions`,
+        }),
+      }).catch(() => {});
+    }
   };
 
   const resetClient = () => { setStep(1); setForm({ name:"", email:"", phone:"", services:[], date:"", time:"", notes:"" }); setSubmitted(false); };

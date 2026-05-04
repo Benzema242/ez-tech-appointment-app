@@ -756,7 +756,7 @@ export default function App() {
                       <div className="reschedule-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
                         <div style={{ minWidth:0 }}>
                           <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:5 }}>DATE</div>
-                          <input type="date" value={selected.date} onChange={e => updateBooking(selected.id, { date: e.target.value })} style={{ fontSize:12, colorScheme:"dark", width:"100%" }} />
+                          <input type="date" value={selected.date} onChange={e => updateBooking(selected.id, { date: e.target.value })} style={{ fontSize:11, padding:"8px 10px", colorScheme:"dark", width:"100%" }} />
                         </div>
                         <div style={{ minWidth:0 }}>
                           <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:5 }}>START TIME</div>

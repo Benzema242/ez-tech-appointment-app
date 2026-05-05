@@ -124,7 +124,8 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [adminTab, setAdminTab] = useState("bookings");
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({ name:"", email:"", phone:"", services:[], date:"", time:"", notes:"" });
+  const [form, setForm] = useState({ name:"", email:"", phone:"", services:[], date:"", time:"", notes:"", duration:1 });
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const now = new Date();
   const [calY, setCalY] = useState(now.getFullYear());
@@ -172,43 +173,30 @@ export default function App() {
   };
 
   const submitBooking = async () => {
-    const payload = { client: form.name, service: form.services, date: form.date, time: form.time, status: "pending", phone: form.phone, email: form.email, notes: form.notes, source: "website", duration: 1 };
+    if (submitting) return;
+    setSubmitting(true);
+    const payload = { client: form.name, service: form.services, date: form.date, time: form.time, status: "pending", phone: form.phone, email: form.email, notes: form.notes, source: "website", duration: form.duration };
     const { data, error } = await supabase.from("bookings").insert(payload).select().single();
-    if (error) { fire("❌ Error submitting booking"); return; }
+    if (error) { fire("❌ Error submitting booking"); setSubmitting(false); return; }
     setBookings(p => [...p, data]);
     setSubmitted(true);
-    // Notify EZ Tech of new booking
-    fetch("https://formspree.io/f/xkoyjodg", {
+    setSubmitting(false);
+    fetch("/api/send-booking-email", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        subject: `New Booking — ${form.name}`,
         name: form.name,
-        email: form.email || "Not provided",
+        email: form.email,
         phone: form.phone,
-        services: form.services.map(id => svc(id).label).join(", "),
+        services: form.services.map(id => svc(id).label),
         date: form.date,
         time: form.time,
-        notes: form.notes || "None",
+        notes: form.notes,
       }),
     }).catch(() => {});
-    // Send confirmation to client (only if they provided an email)
-    if (form.email) {
-      fetch("https://formspree.io/f/xykoeebn", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify({
-          _replyto: form.email,
-          email: form.email,
-          subject: `Booking Confirmation — EZ Tech Solutions`,
-          name: form.name,
-          message: `Hi ${form.name}, your booking request has been received!\n\nServices: ${form.services.map(id => svc(id).label).join(", ")}\nDate: ${form.date}\nTime: ${form.time}\n\nOur team will review your request and contact you at ${form.phone} to confirm. If you have any questions, reach us at ${CONTACT.phone} or ${CONTACT.email}.\n\n— EZ Tech Solutions`,
-        }),
-      }).catch(() => {});
-    }
   };
 
-  const resetClient = () => { setStep(1); setForm({ name:"", email:"", phone:"", services:[], date:"", time:"", notes:"" }); setSubmitted(false); };
+  const resetClient = () => { setStep(1); setForm({ name:"", email:"", phone:"", services:[], date:"", time:"", notes:"", duration:1 }); setSubmitted(false); };
 
   const submitAdminBooking = async () => {
     const payload = { client: adminForm.name, service: adminForm.services, date: adminForm.date, time: adminForm.time, status: adminForm.status, phone: adminForm.phone, email: adminForm.email, notes: adminForm.notes, source: adminForm.source, duration: adminForm.duration };
@@ -1284,7 +1272,7 @@ export default function App() {
                     </div>
                     <div style={{ display:"flex", justifyContent:"space-between", marginTop:18 }}>
                       <button className="btn ghost" onClick={() => setStep(3)}>← BACK</button>
-                      <button className="btn gold" onClick={submitBooking}>✓ SUBMIT BOOKING</button>
+                      <button className="btn gold" onClick={submitBooking} disabled={submitting}>{submitting ? "SUBMITTING…" : "✓ SUBMIT BOOKING"}</button>
                     </div>
                   </div>
                 )}

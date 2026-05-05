@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM = 'EZ Tech Solutions <noreply@ez-techgroup.com>';
+const FROM = 'EZ Tech Solutions <onboarding@resend.dev>';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');

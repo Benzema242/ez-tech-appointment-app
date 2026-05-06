@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from "react";
-import { useForm, ValidationError } from '@formspree/react';
+// Contact form now uses Resend via /api/send-contact-email
 import { supabase } from "./supabase";
 
 // ─── SERVICES CATALOG ──────────────────────────────────────────────────────

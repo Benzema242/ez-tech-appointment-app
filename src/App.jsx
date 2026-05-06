@@ -81,7 +81,25 @@ export default function App() {
   const [pwError, setPwError] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const pwRef = useRef(null);
-  const [contactState, handleContactSubmit] = useForm('mlgzgnvp');
+  const [contactForm, setContactForm] = useState({ name:"", email:"", phone:"", message:"" });
+  const [contactSubmitting, setContactSubmitting] = useState(false);
+  const [contactSucceeded, setContactSucceeded] = useState(false);
+  const [contactError, setContactError] = useState(false);
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setContactSubmitting(true);
+    setContactError(false);
+    try {
+      const res = await fetch("/api/send-contact-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contactForm),
+      });
+      if (res.ok) { setContactSucceeded(true); }
+      else { setContactError(true); }
+    } catch { setContactError(true); }
+    setContactSubmitting(false);
+  };
 
   useEffect(() => {
     const onHash = () => setMode(isAdminRoute() ? "admin" : "client");
@@ -1290,7 +1308,7 @@ export default function App() {
             </div>
 
             <div className="card" style={{ padding:22 }}>
-              {contactState.succeeded ? (
+              {contactSucceeded ? (
                 <div style={{ textAlign:"center", padding:"20px 0" }}>
                   <div style={{ fontSize:52, marginBottom:12 }}>✉️</div>
                   <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:900, color:"#f0c040", letterSpacing:1.5, marginBottom:8 }}>MESSAGE SENT</div>
@@ -1304,36 +1322,33 @@ export default function App() {
                   <form onSubmit={handleContactSubmit} style={{ display:"flex", flexDirection:"column", gap:12 }}>
                     <div>
                       <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FULL NAME *</label>
-                      <input type="text" name="name" placeholder="John Smith" required />
-                      <ValidationError field="name" errors={contactState.errors} className="fs-error" />
+                      <input type="text" value={contactForm.name} onChange={e => setContactForm({...contactForm, name:e.target.value})} placeholder="John Smith" required />
                     </div>
 
                     <div className="contact-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                       <div>
                         <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL *</label>
-                        <input type="email" name="email" placeholder="you@email.com" required />
-                        <ValidationError field="email" errors={contactState.errors} className="fs-error" />
+                        <input type="email" value={contactForm.email} onChange={e => setContactForm({...contactForm, email:e.target.value})} placeholder="you@email.com" required />
                       </div>
                       <div>
                         <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE</label>
-                        <input type="tel" name="phone" placeholder="(242) 555-0000" />
+                        <input type="tel" value={contactForm.phone} onChange={e => setContactForm({...contactForm, phone:e.target.value})} placeholder="(242) 555-0000" />
                       </div>
                     </div>
 
                     <div>
                       <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>MESSAGE *</label>
-                      <textarea name="message" rows={4} placeholder="Tell us how we can help…" required />
-                      <ValidationError field="message" errors={contactState.errors} className="fs-error" />
+                      <textarea value={contactForm.message} onChange={e => setContactForm({...contactForm, message:e.target.value})} rows={4} placeholder="Tell us how we can help…" required />
                     </div>
 
-                    {contactState.errors?.length > 0 && !contactState.errors.some(e => e.field) && (
+                    {contactError && (
                       <div style={{ padding:"9px 12px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:11, color:"#fca5a5" }}>
                         ⚠️ Something went wrong. Please try again.
                       </div>
                     )}
 
-                    <button type="submit" className="btn gold" style={{ padding:"13px", fontSize:12, letterSpacing:2 }} disabled={contactState.submitting}>
-                      {contactState.submitting ? "SENDING…" : "SEND MESSAGE →"}
+                    <button type="submit" className="btn gold" style={{ padding:"13px", fontSize:12, letterSpacing:2 }} disabled={contactSubmitting}>
+                      {contactSubmitting ? "SENDING…" : "SEND MESSAGE →"}
                     </button>
                   </form>
                 </>

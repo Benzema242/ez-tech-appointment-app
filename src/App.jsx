@@ -41,6 +41,17 @@ const firstDay = (y, m) => new Date(y, m, 1).getDay();
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAYNAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
+// ─── VALIDATION & FORMATTING HELPERS ──────────────────────────────────────
+const validEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((v || "").trim());
+const validPhone = (v) => /^\(\d{3}\) \d{3}-\d{4}$/.test((v || "").trim());
+const formatPhone = (v) => {
+  const d = (v || "").replace(/\D/g, "");
+  if (!d) return "";
+  if (d.length <= 3) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0,3)}) ${d.slice(3)}`;
+  return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6,10)}`;
+};
+
 // ─── CONTACT INFO ──────────────────────────────────────────────────────────
 const CONTACT = {
   phone:     "(242) 805-0777",
@@ -142,7 +153,7 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [adminTab, setAdminTab] = useState("bookings");
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({ name:"", email:"", phone:"", services:[], date:"", time:"", notes:"", duration:1 });
+  const [form, setForm] = useState({ firstName:"", lastName:"", email:"", phone:"", services:[], date:"", time:"", notes:"", duration:1 });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const now = new Date();
@@ -193,7 +204,7 @@ export default function App() {
   const submitBooking = async () => {
     if (submitting) return;
     setSubmitting(true);
-    const payload = { client: form.name, service: form.services, date: form.date, time: form.time, status: "pending", phone: form.phone, email: form.email, notes: form.notes, source: "website", duration: form.duration };
+    const payload = { client: `${form.firstName} ${form.lastName}`.trim(), service: form.services, date: form.date, time: form.time, status: "pending", phone: form.phone, email: form.email, notes: form.notes, source: "website", duration: form.duration };
     const { data, error } = await supabase.from("bookings").insert(payload).select().single();
     if (error) { fire("❌ Error submitting booking"); setSubmitting(false); return; }
     setBookings(p => [...p, data]);
@@ -203,7 +214,7 @@ export default function App() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name: form.name,
+        name: `${form.firstName} ${form.lastName}`.trim(),
         email: form.email,
         phone: form.phone,
         services: form.services.map(id => svc(id).label),
@@ -214,7 +225,7 @@ export default function App() {
     }).catch(() => {});
   };
 
-  const resetClient = () => { setStep(1); setForm({ name:"", email:"", phone:"", services:[], date:"", time:"", notes:"", duration:1 }); setSubmitted(false); };
+  const resetClient = () => { setStep(1); setForm({ firstName:"", lastName:"", email:"", phone:"", services:[], date:"", time:"", notes:"", duration:1 }); setSubmitted(false); };
 
   const submitAdminBooking = async () => {
     const payload = { client: adminForm.name, service: adminForm.services, date: adminForm.date, time: adminForm.time, status: adminForm.status, phone: adminForm.phone, email: adminForm.email, notes: adminForm.notes, source: adminForm.source, duration: adminForm.duration };
@@ -1072,7 +1083,7 @@ export default function App() {
 
   // ── Client View ────────────────────────────────────────────────────────
   const ClientView = () => {
-    const canNext1 = form.name && form.email && form.phone;
+    const canNext1 = form.firstName && form.lastName && validEmail(form.email) && validPhone(form.phone);
     const canNext2 = form.services.length > 0;
     const canNext3 = form.date && form.time;
 
@@ -1114,7 +1125,7 @@ export default function App() {
             <div className="card" style={{ padding:30, textAlign:"center" }}>
               <div style={{ fontSize:60, marginBottom:14 }}>✅</div>
               <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:18, fontWeight:900, color:"#f0c040", marginBottom:10, letterSpacing:1.5 }}>BOOKING RECEIVED</div>
-              <div style={{ color:"#c8bfa8", marginBottom:8, fontSize:14 }}>Thank you, <span style={{ color:"#c9a227", fontWeight:700 }}>{form.name}</span>!</div>
+              <div style={{ color:"#c8bfa8", marginBottom:8, fontSize:14 }}>Thank you, <span style={{ color:"#c9a227", fontWeight:700 }}>{form.firstName}</span>!</div>
               <div style={{ color:"#7788aa", fontSize:13, marginBottom:18 }}>
                 Your request for{" "}
                 <strong style={{ color:"#e8e0cc" }}>{form.services.map(id => svc(id).label).join(", ")}</strong>
@@ -1158,9 +1169,26 @@ export default function App() {
                     <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>YOUR INFORMATION</div>
                     <div style={{ fontSize:12, color:"#7788aa", marginBottom:18 }}>Step 1 of 4 · Tell us about yourself</div>
                     <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-                      <div><label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FULL NAME *</label><input value={form.name} onChange={e => setForm({...form, name:e.target.value})} placeholder="John Smith" /></div>
-                      <div><label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL *</label><input type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})} placeholder="you@email.com" /></div>
-                      <div><label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE *</label><input type="tel" value={form.phone} onChange={e => setForm({...form, phone:e.target.value})} placeholder="(242) 555-0000" /></div>
+                      <div style={{ display:"flex", gap:10 }}>
+                        <div style={{ flex:1 }}>
+                          <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FIRST NAME *</label>
+                          <input value={form.firstName} onChange={e => setForm({...form, firstName:e.target.value})} placeholder="John" />
+                        </div>
+                        <div style={{ flex:1 }}>
+                          <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>LAST NAME *</label>
+                          <input value={form.lastName} onChange={e => setForm({...form, lastName:e.target.value})} placeholder="Smith" />
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL *</label>
+                        <input type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})} placeholder="you@email.com" />
+                        {form.email && !validEmail(form.email) && <div style={{ fontSize:11, color:"#f87171", marginTop:4 }}>Please enter a valid email address.</div>}
+                      </div>
+                      <div>
+                        <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE *</label>
+                        <input type="tel" value={form.phone} onChange={e => setForm({...form, phone:formatPhone(e.target.value)})} placeholder="(242) 555-0000" />
+                        {form.phone && !validPhone(form.phone) && <div style={{ fontSize:11, color:"#f87171", marginTop:4 }}>Format: (242) 555-0000</div>}
+                      </div>
                     </div>
                     <div style={{ display:"flex", justifyContent:"flex-end", marginTop:20 }}>
                       <button className="btn gold" disabled={!canNext1} onClick={() => setStep(2)}>NEXT →</button>
@@ -1254,7 +1282,7 @@ export default function App() {
                     <div style={{ fontSize:12, color:"#7788aa", marginBottom:16 }}>Step 4 of 4 · Confirm your booking</div>
                     <div style={{ background:"rgba(201,162,39,.05)", border:"1px solid rgba(201,162,39,.2)", borderRadius:4, padding:16, marginBottom:14 }}>
                       {[
-                        ["NAME",  form.name],
+                        ["NAME",  `${form.firstName} ${form.lastName}`.trim()],
                         ["EMAIL", form.email],
                         ["PHONE", form.phone],
                         ["DATE",  form.date],
@@ -1332,7 +1360,7 @@ export default function App() {
                       </div>
                       <div>
                         <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE</label>
-                        <input type="tel" value={contactForm.phone} onChange={e => setContactForm({...contactForm, phone:e.target.value})} placeholder="(242) 555-0000" />
+                        <input type="tel" value={contactForm.phone} onChange={e => setContactForm({...contactForm, phone:formatPhone(e.target.value)})} placeholder="(242) 555-0000" required />
                       </div>
                     </div>
 

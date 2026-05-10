@@ -1096,10 +1096,10 @@ export default function App() {
           background:"linear-gradient(180deg,rgba(5,13,26,.97),rgba(10,22,40,.93))",
           borderBottom:"1px solid rgba(201,162,39,.25)",
           backdropFilter:"blur(10px)", WebkitBackdropFilter:"blur(10px)",
-          padding:"clamp(10px,2vw,18px) clamp(16px,5vw,56px)",
+          padding:"6px clamp(16px,5vw,56px)",
           display:"flex", alignItems:"center", gap:"clamp(10px,2vw,20px)"
         }}>
-          <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO2.png`} alt="EZ Tech Solutions" style={{ width:220, height:220, flexShrink:0 }} />
+          <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO2.png`} alt="EZ Tech Solutions" style={{ width:72, height:72, flexShrink:0 }} />
           <div style={{ fontSize:"clamp(15px,3vw,24px)", fontWeight:900, color:"#c9a227", letterSpacing:"clamp(1px,0.4vw,3px)", fontStyle:"italic" }}>
             Providing Fast and Quality Services
           </div>

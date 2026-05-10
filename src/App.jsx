@@ -1096,7 +1096,7 @@ export default function App() {
           background:"linear-gradient(180deg,rgba(5,13,26,.97),rgba(10,22,40,.93))",
           borderBottom:"1px solid rgba(201,162,39,.25)",
           backdropFilter:"blur(10px)", WebkitBackdropFilter:"blur(10px)",
-          padding:"2px clamp(16px,5vw,56px)",
+          padding:"2px clamp(8px,1.5vw,16px)",
           display:"flex", alignItems:"center", gap:"clamp(10px,2vw,20px)"
         }}>
           <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO2.png`} alt="EZ Tech Solutions" style={{ width:220, height:220, flexShrink:0 }} />

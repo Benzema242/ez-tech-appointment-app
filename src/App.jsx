@@ -1258,7 +1258,8 @@ export default function App() {
                     </div>
                     {form.date && (
                       <div>
-                        <div style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:8 }}>AVAILABLE TIMES · {form.date}</div>
+                        <div style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:4 }}>AVAILABLE TIMES · {form.date}</div>
+                        <div style={{ fontSize:10, color:"#556677", marginBottom:8 }}>All times are Nassau time (EST, UTC−5)</div>
                         <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6 }}>
                           {CLIENT_TIMES.map(t => {
                             const taken = isClientBooked(form.date, t);

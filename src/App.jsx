@@ -1099,7 +1099,7 @@ export default function App() {
           padding:"clamp(10px,2vw,18px) clamp(16px,5vw,56px)",
           display:"flex", alignItems:"center", gap:"clamp(10px,2vw,20px)"
         }}>
-          <div className="logo-circle" style={{ width:"clamp(40px,6vw,54px)", height:"clamp(40px,6vw,54px)", fontSize:"clamp(14px,2.2vw,20px)", flexShrink:0 }}>EZ</div>
+          <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO2.png`} alt="EZ Tech Solutions" style={{ height:"clamp(40px,6vw,54px)", width:"auto", flexShrink:0 }} />
           <div style={{ flex:1 }}>
             <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:"clamp(15px,3vw,24px)", fontWeight:900, color:"#fff", letterSpacing:"clamp(1px,0.4vw,3px)" }}>
               EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span>

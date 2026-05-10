@@ -1152,11 +1152,14 @@ export default function App() {
               </div>
 
               {/* Step Progress */}
-              <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:20, justifyContent:"center" }}>
-                {[1,2,3,4].map(n => (
-                  <div key={n} style={{ display:"flex", alignItems:"center", gap:6 }}>
-                    <div style={{ width:28, height:28, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Orbitron',sans-serif", fontSize:12, fontWeight:700, background: step >= n ? "#c9a227" : "transparent", color: step >= n ? "#050d1a" : "#556677", border: step >= n ? "none" : "1px solid #556677" }}>{n}</div>
-                    {n < 4 && <div style={{ width:20, height:1, background: step > n ? "#c9a227" : "#556677" }} />}
+              <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"center", marginBottom:20 }}>
+                {[{n:1,label:"Info"},{n:2,label:"Service"},{n:3,label:"Date"},{n:4,label:"Confirm"}].map(({n,label}) => (
+                  <div key={n} style={{ display:"flex", alignItems:"flex-start" }}>
+                    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:5 }}>
+                      <div style={{ width:28, height:28, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Orbitron',sans-serif", fontSize:12, fontWeight:700, background: step >= n ? "#c9a227" : "transparent", color: step >= n ? "#050d1a" : "#556677", border: step >= n ? "none" : "1px solid #556677" }}>{n}</div>
+                      <div style={{ fontSize:9, color: step >= n ? "#c9a227" : "#556677", fontFamily:"'Orbitron',sans-serif", letterSpacing:0.5, whiteSpace:"nowrap" }}>{label}</div>
+                    </div>
+                    {n < 4 && <div style={{ width:20, height:1, background: step > n ? "#c9a227" : "#556677", marginTop:14 }} />}
                   </div>
                 ))}
               </div>

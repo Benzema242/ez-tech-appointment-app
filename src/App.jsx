@@ -1099,14 +1099,9 @@ export default function App() {
           padding:"clamp(10px,2vw,18px) clamp(16px,5vw,56px)",
           display:"flex", alignItems:"center", gap:"clamp(10px,2vw,20px)"
         }}>
-          <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO2.png`} alt="EZ Tech Solutions" style={{ height:"clamp(40px,6vw,54px)", width:"auto", flexShrink:0 }} />
-          <div style={{ flex:1 }}>
-            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:"clamp(15px,3vw,24px)", fontWeight:900, color:"#fff", letterSpacing:"clamp(1px,0.4vw,3px)" }}>
-              EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span>
-            </div>
-            <div style={{ fontSize:"clamp(9px,1.6vw,12px)", color:"#c9a227", letterSpacing:"clamp(0.5px,0.2vw,1.5px)", marginTop:3, fontStyle:"italic" }}>
-              Providing Fast and Quality Services
-            </div>
+          <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO2.png`} alt="EZ Tech Solutions" style={{ width:220, height:220, flexShrink:0 }} />
+          <div style={{ fontSize:"clamp(15px,3vw,24px)", fontWeight:900, color:"#c9a227", letterSpacing:"clamp(1px,0.4vw,3px)", fontStyle:"italic" }}>
+            Providing Fast and Quality Services
           </div>
         </div>
 

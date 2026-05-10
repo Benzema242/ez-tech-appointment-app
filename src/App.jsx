@@ -1097,7 +1097,7 @@ export default function App() {
           borderBottom:"1px solid rgba(201,162,39,.25)",
           backdropFilter:"blur(10px)", WebkitBackdropFilter:"blur(10px)",
           padding:"2px clamp(8px,1.5vw,16px)",
-          display:"flex", alignItems:"center", gap:"clamp(10px,2vw,20px)"
+          display:"flex", alignItems:"center", justifyContent:"center", gap:"clamp(10px,2vw,20px)"
         }}>
           <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO2.png`} alt="EZ Tech Solutions" style={{ width:220, height:220, flexShrink:0 }} />
           <div style={{ fontSize:"clamp(15px,3vw,24px)", fontWeight:900, color:"#c9a227", letterSpacing:"clamp(1px,0.4vw,3px)", fontStyle:"italic" }}>

@@ -498,8 +498,9 @@ export default function App() {
           <div style={{ fontSize:11, color:"#7788aa", letterSpacing:2, marginTop:6, fontFamily:"'Orbitron',sans-serif" }}>ADMIN ACCESS</div>
         </div>
         <div style={{ marginBottom:14 }}>
-          <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:6 }}>PASSWORD</label>
+          <label htmlFor="admin-pw" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:6 }}>PASSWORD</label>
           <input
+            id="admin-pw"
             ref={pwRef}
             type="password"
             value={pwInput}
@@ -936,17 +937,17 @@ export default function App() {
 
             <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
               <div>
-                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FULL NAME *</label>
-                <input value={adminForm.name} onChange={e => setAdminForm({...adminForm, name:e.target.value})} placeholder="Client name" />
+                <label htmlFor="admin-name" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FULL NAME *</label>
+                <input id="admin-name" value={adminForm.name} onChange={e => setAdminForm({...adminForm, name:e.target.value})} placeholder="Client name" />
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                 <div>
-                  <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE *</label>
-                  <input type="tel" value={adminForm.phone} onChange={e => setAdminForm({...adminForm, phone:e.target.value})} placeholder="(242) 555-0000" />
+                  <label htmlFor="admin-phone" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE *</label>
+                  <input id="admin-phone" type="tel" value={adminForm.phone} onChange={e => setAdminForm({...adminForm, phone:e.target.value})} placeholder="(242) 555-0000" />
                 </div>
                 <div>
-                  <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL</label>
-                  <input type="email" value={adminForm.email} onChange={e => setAdminForm({...adminForm, email:e.target.value})} placeholder="email@example.com" />
+                  <label htmlFor="admin-email" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL</label>
+                  <input id="admin-email" type="email" value={adminForm.email} onChange={e => setAdminForm({...adminForm, email:e.target.value})} placeholder="email@example.com" />
                 </div>
               </div>
 
@@ -965,12 +966,12 @@ export default function App() {
 
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                 <div>
-                  <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>DATE *</label>
-                  <input type="date" value={adminForm.date} onChange={e => { setAdminForm({...adminForm, date:e.target.value}); setAdminConfirmOverlap(false); }} style={{ colorScheme:"dark" }} />
+                  <label htmlFor="admin-date" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>DATE *</label>
+                  <input id="admin-date" type="date" value={adminForm.date} onChange={e => { setAdminForm({...adminForm, date:e.target.value}); setAdminConfirmOverlap(false); }} style={{ colorScheme:"dark" }} />
                 </div>
                 <div>
-                  <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>TIME *</label>
-                  <select value={adminForm.time} onChange={e => { setAdminForm({...adminForm, time:e.target.value}); setAdminConfirmOverlap(false); }}>
+                  <label htmlFor="admin-time" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>TIME *</label>
+                  <select id="admin-time" value={adminForm.time} onChange={e => { setAdminForm({...adminForm, time:e.target.value}); setAdminConfirmOverlap(false); }}>
                     <option value="">Select time…</option>
                     {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -1005,8 +1006,8 @@ export default function App() {
                 </div>
               </div>
               <div>
-                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>NOTES</label>
-                <textarea rows={2} value={adminForm.notes} onChange={e => setAdminForm({...adminForm, notes:e.target.value})} placeholder="Additional notes, location, or special requirements…" />
+                <label htmlFor="admin-notes" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>NOTES</label>
+                <textarea id="admin-notes" rows={2} value={adminForm.notes} onChange={e => setAdminForm({...adminForm, notes:e.target.value})} placeholder="Additional notes, location, or special requirements…" />
               </div>
             </div>
 
@@ -1052,16 +1053,16 @@ export default function App() {
             </div>
             <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
               <div>
-                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>CURRENT PASSWORD *</label>
-                <input type="password" value={changePwForm.old} onChange={e => { setChangePwForm(f => ({...f, old:e.target.value})); setChangePwError(""); }} placeholder="Enter current password" autoFocus />
+                <label htmlFor="cpw-old" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>CURRENT PASSWORD *</label>
+                <input id="cpw-old" type="password" value={changePwForm.old} onChange={e => { setChangePwForm(f => ({...f, old:e.target.value})); setChangePwError(""); }} placeholder="Enter current password" autoFocus />
               </div>
               <div>
-                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>NEW PASSWORD *</label>
-                <input type="password" value={changePwForm.newPw} onChange={e => { setChangePwForm(f => ({...f, newPw:e.target.value})); setChangePwError(""); }} placeholder="Min. 6 characters" />
+                <label htmlFor="cpw-new" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>NEW PASSWORD *</label>
+                <input id="cpw-new" type="password" value={changePwForm.newPw} onChange={e => { setChangePwForm(f => ({...f, newPw:e.target.value})); setChangePwError(""); }} placeholder="Min. 6 characters" />
               </div>
               <div>
-                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>CONFIRM NEW PASSWORD *</label>
-                <input type="password" value={changePwForm.confirm} onChange={e => { setChangePwForm(f => ({...f, confirm:e.target.value})); setChangePwError(""); }} placeholder="Re-enter new password" onKeyDown={e => e.key === "Enter" && submitChangePassword()} />
+                <label htmlFor="cpw-confirm" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>CONFIRM NEW PASSWORD *</label>
+                <input id="cpw-confirm" type="password" value={changePwForm.confirm} onChange={e => { setChangePwForm(f => ({...f, confirm:e.target.value})); setChangePwError(""); }} placeholder="Re-enter new password" onKeyDown={e => e.key === "Enter" && submitChangePassword()} />
               </div>
               {changePwError && (
                 <div style={{ padding:"9px 12px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:11, color:"#fca5a5" }}>
@@ -1169,22 +1170,22 @@ export default function App() {
                     <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
                       <div style={{ display:"flex", gap:10 }}>
                         <div style={{ flex:1 }}>
-                          <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FIRST NAME *</label>
-                          <input value={form.firstName} onChange={e => setForm({...form, firstName:e.target.value})} placeholder="John" />
+                          <label htmlFor="cl-fname" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FIRST NAME *</label>
+                          <input id="cl-fname" value={form.firstName} onChange={e => setForm({...form, firstName:e.target.value})} placeholder="John" />
                         </div>
                         <div style={{ flex:1 }}>
-                          <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>LAST NAME *</label>
-                          <input value={form.lastName} onChange={e => setForm({...form, lastName:e.target.value})} placeholder="Smith" />
+                          <label htmlFor="cl-lname" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>LAST NAME *</label>
+                          <input id="cl-lname" value={form.lastName} onChange={e => setForm({...form, lastName:e.target.value})} placeholder="Smith" />
                         </div>
                       </div>
                       <div>
-                        <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL *</label>
-                        <input type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})} placeholder="you@email.com" />
+                        <label htmlFor="cl-email" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL *</label>
+                        <input id="cl-email" type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})} placeholder="you@email.com" />
                         {form.email && !validEmail(form.email) && <div style={{ fontSize:11, color:"#f87171", marginTop:4 }}>Please enter a valid email address.</div>}
                       </div>
                       <div>
-                        <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE *</label>
-                        <input type="tel" value={form.phone} onChange={e => setForm({...form, phone:formatPhone(e.target.value)})} placeholder="(242) 555-0000" />
+                        <label htmlFor="cl-phone" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE *</label>
+                        <input id="cl-phone" type="tel" value={form.phone} onChange={e => setForm({...form, phone:formatPhone(e.target.value)})} placeholder="(242) 555-0000" />
                         {form.phone && !validPhone(form.phone) && <div style={{ fontSize:11, color:"#f87171", marginTop:4 }}>Format: (242) 555-0000</div>}
                       </div>
                     </div>
@@ -1308,8 +1309,8 @@ export default function App() {
                       </div>
                     </div>
                     <div>
-                      <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>ADDITIONAL NOTES (OPTIONAL)</label>
-                      <textarea rows={3} value={form.notes} onChange={e => setForm({...form, notes:e.target.value})} placeholder="Tell us about your project, location, or any special requirements..." />
+                      <label htmlFor="cl-notes" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>ADDITIONAL NOTES (OPTIONAL)</label>
+                      <textarea id="cl-notes" rows={3} value={form.notes} onChange={e => setForm({...form, notes:e.target.value})} placeholder="Tell us about your project, location, or any special requirements..." />
                     </div>
                     <div style={{ marginTop:14, padding:11, background:"rgba(59,130,246,.08)", border:"1px solid rgba(59,130,246,.2)", borderRadius:4, fontSize:11, color:"#93bbf0" }}>
                       ℹ️ After submitting, our team will review your request and reach out to <strong>approve</strong>, <strong>schedule a call</strong>, or follow up.
@@ -1347,24 +1348,24 @@ export default function App() {
 
                   <form onSubmit={handleContactSubmit} style={{ display:"flex", flexDirection:"column", gap:12 }}>
                     <div>
-                      <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FULL NAME *</label>
-                      <input type="text" value={contactForm.name} onChange={e => setContactForm({...contactForm, name:e.target.value})} placeholder="John Smith" required />
+                      <label htmlFor="cf-name" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FULL NAME *</label>
+                      <input id="cf-name" type="text" value={contactForm.name} onChange={e => setContactForm({...contactForm, name:e.target.value})} placeholder="John Smith" required />
                     </div>
 
                     <div className="contact-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                       <div>
-                        <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL *</label>
-                        <input type="email" value={contactForm.email} onChange={e => setContactForm({...contactForm, email:e.target.value})} placeholder="you@email.com" required />
+                        <label htmlFor="cf-email" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL *</label>
+                        <input id="cf-email" type="email" value={contactForm.email} onChange={e => setContactForm({...contactForm, email:e.target.value})} placeholder="you@email.com" required />
                       </div>
                       <div>
-                        <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE</label>
-                        <input type="tel" value={contactForm.phone} onChange={e => setContactForm({...contactForm, phone:formatPhone(e.target.value)})} placeholder="(242) 555-0000" required />
+                        <label htmlFor="cf-phone" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE</label>
+                        <input id="cf-phone" type="tel" value={contactForm.phone} onChange={e => setContactForm({...contactForm, phone:formatPhone(e.target.value)})} placeholder="(242) 555-0000" required />
                       </div>
                     </div>
 
                     <div>
-                      <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>MESSAGE *</label>
-                      <textarea value={contactForm.message} onChange={e => setContactForm({...contactForm, message:e.target.value})} rows={4} placeholder="Tell us how we can help…" required />
+                      <label htmlFor="cf-message" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>MESSAGE *</label>
+                      <textarea id="cf-message" value={contactForm.message} onChange={e => setContactForm({...contactForm, message:e.target.value})} rows={4} placeholder="Tell us how we can help…" required />
                     </div>
 
                     {contactError && (

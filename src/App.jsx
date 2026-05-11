@@ -150,6 +150,8 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [toast, setToast] = useState(null);
   const [adminTab, setAdminTab] = useState("bookings");
   const [step, setStep] = useState(1);
@@ -374,6 +376,12 @@ export default function App() {
       if (b.price != null) return sum + b.price;
       return sum + svcList(b.service).reduce((s2, sv) => s2 + (sv.price || 0), 0);
     }, 0);
+  const paidRevenue = bookings
+    .filter(b => b.paid)
+    .reduce((sum, b) => {
+      if (b.price != null) return sum + b.price;
+      return sum + svcList(b.service).reduce((s2, sv) => s2 + (sv.price || 0), 0);
+    }, 0);
   const relativeDate = (ds) => {
     const diff = Math.round((new Date(ds + "T00:00:00") - new Date(todayStr + "T00:00:00")) / 86400000);
     if (diff === 0) return "Today";
@@ -384,6 +392,8 @@ export default function App() {
   const filtered = bookings
     .filter(b => filter === "all" || b.status === filter)
     .filter(b => !search.trim() || b.client.toLowerCase().includes(search.toLowerCase()))
+    .filter(b => !dateFrom || b.date >= dateFrom)
+    .filter(b => !dateTo   || b.date <= dateTo)
     .sort((a, b) => a.date.localeCompare(b.date));
 
   // ── Global Styles ──────────────────────────────────────────────────────
@@ -593,7 +603,7 @@ export default function App() {
           { l:"PENDING",  v:pendingCount,                                            c:"#f59e0b" },
           { l:"APPROVED", v:bookings.filter(b=>b.status==="approved").length,        c:"#22c55e" },
           { l:"CALLS",    v:bookings.filter(b=>b.status==="scheduled_call").length,  c:"#3b82f6" },
-          { l:"REVENUE",  v:`$${revenue}`,                                           c:"#34d399" },
+          { l:"REVENUE",  v:`$${revenue}`, sub: paidRevenue > 0 ? `$${paidRevenue} paid` : null, c:"#34d399" },
         ].map(s => (
           <div key={s.l} className="card stat-card" style={{ padding:"12px 18px", flex:"1 1 100px" }}>
             <div style={{ fontSize:9, letterSpacing:2, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:4 }}>{s.l}</div>
@@ -602,6 +612,7 @@ export default function App() {
               {s.l==="PENDING" && pendingCount > 0 && <span className="pulse" style={{ marginLeft:6, fontSize:14 }}>●</span>}
               {s.l==="TODAY" && todayCount > 0 && <span className="pulse" style={{ marginLeft:6, fontSize:14 }}>●</span>}
             </div>
+            {s.sub && <div style={{ fontSize:9, color:"#34d399", marginTop:3, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{s.sub}</div>}
           </div>
         ))}
       </div>
@@ -627,7 +638,7 @@ export default function App() {
                 placeholder="Search by client name…"
                 style={{ marginBottom:10, fontSize:12, padding:"9px 12px" }}
               />
-              <div style={{ display:"flex", gap:6, marginBottom:14, flexWrap:"wrap", alignItems:"center" }}>
+              <div style={{ display:"flex", gap:6, marginBottom:8, flexWrap:"wrap", alignItems:"center" }}>
                 <div className="filter-row" style={{ display:"flex", gap:6, flexWrap:"wrap", flex:1 }}>
                   {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"]].map(([k,l]) => (
                     <button key={k} onClick={() => setFilter(k)} className="btn" style={{ padding:"6px 11px", fontSize:10, background: filter===k ? "rgba(201,162,39,.2)" : "transparent", border:"1px solid rgba(201,162,39,.3)", color: filter===k ? "#f0c040" : "#7788aa" }}>{l}</button>
@@ -636,6 +647,12 @@ export default function App() {
                 <button className="btn ghost" style={{ padding:"7px 12px", fontSize:10, flexShrink:0, color: editMode ? "#f0c040" : "#7788aa" }} onClick={toggleEditMode}>{editMode ? "DONE" : "SELECT"}</button>
                 {!editMode && <button className="btn ghost" style={{ padding:"7px 12px", fontSize:10, flexShrink:0 }} onClick={exportCSV} title="Download all bookings as CSV">⬇ CSV</button>}
                 {!editMode && <button className="btn gold" style={{ padding:"7px 14px", fontSize:10, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋ ADD</button>}
+              </div>
+              <div style={{ display:"flex", gap:6, marginBottom:14, alignItems:"center", flexWrap:"wrap" }}>
+                <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ fontSize:11, padding:"5px 8px", colorScheme:"dark", flex:1, minWidth:120 }} title="From date" />
+                <span style={{ fontSize:10, color:"#556677", flexShrink:0 }}>to</span>
+                <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ fontSize:11, padding:"5px 8px", colorScheme:"dark", flex:1, minWidth:120 }} title="To date" />
+                {(dateFrom || dateTo) && <button onClick={() => { setDateFrom(""); setDateTo(""); }} style={{ background:"none", border:"none", color:"#556677", fontSize:11, cursor:"pointer", flexShrink:0, padding:"4px" }} title="Clear dates">✕</button>}
               </div>
 
               {editMode && filtered.length > 0 && (
@@ -788,6 +805,33 @@ export default function App() {
                         </div>
                       )}
                     </div>
+
+                    {/* Paid toggle */}
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid rgba(201,162,39,.1)" }}>
+                      <span style={{ fontSize:13, color:"#7788aa" }}>💳 Payment</span>
+                      <button
+                        onClick={() => updateBooking(selected.id, { paid: !selected.paid })}
+                        style={{ padding:"4px 14px", fontSize:11, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, fontWeight:700, borderRadius:3, cursor:"pointer", transition:"all .15s",
+                          background: selected.paid ? "rgba(52,211,153,.15)" : "transparent",
+                          border: `1px solid ${selected.paid ? "#34d399" : "rgba(201,162,39,.3)"}`,
+                          color: selected.paid ? "#34d399" : "#556677" }}
+                      >{selected.paid ? "✓ PAID" : "MARK AS PAID"}</button>
+                    </div>
+
+                    {/* Client history */}
+                    {(() => {
+                      const history = bookings.filter(b => b.id !== selected.id && (b.phone === selected.phone || (selected.email && b.email === selected.email)));
+                      if (history.length === 0) return null;
+                      const last = history.sort((a,b) => b.date.localeCompare(a.date))[0];
+                      return (
+                        <div style={{ padding:"10px 12px", marginTop:10, background:"rgba(59,130,246,.06)", border:"1px solid rgba(59,130,246,.18)", borderRadius:4 }}>
+                          <div style={{ fontSize:10, color:"#60a5fa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>CLIENT HISTORY</div>
+                          <div style={{ fontSize:12, color:"#93bbf0" }}>
+                            {history.length} previous booking{history.length !== 1 ? "s" : ""} — last on {last.date}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     <div style={{ marginTop:14, padding:12, background:"rgba(201,162,39,.05)", border:"1px solid rgba(201,162,39,.15)", borderRadius:4 }}>
                       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6 }}>

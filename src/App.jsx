@@ -195,10 +195,28 @@ export default function App() {
   const updateStatus = async (id, status) => {
     const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
     if (error) { fire("❌ Error updating status"); return; }
+    const booking = bookings.find(b => b.id === id);
     setBookings(p => p.map(b => b.id === id ? { ...b, status } : b));
     setSelected(p => p ? { ...p, status } : null);
     const m = { approved: "✅ Approved!", denied: "❌ Denied", scheduled_call: "📞 Call scheduled", pending: "↩ Reset to pending" };
     fire(m[status] || "Updated");
+    if (booking?.email && status !== "pending") {
+      fetch("/api/send-status-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status,
+          name: booking.client,
+          email: booking.email,
+          phone: booking.phone,
+          services: booking.service,
+          date: booking.date,
+          time: booking.time,
+          duration: booking.duration,
+          notes: booking.notes,
+        }),
+      }).catch(() => {});
+    }
   };
 
   const submitBooking = async () => {

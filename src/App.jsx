@@ -270,7 +270,7 @@ export default function App() {
   const submitAdminBooking = async () => {
     const payload = { client: adminForm.name, service: adminForm.services, date: adminForm.date, time: adminForm.time, status: adminForm.status, phone: adminForm.phone, email: adminForm.email, notes: adminForm.notes, source: adminForm.source, duration: adminForm.duration, paid: adminForm.paid };
     const { data, error } = await supabase.from("bookings").insert(payload).select().single();
-    if (error) { fire("❌ Error adding appointment"); return; }
+    if (error) { fire(`❌ ${error.message}`); return; }
     setBookings(p => [...p, data]);
     setShowAddModal(false);
     setAdminForm({ name:"", email:"", phone:"", services:[], date:"", time:"", source:"call", status:"pending", duration:1, notes:"", paid:false });

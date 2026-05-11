@@ -31,6 +31,12 @@ const STATUS_CONFIG = {
     headlineColor: '#ef4444',
     message: 'Unfortunately we\'re unable to accommodate your request at this time. Please contact us to discuss alternatives or rebook.',
   },
+  reminder: {
+    subject: 'Appointment Reminder — EZ Tech Solutions',
+    headline: '🔔 Appointment Reminder',
+    headlineColor: '#c9a227',
+    message: 'This is a friendly reminder about your upcoming appointment with EZ Tech Solutions. See the details below.',
+  },
 };
 
 export default async function handler(req, res) {

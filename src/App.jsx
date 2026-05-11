@@ -245,6 +245,26 @@ export default function App() {
 
   const resetClient = () => { setStep(1); setForm({ firstName:"", lastName:"", email:"", phone:"", services:[], date:"", time:"", notes:"", duration:1 }); setSubmitted(false); };
 
+  const exportCSV = () => {
+    const headers = ["Client","Phone","Email","Services","Date","Time","Duration (hrs)","Status","Price","Notes","Booked On"];
+    const rows = bookings.map(b => [
+      b.client, b.phone, b.email || "", Array.isArray(b.service) ? b.service.join("; ") : (b.service || ""),
+      b.date, b.time, b.duration || 1, b.status, b.price ?? "", b.notes || "", (b.created_at || "").slice(0,10),
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([csv], { type:"text/csv" })), download: `ez-tech-bookings-${todayStr}.csv` });
+    a.click();
+  };
+
+  const sendReminder = (booking) => {
+    if (!booking?.email) return;
+    fetch("/api/send-status-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status:"reminder", name:booking.client, email:booking.email, phone:booking.phone, services:booking.service, date:booking.date, time:booking.time, duration:booking.duration, notes:booking.notes }),
+    }).then(() => fire("📧 Reminder sent!")).catch(() => fire("❌ Failed to send reminder"));
+  };
+
   const submitAdminBooking = async () => {
     const payload = { client: adminForm.name, service: adminForm.services, date: adminForm.date, time: adminForm.time, status: adminForm.status, phone: adminForm.phone, email: adminForm.email, notes: adminForm.notes, source: adminForm.source, duration: adminForm.duration };
     const { data, error } = await supabase.from("bookings").insert(payload).select().single();
@@ -345,6 +365,7 @@ export default function App() {
   };
 
   const todayStr = fmtDate(now.getFullYear(), now.getMonth(), now.getDate());
+  const next7Str = fmtDate(now.getFullYear(), now.getMonth(), now.getDate() + 7);
   const pendingCount = bookings.filter(b => b.status === "pending").length;
   const todayCount = bookings.filter(b => b.date === todayStr).length;
   const revenue = bookings
@@ -587,7 +608,7 @@ export default function App() {
 
       {/* Tab Navigation */}
       <div style={{ padding:"0 24px", display:"flex", borderBottom:"1px solid rgba(201,162,39,.15)" }}>
-        {[["bookings","📋 BOOKINGS"],["calendar","📅 CALENDAR"]].map(([k,l]) => (
+        {[["bookings","📋 BOOKINGS"],["upcoming","🗓 UPCOMING"],["calendar","📅 CALENDAR"]].map(([k,l]) => (
           <button key={k} onClick={() => setAdminTab(k)} style={{ padding:"14px 20px", background:"transparent", border:"none", borderBottom: adminTab===k ? "2px solid #c9a227" : "2px solid transparent", color: adminTab===k ? "#c9a227" : "#7788aa", fontFamily:"'Orbitron',sans-serif", fontSize:11, fontWeight:700, letterSpacing:1.5, cursor:"pointer", transition:"all .2s" }}>{l}</button>
         ))}
       </div>
@@ -613,6 +634,7 @@ export default function App() {
                   ))}
                 </div>
                 <button className="btn ghost" style={{ padding:"7px 12px", fontSize:10, flexShrink:0, color: editMode ? "#f0c040" : "#7788aa" }} onClick={toggleEditMode}>{editMode ? "DONE" : "SELECT"}</button>
+                {!editMode && <button className="btn ghost" style={{ padding:"7px 12px", fontSize:10, flexShrink:0 }} onClick={exportCSV} title="Download all bookings as CSV">⬇ CSV</button>}
                 {!editMode && <button className="btn gold" style={{ padding:"7px 14px", fontSize:10, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋ ADD</button>}
               </div>
 
@@ -827,6 +849,9 @@ export default function App() {
                       ) : (
                         <button className="btn ghost" onClick={() => updateStatus(selected.id, "pending")}>↩ RESET TO PENDING</button>
                       )}
+                      {selected.email && (
+                        <button className="btn ghost" style={{ fontSize:10 }} onClick={() => sendReminder(selected)}>📧 SEND REMINDER</button>
+                      )}
                       <div style={{ marginTop:4 }}>
                         {deleteConfirm ? (
                           <div>
@@ -848,6 +873,51 @@ export default function App() {
               })()}
             </div>
           </div>
+
+        ) : adminTab === "upcoming" ? (
+
+          // ── Upcoming Tab ──────────────────────────────────────────────
+          (() => {
+            const upcoming = bookings
+              .filter(b => b.date >= todayStr && b.date <= next7Str && b.status !== "denied")
+              .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+            return (
+              <div style={{ flex:1, padding:24, overflowY:"auto" }}>
+                <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>NEXT 7 DAYS</div>
+                <div style={{ fontSize:12, color:"#7788aa", marginBottom:20 }}>{upcoming.length} appointment{upcoming.length !== 1 ? "s" : ""} coming up</div>
+                {upcoming.length === 0 ? (
+                  <div style={{ textAlign:"center", padding:"40px 0", color:"#445566", fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:1 }}>NO UPCOMING APPOINTMENTS</div>
+                ) : (
+                  <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                    {upcoming.map(b => {
+                      const diff = Math.round((new Date(b.date + "T00:00:00") - new Date(todayStr + "T00:00:00")) / 86400000);
+                      const dayLabel = diff === 0 ? "Today" : diff === 1 ? "Tomorrow" : `In ${diff} days`;
+                      const st = STATUS[b.status] || STATUS.pending;
+                      return (
+                        <div key={b.id} className="card" style={{ padding:"14px 18px", display:"flex", gap:14, alignItems:"flex-start", cursor:"pointer", border:`1px solid ${st.border}` }}
+                          onClick={() => { setSelected(b); setDeleteConfirm(false); setAdminTab("bookings"); }}>
+                          <div style={{ minWidth:56, textAlign:"center" }}>
+                            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:9, color:"#c9a227", letterSpacing:1 }}>{b.date.slice(5).replace("-","/")}</div>
+                            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, fontWeight:700, color: diff === 0 ? "#f0c040" : "#e8e0cc", marginTop:2 }}>{dayLabel}</div>
+                            <div style={{ fontSize:11, color:"#7788aa", marginTop:2 }}>{b.time}</div>
+                          </div>
+                          <div style={{ flex:1, minWidth:0 }}>
+                            <div style={{ fontWeight:700, fontSize:13, color:"#e8e0cc", marginBottom:3 }}>{b.client}</div>
+                            <div style={{ fontSize:11, color:"#7788aa", marginBottom:4 }}>{Array.isArray(b.service) ? b.service.join(", ") : b.service}</div>
+                            <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                              <span style={{ fontSize:10, color:st.color, background:st.bg, border:`1px solid ${st.border}`, borderRadius:3, padding:"2px 7px", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{st.label}</span>
+                              {b.duration && <span style={{ fontSize:10, color:"#7788aa" }}>{b.duration}h</span>}
+                              {b.phone && <span style={{ fontSize:10, color:"#7788aa" }}>{b.phone}</span>}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })()
 
         ) : (
 

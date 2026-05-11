@@ -51,6 +51,12 @@ const formatPhone = (v) => {
   if (d.length <= 6) return `(${d.slice(0,3)}) ${d.slice(3)}`;
   return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6,10)}`;
 };
+const waPhone = (phone) => {
+  const d = (phone || "").replace(/\D/g, "");
+  if (d.length === 7)  return `1242${d}`;  // local Nassau, no area code
+  if (d.length === 10) return `1${d}`;     // North American with area code
+  return d;                                // already has country code
+};
 
 // ─── CONTACT INFO ──────────────────────────────────────────────────────────
 const CONTACT = {
@@ -619,7 +625,7 @@ export default function App() {
 
       {/* Tab Navigation */}
       <div style={{ padding:"0 24px", display:"flex", borderBottom:"1px solid rgba(201,162,39,.15)" }}>
-        {[["bookings","📋 BOOKINGS"],["upcoming","🗓 UPCOMING"],["calendar","📅 CALENDAR"]].map(([k,l]) => (
+        {[["bookings","📋 BOOKINGS"],["upcoming","🗓 UPCOMING"],["calendar","📅 CALENDAR"],["stats","📊 STATS"]].map(([k,l]) => (
           <button key={k} onClick={() => setAdminTab(k)} style={{ padding:"14px 20px", background:"transparent", border:"none", borderBottom: adminTab===k ? "2px solid #c9a227" : "2px solid transparent", color: adminTab===k ? "#c9a227" : "#7788aa", fontFamily:"'Orbitron',sans-serif", fontSize:11, fontWeight:700, letterSpacing:1.5, cursor:"pointer", transition:"all .2s" }}>{l}</button>
         ))}
       </div>
@@ -896,6 +902,14 @@ export default function App() {
                       {selected.email && (
                         <button className="btn ghost" style={{ fontSize:10 }} onClick={() => sendReminder(selected)}>📧 SEND REMINDER</button>
                       )}
+                      {selected.phone && (
+                        <a
+                          href={`https://wa.me/${waPhone(selected.phone)}?text=${encodeURIComponent(`Hi ${selected.client}, this is EZ Tech Solutions. We're reaching out about your ${Array.isArray(selected.service) ? selected.service[0] : selected.service} appointment on ${selected.date} at ${selected.time}. Please let us know if you have any questions.`)}`}
+                          target="_blank" rel="noopener noreferrer"
+                          className="btn ghost"
+                          style={{ textDecoration:"none", textAlign:"center", fontSize:10, display:"block" }}
+                        >💬 WHATSAPP CLIENT</a>
+                      )}
                       <div style={{ marginTop:4 }}>
                         {deleteConfirm ? (
                           <div>
@@ -1058,6 +1072,76 @@ export default function App() {
               })() : <div style={{ color:"#556677", padding:20, textAlign:"center", fontSize:13 }}>Click a day to see bookings</div>}
             </div>
           </div>
+
+        ) : (
+
+          // ── Stats Tab ────────────────────────────────────────────────
+          (() => {
+            const last12 = Array.from({length:12}, (_, i) => {
+              const d = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1);
+              const key = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+              return { key, label: MONTHS[d.getMonth()].slice(0,3), year: d.getFullYear() };
+            });
+            const monthStats = last12.map(({ key, label, year }) => {
+              const mb = bookings.filter(b => b.date && b.date.startsWith(key));
+              const rev = mb.filter(b => b.status === "approved").reduce((s, b) => s + (b.price != null ? b.price : svcList(b.service).reduce((s2,sv) => s2+(sv.price||0),0)), 0);
+              const paid = mb.filter(b => b.paid).reduce((s, b) => s + (b.price != null ? b.price : svcList(b.service).reduce((s2,sv) => s2+(sv.price||0),0)), 0);
+              return { key, label, year, total: mb.length, rev, paid };
+            });
+            const maxRev = Math.max(...monthStats.map(m => m.rev), 1);
+            const totalRev = monthStats.reduce((s,m) => s+m.rev, 0);
+            const totalPaid = monthStats.reduce((s,m) => s+m.paid, 0);
+            const avgRev = Math.round(totalRev / 12);
+            const bestMonth = monthStats.reduce((a,b) => b.rev > a.rev ? b : a, monthStats[0]);
+            const approvedCount = bookings.filter(b => b.status === "approved").length;
+            const approvalRate = bookings.length ? Math.round((approvedCount / bookings.length) * 100) : 0;
+            return (
+              <div style={{ flex:1, padding:24, overflowY:"auto" }}>
+                <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>REVENUE — LAST 12 MONTHS</div>
+                <div style={{ fontSize:12, color:"#7788aa", marginBottom:20 }}>Gold = approved revenue · Green overlay = paid</div>
+
+                {/* Bar chart */}
+                <div className="card" style={{ padding:"20px 16px 10px", marginBottom:20 }}>
+                  <div style={{ display:"flex", alignItems:"flex-end", gap:4, height:180 }}>
+                    {monthStats.map(m => (
+                      <div key={m.key} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:3, height:"100%" }}>
+                        <div style={{ flex:1, width:"100%", display:"flex", flexDirection:"column", justifyContent:"flex-end" }}>
+                          {m.rev > 0 && (
+                            <div style={{ fontSize:7, color:"#7788aa", textAlign:"center", marginBottom:3, fontFamily:"'Orbitron',sans-serif" }}>${m.rev >= 1000 ? `${(m.rev/1000).toFixed(1)}k` : m.rev}</div>
+                          )}
+                          <div style={{ width:"100%", height:`${Math.max((m.rev/maxRev)*130, m.rev > 0 ? 4 : 0)}px`, background:"rgba(201,162,39,.35)", borderRadius:"2px 2px 0 0", position:"relative", overflow:"hidden", transition:"height .3s" }}>
+                            {m.paid > 0 && (
+                              <div style={{ position:"absolute", bottom:0, width:"100%", height:`${(m.paid/m.rev)*100}%`, background:"rgba(52,211,153,.55)", borderRadius:"2px 2px 0 0" }} />
+                            )}
+                          </div>
+                        </div>
+                        <div style={{ fontSize:7, color:"#556677", fontFamily:"'Orbitron',sans-serif", textAlign:"center", letterSpacing:.3 }}>{m.label}</div>
+                        {m.total > 0 && <div style={{ fontSize:7, color:"#445566" }}>{m.total}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Summary cards */}
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))", gap:12 }}>
+                  {[
+                    { l:"12-MONTH REVENUE", v:`$${totalRev}`, c:"#c9a227" },
+                    { l:"TOTAL PAID",       v:`$${totalPaid}`, c:"#34d399" },
+                    { l:"MONTHLY AVG",      v:`$${avgRev}`, c:"#a78bfa" },
+                    { l:"BEST MONTH",       v:`${bestMonth.label} $${bestMonth.rev}`, c:"#f0c040" },
+                    { l:"APPROVAL RATE",    v:`${approvalRate}%`, c:"#22c55e" },
+                    { l:"TOTAL BOOKINGS",   v:bookings.length, c:"#c9a227" },
+                  ].map(s => (
+                    <div key={s.l} className="card" style={{ padding:"14px 16px" }}>
+                      <div style={{ fontSize:8, letterSpacing:1.5, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:5 }}>{s.l}</div>
+                      <div style={{ fontSize:18, fontWeight:900, color:s.c, fontFamily:"'Orbitron',sans-serif" }}>{s.v}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()
+
         )}
       </div>
 

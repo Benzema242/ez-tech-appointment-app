@@ -977,7 +977,7 @@ export default function App() {
             );
           })()
 
-        ) : (
+        ) : adminTab === "calendar" ? (
 
           // ── Calendar Tab ──────────────────────────────────────────────
           <div style={{ flex:1, padding:24, overflowY:"auto", display:"flex", gap:20, flexWrap:"wrap" }}>

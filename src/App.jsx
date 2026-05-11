@@ -163,7 +163,7 @@ export default function App() {
   const [calM, setCalM] = useState(now.getMonth());
   const [selDay, setSelDay] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [adminForm, setAdminForm] = useState({ name:"", email:"", phone:"", services:[], date:"", time:"", source:"call", status:"pending", duration:1, notes:"" });
+  const [adminForm, setAdminForm] = useState({ name:"", email:"", phone:"", services:[], date:"", time:"", source:"call", status:"pending", duration:1, notes:"", paid:false });
   const [adminConfirmOverlap, setAdminConfirmOverlap] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [showChangePwModal, setShowChangePwModal] = useState(false);
@@ -268,12 +268,12 @@ export default function App() {
   };
 
   const submitAdminBooking = async () => {
-    const payload = { client: adminForm.name, service: adminForm.services, date: adminForm.date, time: adminForm.time, status: adminForm.status, phone: adminForm.phone, email: adminForm.email, notes: adminForm.notes, source: adminForm.source, duration: adminForm.duration };
+    const payload = { client: adminForm.name, service: adminForm.services, date: adminForm.date, time: adminForm.time, status: adminForm.status, phone: adminForm.phone, email: adminForm.email, notes: adminForm.notes, source: adminForm.source, duration: adminForm.duration, paid: adminForm.paid };
     const { data, error } = await supabase.from("bookings").insert(payload).select().single();
     if (error) { fire("❌ Error adding appointment"); return; }
     setBookings(p => [...p, data]);
     setShowAddModal(false);
-    setAdminForm({ name:"", email:"", phone:"", services:[], date:"", time:"", source:"call", status:"pending", duration:1, notes:"" });
+    setAdminForm({ name:"", email:"", phone:"", services:[], date:"", time:"", source:"call", status:"pending", duration:1, notes:"", paid:false });
     fire("✅ Appointment added!");
   };
 
@@ -1078,7 +1078,7 @@ export default function App() {
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                 <div>
                   <label htmlFor="admin-phone" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE *</label>
-                  <input id="admin-phone" type="tel" value={adminForm.phone} onChange={e => setAdminForm({...adminForm, phone:e.target.value})} placeholder="(242) 555-0000" />
+                  <input id="admin-phone" type="tel" value={adminForm.phone} onChange={e => setAdminForm({...adminForm, phone:formatPhone(e.target.value)})} placeholder="(242) 555-0000" />
                 </div>
                 <div>
                   <label htmlFor="admin-email" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL</label>
@@ -1139,6 +1139,15 @@ export default function App() {
                     <button key={k} type="button" onClick={() => setAdminForm({...adminForm, status:k})} className="btn" style={{ padding:"7px 10px", fontSize:10, flex:1, background: adminForm.status === k ? bg : "transparent", border: adminForm.status === k ? `1px solid ${border}` : "1px solid rgba(201,162,39,.2)", color: adminForm.status === k ? c : "#7788aa" }}>{l}</button>
                   ))}
                 </div>
+              </div>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif" }}>PAYMENT</label>
+                <button type="button" onClick={() => setAdminForm({...adminForm, paid:!adminForm.paid})}
+                  style={{ padding:"5px 14px", fontSize:11, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, fontWeight:700, borderRadius:3, cursor:"pointer", transition:"all .15s",
+                    background: adminForm.paid ? "rgba(52,211,153,.15)" : "transparent",
+                    border: `1px solid ${adminForm.paid ? "#34d399" : "rgba(201,162,39,.3)"}`,
+                    color: adminForm.paid ? "#34d399" : "#556677" }}
+                >{adminForm.paid ? "✓ PAID" : "MARK AS PAID"}</button>
               </div>
               <div>
                 <label htmlFor="admin-notes" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>NOTES</label>

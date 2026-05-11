@@ -1,8 +1,16 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: 'info@ez-techgroup.com',
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
-const FROM = 'EZ Tech Solutions <noreply@eztechbahamas.com>';
+const FROM = 'EZ Tech Solutions <info@ez-techgroup.com>';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
@@ -13,7 +21,7 @@ export default async function handler(req, res) {
 
   try {
     // Admin notification
-    await resend.emails.send({
+    await transporter.sendMail({
       from: FROM,
       to: 'info@ez-techgroup.com',
       subject: `New Booking — ${name}`,
@@ -36,7 +44,7 @@ export default async function handler(req, res) {
 
     // Client confirmation (only if email provided)
     if (email) {
-      await resend.emails.send({
+      await transporter.sendMail({
         from: FROM,
         to: email,
         subject: 'Booking Confirmation — EZ Tech Solutions',

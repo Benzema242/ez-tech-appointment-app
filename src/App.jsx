@@ -482,7 +482,7 @@ export default function App() {
         ))}
       </div>
       <div style={{ fontSize:"clamp(9px,1.5vw,11px)", color:"#445566", letterSpacing:"clamp(0.3px,0.1vw,1px)", fontFamily:"'Orbitron',sans-serif" }}>
-        © {new Date().getFullYear()} EZ Tech Solutions · All Rights Reserved · Powered by <a href="https://nueradigital.com/" target="_blank" rel="noopener noreferrer" style={{ color:"#445566", textDecoration:"none" }}>Nuera Digital</a>
+        © {new Date().getFullYear()} EZ Tech Solutions · All Rights Reserved · Powered by <a href="https://nueradigital.com/" target="_blank" rel="noopener noreferrer" style={{ color:"#60a5fa", textDecoration:"underline dotted" }}>Nuera Digital</a>
       </div>
       <div style={{ marginTop:6 }}>
         <a href="https://eztechbahamas.com/privacy" target="_blank" rel="noopener noreferrer" style={{ fontSize:"clamp(8px,1.2vw,10px)", color:"#334455", textDecoration:"none", fontFamily:"'Orbitron',sans-serif", letterSpacing:"clamp(0.3px,0.1vw,1px)" }}>Privacy Policy</a>

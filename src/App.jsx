@@ -170,6 +170,8 @@ export default function App() {
   const [selDay, setSelDay] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [adminForm, setAdminForm] = useState({ name:"", email:"", phone:"", services:[], date:"", time:"", source:"call", status:"pending", duration:1, notes:"", paid:false });
+  const [recurringOn, setRecurringOn] = useState(false);
+  const [recurInterval, setRecurInterval] = useState(7);
   const [adminConfirmOverlap, setAdminConfirmOverlap] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [showChangePwModal, setShowChangePwModal] = useState(false);
@@ -278,9 +280,19 @@ export default function App() {
     const { data, error } = await supabase.from("bookings").insert(payload).select().single();
     if (error) { fire(`❌ ${error.message}`); return; }
     setBookings(p => [...p, data]);
+    if (recurringOn && adminForm.date) {
+      const next = new Date(adminForm.date + "T00:00:00");
+      next.setDate(next.getDate() + recurInterval);
+      const nextDate = fmtDate(next.getFullYear(), next.getMonth(), next.getDate());
+      const { data: data2 } = await supabase.from("bookings").insert({ ...payload, date: nextDate, paid: false, status: "pending" }).select().single();
+      if (data2) setBookings(p => [...p, data2]);
+      fire(`✅ Added! Next booking pre-filled for ${nextDate}`);
+    } else {
+      fire("✅ Appointment added!");
+    }
     setShowAddModal(false);
+    setRecurringOn(false);
     setAdminForm({ name:"", email:"", phone:"", services:[], date:"", time:"", source:"call", status:"pending", duration:1, notes:"", paid:false });
-    fire("✅ Appointment added!");
   };
 
   const updateBooking = async (id, updates) => {
@@ -1223,6 +1235,30 @@ export default function App() {
                     <button key={k} type="button" onClick={() => setAdminForm({...adminForm, status:k})} className="btn" style={{ padding:"7px 10px", fontSize:10, flex:1, background: adminForm.status === k ? bg : "transparent", border: adminForm.status === k ? `1px solid ${border}` : "1px solid rgba(201,162,39,.2)", color: adminForm.status === k ? c : "#7788aa" }}>{l}</button>
                   ))}
                 </div>
+              </div>
+              <div style={{ display:"flex", flexDirection:"column", gap:8, padding:"12px", background:"rgba(201,162,39,.05)", border:"1px solid rgba(201,162,39,.15)", borderRadius:4 }}>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                  <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif" }}>RECURRING</label>
+                  <button type="button" onClick={() => setRecurringOn(r => !r)}
+                    style={{ padding:"5px 14px", fontSize:11, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, fontWeight:700, borderRadius:3, cursor:"pointer", transition:"all .15s",
+                      background: recurringOn ? "rgba(201,162,39,.2)" : "transparent",
+                      border: `1px solid ${recurringOn ? "#c9a227" : "rgba(201,162,39,.3)"}`,
+                      color: recurringOn ? "#f0c040" : "#556677" }}
+                  >{recurringOn ? "✓ ON" : "OFF"}</button>
+                </div>
+                {recurringOn && (
+                  <div style={{ display:"flex", gap:6 }}>
+                    {[{ l:"Weekly", v:7 },{ l:"2 Weeks", v:14 },{ l:"Monthly", v:30 }].map(({ l, v }) => (
+                      <button key={v} type="button" onClick={() => setRecurInterval(v)} className="btn"
+                        style={{ flex:1, padding:"6px 4px", fontSize:10,
+                          background: recurInterval === v ? "rgba(201,162,39,.2)" : "transparent",
+                          border: `1px solid ${recurInterval === v ? "#c9a227" : "rgba(201,162,39,.2)"}`,
+                          color: recurInterval === v ? "#f0c040" : "#7788aa" }}
+                      >{l}</button>
+                    ))}
+                  </div>
+                )}
+                {recurringOn && <div style={{ fontSize:10, color:"#556677" }}>A second pending booking will be auto-created {recurInterval} days after this one.</div>}
               </div>
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
                 <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif" }}>PAYMENT</label>

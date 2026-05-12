@@ -266,6 +266,40 @@ export default function App() {
     a.click();
   };
 
+  const downloadBookingIcs = (b) => {
+    const services = Array.isArray(b.service) ? b.service.join(', ') : (b.service || 'Service');
+    const parseT = (t) => {
+      const match = (t || '').match(/(\d+):(\d+)\s*(AM|PM)/i);
+      if (!match) return { h:0, m:0 };
+      let h = parseInt(match[1]); const m = parseInt(match[2]);
+      if (match[3].toUpperCase() === 'PM' && h !== 12) h += 12;
+      if (match[3].toUpperCase() === 'AM' && h === 12) h = 0;
+      return { h, m };
+    };
+    const { h, m } = parseT(b.time);
+    const p = n => String(n).padStart(2,'0');
+    const [y, mo, d] = (b.date || '').split('-');
+    const dtstart = `${y}${mo}${d}T${p(h)}${p(m)}00`;
+    const end = new Date(`${b.date}T${p(h)}:${p(m)}:00`);
+    end.setHours(end.getHours() + (b.duration || 1));
+    const dtend = `${end.getFullYear()}${p(end.getMonth()+1)}${p(end.getDate())}T${p(end.getHours())}${p(end.getMinutes())}00`;
+    const ics = [
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//EZ Tech Solutions//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+      'BEGIN:VEVENT',
+      `UID:booking-${b.id}@ez-techgroup.com`,
+      `DTSTAMP:${new Date().toISOString().replace(/[-:.]/g,'').slice(0,15)}Z`,
+      `DTSTART;TZID=America/Nassau:${dtstart}`,
+      `DTEND;TZID=America/Nassau:${dtend}`,
+      `SUMMARY:EZ Tech Solutions — ${services}`,
+      `DESCRIPTION:Client: ${b.client}\\nPhone: ${b.phone}\\n${b.notes ? `Notes: ${b.notes}` : ''}`,
+      'LOCATION:Nassau\\, Bahamas',
+      'STATUS:CONFIRMED',
+      'END:VEVENT', 'END:VCALENDAR',
+    ].join('\r\n');
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([ics], { type:'text/calendar' })), download:`ez-tech-${b.date}.ics` });
+    a.click();
+  };
+
   const sendReminder = (booking) => {
     if (!booking?.email) return;
     fetch("/api/send-status-email", {
@@ -922,6 +956,7 @@ export default function App() {
                           style={{ textDecoration:"none", textAlign:"center", fontSize:10, display:"block" }}
                         >💬 WHATSAPP CLIENT</a>
                       )}
+                      <button className="btn ghost" style={{ fontSize:10 }} onClick={() => downloadBookingIcs(selected)}>📅 DOWNLOAD .ICS</button>
                       <div style={{ marginTop:4 }}>
                         {deleteConfirm ? (
                           <div>

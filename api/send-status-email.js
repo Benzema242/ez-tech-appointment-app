@@ -39,6 +39,30 @@ const STATUS_CONFIG = {
   },
 };
 
+function parseTimeToHM(timeStr) {
+  const match = (timeStr || '').match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!match) return { h: 0, m: 0 };
+  let h = parseInt(match[1]);
+  const m = parseInt(match[2]);
+  if (match[3].toUpperCase() === 'PM' && h !== 12) h += 12;
+  if (match[3].toUpperCase() === 'AM' && h === 12) h = 0;
+  return { h, m };
+}
+
+function buildGoogleCalUrl({ services, date, time, duration, notes }) {
+  const serviceList = Array.isArray(services) ? services.join(', ') : services;
+  const { h, m } = parseTimeToHM(time);
+  const pad = n => String(n).padStart(2, '0');
+  const [y, mo, d] = (date || '').split('-');
+  const startStr = `${y}${mo}${d}T${pad(h)}${pad(m)}00`;
+  const endDate = new Date(`${date}T${pad(h)}:${pad(m)}:00`);
+  endDate.setHours(endDate.getHours() + (duration || 1));
+  const endStr = `${endDate.getFullYear()}${pad(endDate.getMonth()+1)}${pad(endDate.getDate())}T${pad(endDate.getHours())}${pad(endDate.getMinutes())}00`;
+  const details = [`Services: ${serviceList}`, notes ? `Notes: ${notes}` : null, 'EZ Tech Solutions — (242) 805-0777'].filter(Boolean).join('\n');
+  const params = new URLSearchParams({ action:'TEMPLATE', text:`EZ Tech Solutions — ${serviceList}`, dates:`${startStr}/${endStr}`, ctz:'America/Nassau', details, location:'Nassau, Bahamas' });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
@@ -69,6 +93,14 @@ export default async function handler(req, res) {
             <tr><td style="padding:8px 0;color:#7788aa;">Phone</td><td style="padding:8px 0;">${phone}</td></tr>
             ${notes ? `<tr><td style="padding:8px 0;color:#7788aa;vertical-align:top;">Notes</td><td style="padding:8px 0;">${notes}</td></tr>` : ''}
           </table>
+          ${(status === 'approved' || status === 'reminder') ? `
+          <div style="margin-top:24px;">
+            <p style="margin:0 0 10px;font-size:12px;color:#7788aa;">Add this appointment to your calendar:</p>
+            <a href="${buildGoogleCalUrl({ services, date, time, duration, notes })}" target="_blank"
+              style="display:inline-block;padding:10px 20px;background:#c9a227;color:#050d1a;text-decoration:none;border-radius:4px;font-size:12px;font-weight:700;margin-right:8px;">
+              📅 Google Calendar
+            </a>
+          </div>` : ''}
           <div style="margin-top:24px;padding:16px;background:rgba(201,162,39,.08);border:1px solid rgba(201,162,39,.2);border-radius:6px;">
             <p style="margin:0;font-size:13px;color:#c8bfa8;">Questions? Get in touch with us directly:</p>
             <p style="margin:10px 0 0;font-size:13px;color:#c9a227;">📞 (242) 805-0777 &nbsp;·&nbsp; ✉️ info@ez-techgroup.com</p>

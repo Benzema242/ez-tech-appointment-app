@@ -283,7 +283,13 @@ export default function App() {
     const end = new Date(`${b.date}T${p(h)}:${p(m)}:00`);
     end.setHours(end.getHours() + (b.duration || 1));
     const dtend = `${end.getFullYear()}${p(end.getMonth()+1)}${p(end.getDate())}T${p(end.getHours())}${p(end.getMinutes())}00`;
-    const ics = [
+    const phoneDigits = (b.phone || '').replace(/\D/g, '');
+    const telUrl = phoneDigits.length === 7
+      ? `tel:+1242${phoneDigits}`
+      : phoneDigits.length === 10
+        ? `tel:+1${phoneDigits}`
+        : phoneDigits ? `tel:+${phoneDigits}` : null;
+    const icsLines = [
       'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//EZ Tech Solutions//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
       'BEGIN:VEVENT',
       `UID:booking-${b.id}@ez-techgroup.com`,
@@ -294,8 +300,10 @@ export default function App() {
       `DESCRIPTION:Client: ${b.client}\\nPhone: ${b.phone}\\n${b.notes ? `Notes: ${b.notes}` : ''}`,
       'LOCATION:Nassau\\, Bahamas',
       'STATUS:CONFIRMED',
-      'END:VEVENT', 'END:VCALENDAR',
-    ].join('\r\n');
+    ];
+    if (telUrl) icsLines.push(`URL:${telUrl}`);
+    icsLines.push('END:VEVENT', 'END:VCALENDAR');
+    const ics = icsLines.join('\r\n');
     const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([ics], { type:'text/calendar' })), download:`ez-tech-${b.date}.ics` });
     a.click();
   };

@@ -65,7 +65,14 @@ export default async function handler(req, res) {
       b.notes ? `Notes: ${b.notes}` : null,
     ].filter(Boolean);
 
-    return [
+    const phoneDigits = (b.phone || '').replace(/\D/g, '');
+    const telUrl = phoneDigits.length === 7
+      ? `tel:+1242${phoneDigits}`
+      : phoneDigits.length === 10
+        ? `tel:+1${phoneDigits}`
+        : phoneDigits ? `tel:+${phoneDigits}` : null;
+
+    const vevent = [
       'BEGIN:VEVENT',
       `UID:booking-${b.id}@ez-techgroup.com`,
       `DTSTAMP:${now}`,
@@ -75,8 +82,10 @@ export default async function handler(req, res) {
       `DESCRIPTION:${escapeIcal(descParts.join('\\n'))}`,
       'LOCATION:Nassau\\, Bahamas',
       b.status === 'scheduled_call' ? 'STATUS:TENTATIVE' : 'STATUS:CONFIRMED',
-      'END:VEVENT',
-    ].join('\r\n');
+    ];
+    if (telUrl) vevent.push(`URL:${telUrl}`);
+    vevent.push('END:VEVENT');
+    return vevent.join('\r\n');
   });
 
   const ical = [

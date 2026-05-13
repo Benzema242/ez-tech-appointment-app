@@ -325,14 +325,10 @@ export default function App() {
       *{box-sizing:border-box;margin:0;padding:0;}
       body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:13px;min-height:100vh;display:flex;flex-direction:column;}
       /* ── Header ── */
-      .hdr{background:#050b1f;color:#fff;padding:22px 36px;display:flex;align-items:center;justify-content:space-between;}
-      .hdr-brand{display:flex;flex-direction:column;gap:3px;}
-      .hdr-name{font-size:26px;font-weight:900;letter-spacing:3px;color:#c9a227;font-family:'Arial Black',sans-serif;}
-      .hdr-tag{font-size:10px;letter-spacing:2px;color:#7788aa;text-transform:uppercase;}
-      .hdr-contact{text-align:right;font-size:11px;color:#8899aa;line-height:1.8;}
-      .hdr-contact span{color:#c9a227;font-weight:700;}
-      /* ── Gold rule ── */
+      .hdr{background:#fff;padding:22px 36px;display:flex;align-items:center;}
+      /* ── Rules ── */
       .gold-rule{height:4px;background:linear-gradient(90deg,#c9a227,#f0c040,#c9a227);}
+      .blue-rule{height:4px;background:linear-gradient(90deg,#1e40af,#3b82f6,#1e40af);}
       /* ── Doc info bar ── */
       .doc-bar{background:#f7f5ef;border-bottom:1px solid #e0d9c8;padding:12px 36px;display:flex;align-items:center;justify-content:space-between;}
       .doc-title{font-size:16px;font-weight:800;color:#050b1f;letter-spacing:.5px;}
@@ -355,26 +351,19 @@ export default function App() {
       .dispatch td:first-child{font-weight:400;background:#fff;width:auto;}
       .dispatch tr:nth-child(even) td{background:#fafaf8;}
       /* ── Footer ── */
-      .ftr-rule{height:3px;background:linear-gradient(90deg,#c9a227,#f0c040,#c9a227);margin-top:auto;}
-      .ftr{background:#050b1f;padding:16px 36px;display:flex;align-items:flex-start;gap:24px;}
-      .ftr-logo{font-size:14px;font-weight:900;letter-spacing:2px;color:#c9a227;white-space:nowrap;padding-top:2px;}
-      .ftr-disclaimer{font-size:9.5px;color:#7788aa;line-height:1.6;}
-      .ftr-disclaimer strong{color:#9aabb8;}
+      .ftr-rules{margin-top:auto;}
+      .ftr-gold{height:4px;background:linear-gradient(90deg,#c9a227,#f0c040,#c9a227);}
+      .ftr-blue{height:4px;background:linear-gradient(90deg,#1e40af,#3b82f6,#1e40af);}
+      .ftr{background:#fff;padding:16px 36px;}
+      .ftr-disclaimer{font-size:9.5px;color:#111;line-height:1.6;}
+      .ftr-disclaimer strong{color:#111;}
       @media print{@page{margin:0;size:A4}body{min-height:0;}button{display:none;}}
     </style></head><body>
       <div class="hdr">
-        <div class="hdr-brand">
-          ${logoSrc ? `<img src="${logoSrc}" style="width:60px;height:60px;object-fit:contain;margin-bottom:6px;" />` : ''}
-          <div class="hdr-name">EZ TECH</div>
-          <div class="hdr-tag">Solutions · Nassau, Bahamas</div>
-        </div>
-        <div class="hdr-contact">
-          <span>(242) 805-0777</span><br/>
-          info@ez-techgroup.com<br/>
-          eztechbahamas.com
-        </div>
+        ${logoSrc ? `<img src="${logoSrc}" style="width:110px;height:110px;object-fit:contain;" />` : ''}
       </div>
       <div class="gold-rule"></div>
+      <div class="blue-rule"></div>
       <div class="doc-bar">
         <div class="doc-title">${title}</div>
         <div class="doc-meta">
@@ -383,9 +372,11 @@ export default function App() {
         </div>
       </div>
       <div class="body">${bodyHtml}</div>
-      <div class="ftr-rule"></div>
+      <div class="ftr-rules">
+        <div class="ftr-gold"></div>
+        <div class="ftr-blue"></div>
+      </div>
       <div class="ftr">
-        <div class="ftr-logo">EZ TECH</div>
         <div class="ftr-disclaimer">
           <strong>CONFIDENTIALITY NOTICE:</strong> This document and the information contained herein are the exclusive property of EZ Tech Solutions and are intended solely for authorised internal use. Unauthorised reproduction, distribution, disclosure, or use of this document — in whole or in part — without the prior written consent of EZ Tech Solutions is strictly prohibited. Any person found to have misused, falsified, or unlawfully distributed information contained in this document will be subject to civil and criminal prosecution to the fullest extent permitted under the laws of The Commonwealth of The Bahamas. EZ Tech Solutions reserves the right to pursue all available legal remedies in the event of any breach. By handling this document, the recipient acknowledges and accepts these terms.
         </div>

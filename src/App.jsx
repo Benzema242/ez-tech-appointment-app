@@ -1064,31 +1064,31 @@ export default function App() {
               .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
             return (
               <div style={{ flex:1, padding:24, overflowY:"auto" }}>
-                <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>NEXT 7 DAYS</div>
-                <div style={{ fontSize:12, color:"#7788aa", marginBottom:20 }}>{upcoming.length} appointment{upcoming.length !== 1 ? "s" : ""} coming up</div>
+                <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>NEXT 7 DAYS</div>
+                <div style={{ fontSize:14, color:"#7788aa", marginBottom:20 }}>{upcoming.length} appointment{upcoming.length !== 1 ? "s" : ""} coming up</div>
                 {upcoming.length === 0 ? (
-                  <div style={{ textAlign:"center", padding:"40px 0", color:"#445566", fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:1 }}>NO UPCOMING APPOINTMENTS</div>
+                  <div style={{ textAlign:"center", padding:"40px 0", color:"#445566", fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:1 }}>NO UPCOMING APPOINTMENTS</div>
                 ) : (
-                  <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                  <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
                     {upcoming.map(b => {
                       const diff = Math.round((new Date(b.date + "T00:00:00") - new Date(todayStr + "T00:00:00")) / 86400000);
                       const dayLabel = diff === 0 ? "Today" : diff === 1 ? "Tomorrow" : `In ${diff} days`;
                       const st = STATUS[b.status] || STATUS.pending;
                       return (
-                        <div key={b.id} className="card" style={{ padding:"14px 18px", display:"flex", gap:14, alignItems:"flex-start", cursor:"pointer", border:`1px solid ${st.border}` }}
+                        <div key={b.id} className="card" style={{ padding:"16px 20px", display:"flex", gap:16, alignItems:"flex-start", cursor:"pointer", border:`1px solid ${st.border}` }}
                           onClick={() => { setSelected(b); setDeleteConfirm(false); setAdminTab("bookings"); }}>
-                          <div style={{ minWidth:56, textAlign:"center" }}>
-                            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:9, color:"#c9a227", letterSpacing:1 }}>{b.date.slice(5).replace("-","/")}</div>
-                            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, fontWeight:700, color: diff === 0 ? "#f0c040" : "#e8e0cc", marginTop:2 }}>{dayLabel}</div>
-                            <div style={{ fontSize:11, color:"#7788aa", marginTop:2 }}>{b.time}</div>
+                          <div style={{ minWidth:64, textAlign:"center" }}>
+                            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, color:"#c9a227", letterSpacing:1 }}>{b.date.slice(5).replace("-","/")}</div>
+                            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color: diff === 0 ? "#f0c040" : "#e8e0cc", marginTop:3 }}>{dayLabel}</div>
+                            <div style={{ fontSize:13, color:"#7788aa", marginTop:3 }}>{b.time}</div>
                           </div>
                           <div style={{ flex:1, minWidth:0 }}>
-                            <div style={{ fontWeight:700, fontSize:13, color:"#e8e0cc", marginBottom:3 }}>{b.client}</div>
-                            <div style={{ fontSize:11, color:"#7788aa", marginBottom:4 }}>{Array.isArray(b.service) ? b.service.join(", ") : b.service}</div>
+                            <div style={{ fontWeight:700, fontSize:15, color:"#e8e0cc", marginBottom:4 }}>{b.client}</div>
+                            <div style={{ fontSize:13, color:"#7788aa", marginBottom:6 }}>{Array.isArray(b.service) ? b.service.join(", ") : b.service}</div>
                             <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-                              <span style={{ fontSize:10, color:st.color, background:st.bg, border:`1px solid ${st.border}`, borderRadius:3, padding:"2px 7px", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{st.label}</span>
-                              {b.duration && <span style={{ fontSize:10, color:"#7788aa" }}>{b.duration}h</span>}
-                              {b.phone && <span style={{ fontSize:10, color:"#7788aa" }}>{b.phone}</span>}
+                              <span style={{ fontSize:12, color:st.color, background:st.bg, border:`1px solid ${st.border}`, borderRadius:3, padding:"3px 9px", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{st.label}</span>
+                              {b.duration && <span style={{ fontSize:12, color:"#7788aa" }}>{b.duration}h</span>}
+                              {b.phone && <span style={{ fontSize:12, color:"#7788aa" }}>{b.phone}</span>}
                             </div>
                           </div>
                         </div>

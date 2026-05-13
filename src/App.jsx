@@ -311,9 +311,15 @@ export default function App() {
     a.click();
   };
 
-  const printDoc = (title, bodyHtml) => {
+  const printDoc = async (title, bodyHtml) => {
     const docRef = `EZT-${Date.now().toString(36).toUpperCase().slice(-6)}`;
     const dateStr = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    let logoSrc = '';
+    try {
+      const res = await fetch('/assets/EZTECHLOGO2.png');
+      const blob = await res.blob();
+      logoSrc = await new Promise(r => { const fr = new FileReader(); fr.onloadend = () => r(fr.result); fr.readAsDataURL(blob); });
+    } catch(e) {}
     const win = window.open('', '_blank');
     win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>${title} — EZ Tech Solutions</title><style>
       *{box-sizing:border-box;margin:0;padding:0;}
@@ -358,6 +364,7 @@ export default function App() {
     </style></head><body>
       <div class="hdr">
         <div class="hdr-brand">
+          ${logoSrc ? `<img src="${logoSrc}" style="width:60px;height:60px;object-fit:contain;margin-bottom:6px;" />` : ''}
           <div class="hdr-name">EZ TECH</div>
           <div class="hdr-tag">Solutions · Nassau, Bahamas</div>
         </div>

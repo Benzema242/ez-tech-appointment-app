@@ -758,12 +758,12 @@ export default function App() {
                         <span style={{ fontSize:20 }}>{first.icon}</span>
                       )}
                       <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:14, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.client}</div>
-                        <div style={{ fontSize:11, color:"#7788aa", marginTop:2, display:"flex", alignItems:"center", gap:6 }}>
+                        <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:16, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.client}</div>
+                        <div style={{ fontSize:13, color:"#7788aa", marginTop:2, display:"flex", alignItems:"center", gap:6 }}>
                           <span style={{ overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{first.label}</span>
                           {extra > 0 && <span style={{ flexShrink:0, padding:"1px 6px", background:"rgba(201,162,39,.15)", border:"1px solid rgba(201,162,39,.3)", borderRadius:3, fontSize:9, color:"#c9a227" }}>+{extra} more</span>}
                         </div>
-                        <div style={{ fontSize:11, color:"#c9a227", marginTop:3, fontFamily:"'Orbitron',sans-serif" }}>{relativeDate(b.date)} · {b.time}</div>
+                        <div style={{ fontSize:13, color:"#c9a227", marginTop:3, fontFamily:"'Orbitron',sans-serif" }}>{relativeDate(b.date)} · {b.time}</div>
                       </div>
                       <span style={{ padding:"3px 8px", borderRadius:3, fontSize:9, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:st.color, background:st.bg, border:`1px solid ${st.border}`, whiteSpace:"nowrap" }}>{st.label}</span>
                     </div>
@@ -835,8 +835,8 @@ export default function App() {
                       ["⏱ Duration", `${selected.duration || 1} hour${(selected.duration || 1) !== 1 ? "s" : ""}`],
                     ].map(([l,v]) => (
                       <div key={l} style={{ display:"flex", justifyContent:"space-between", padding:"10px 0", borderBottom:"1px solid rgba(201,162,39,.1)", gap:10 }}>
-                        <span style={{ fontSize:13, color:"#7788aa" }}>{l}</span>
-                        <span style={{ fontSize:13, color:"#e8e0cc", fontWeight:500, textAlign:"right" }}>{v}</span>
+                        <span style={{ fontSize:15, color:"#7788aa" }}>{l}</span>
+                        <span style={{ fontSize:15, color:"#e8e0cc", fontWeight:500, textAlign:"right" }}>{v}</span>
                       </div>
                     ))}
 
@@ -886,15 +886,15 @@ export default function App() {
                         </>
                       ) : (
                         <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
-                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:13 }}><span style={{ color:"#7788aa" }}>📞 Phone</span><span style={{ color:"#e8e0cc" }}>{selected.phone || "—"}</span></div>
-                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:13, paddingTop:4 }}><span style={{ color:"#7788aa" }}>✉️ Email</span><span style={{ color:"#e8e0cc", textAlign:"right", maxWidth:"65%", wordBreak:"break-all" }}>{selected.email || "—"}</span></div>
+                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:15 }}><span style={{ color:"#7788aa" }}>📞 Phone</span><span style={{ color:"#e8e0cc" }}>{selected.phone || "—"}</span></div>
+                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:15, paddingTop:4 }}><span style={{ color:"#7788aa" }}>✉️ Email</span><span style={{ color:"#e8e0cc", textAlign:"right", maxWidth:"65%", wordBreak:"break-all" }}>{selected.email || "—"}</span></div>
                         </div>
                       )}
                     </div>
 
                     {/* Editable Price */}
                     <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid rgba(201,162,39,.1)", gap:10 }}>
-                      <span style={{ fontSize:13, color:"#7788aa", flexShrink:0 }}>
+                      <span style={{ fontSize:15, color:"#7788aa", flexShrink:0 }}>
                         💰 {selected.price != null ? "Price" : "Est. Price"}
                       </span>
                       {editingPrice ? (
@@ -917,7 +917,7 @@ export default function App() {
                         </div>
                       ) : (
                         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                          <span style={{ fontSize:13, fontWeight:500, color: selected.price != null ? "#34d399" : "#e8e0cc" }}>
+                          <span style={{ fontSize:15, fontWeight:500, color: selected.price != null ? "#34d399" : "#e8e0cc" }}>
                             {selected.price != null ? `$${selected.price}` : priceDisplay}
                           </span>
                           {selected.price != null && (
@@ -930,7 +930,7 @@ export default function App() {
 
                     {/* Paid toggle */}
                     <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid rgba(201,162,39,.1)" }}>
-                      <span style={{ fontSize:13, color:"#7788aa" }}>💳 Payment</span>
+                      <span style={{ fontSize:15, color:"#7788aa" }}>💳 Payment</span>
                       <button
                         onClick={() => updateBooking(selected.id, { paid: !selected.paid })}
                         style={{ padding:"4px 14px", fontSize:11, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, fontWeight:700, borderRadius:3, cursor:"pointer", transition:"all .15s",

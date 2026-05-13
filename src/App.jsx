@@ -955,49 +955,49 @@ export default function App() {
                       );
                     })()}
 
-                    <div style={{ marginTop:14, padding:12, background:"rgba(201,162,39,.05)", border:"1px solid rgba(201,162,39,.15)", borderRadius:4 }}>
-                      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6 }}>
-                        <div style={{ fontSize:10, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>NOTES</div>
+                    <div style={{ marginTop:14, padding:14, background:"rgba(201,162,39,.05)", border:"1px solid rgba(201,162,39,.15)", borderRadius:8 }}>
+                      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
+                        <div style={{ fontSize:13, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>NOTES</div>
                         {!editingNotes && (
-                          <button onClick={() => { setNotesInput(selected.notes || ""); setEditingNotes(true); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>✏️ Edit</button>
+                          <button onClick={() => { setNotesInput(selected.notes || ""); setEditingNotes(true); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:13, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>✏️ Edit</button>
                         )}
                       </div>
                       {editingNotes ? (
                         <>
-                          <textarea value={notesInput} onChange={e => setNotesInput(e.target.value)} rows={3} style={{ fontSize:12, resize:"vertical" }} placeholder="Add notes…" />
-                          <div style={{ display:"flex", gap:8, marginTop:8 }}>
-                            <button className="btn gold" style={{ padding:"6px 14px", fontSize:10 }} onClick={() => { updateBooking(selected.id, { notes: notesInput }); setEditingNotes(false); }}>SAVE</button>
-                            <button className="btn ghost" style={{ padding:"6px 14px", fontSize:10 }} onClick={() => setEditingNotes(false)}>CANCEL</button>
+                          <textarea value={notesInput} onChange={e => setNotesInput(e.target.value)} rows={4} style={{ fontSize:14, resize:"vertical", padding:"10px 12px", borderRadius:6 }} placeholder="Add notes…" />
+                          <div style={{ display:"flex", gap:8, marginTop:10 }}>
+                            <button className="btn gold" style={{ padding:"11px 18px", fontSize:13, borderRadius:8 }} onClick={() => { updateBooking(selected.id, { notes: notesInput }); setEditingNotes(false); }}>SAVE</button>
+                            <button className="btn ghost" style={{ padding:"11px 18px", fontSize:13, borderRadius:8 }} onClick={() => setEditingNotes(false)}>CANCEL</button>
                           </div>
                         </>
                       ) : (
-                        <div style={{ fontSize:13, color: selected.notes ? "#c8bfa8" : "#445566", fontStyle: selected.notes ? "normal" : "italic" }}>
+                        <div style={{ fontSize:14, color: selected.notes ? "#c8bfa8" : "#445566", fontStyle: selected.notes ? "normal" : "italic" }}>
                           {selected.notes || "No notes — click Edit to add"}
                         </div>
                       )}
                     </div>
 
                     {/* Reschedule */}
-                    <div style={{ marginTop:18, padding:14, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
-                      <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:10, letterSpacing:2, color:"#c9a227", marginBottom:12 }}>RESCHEDULE</div>
-                      <div className="reschedule-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
+                    <div style={{ marginTop:18, padding:16, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:8 }}>
+                      <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:2, color:"#c9a227", marginBottom:14 }}>RESCHEDULE</div>
+                      <div className="reschedule-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:12 }}>
                         <div style={{ minWidth:0, paddingRight:10 }}>
-                          <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:5 }}>DATE</div>
-                          <input type="date" value={selected.date} onChange={e => updateBooking(selected.id, { date: e.target.value })} style={{ fontSize:13, padding:"8px 0px 8px 10px", colorScheme:"dark", width:"100%" }} />
+                          <div style={{ fontSize:12, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>DATE</div>
+                          <input type="date" value={selected.date} onChange={e => updateBooking(selected.id, { date: e.target.value })} style={{ fontSize:14, padding:"11px 10px", colorScheme:"dark", width:"100%", borderRadius:6 }} />
                         </div>
                         <div style={{ minWidth:0 }}>
-                          <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:5 }}>START TIME</div>
-                          <select value={selected.time} onChange={e => updateBooking(selected.id, { time: e.target.value })} style={{ fontSize:12 }}>
+                          <div style={{ fontSize:12, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>START TIME</div>
+                          <select value={selected.time} onChange={e => updateBooking(selected.id, { time: e.target.value })} style={{ fontSize:14, padding:"11px 8px", borderRadius:6, width:"100%" }}>
                             {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
                           </select>
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>DURATION</div>
+                        <div style={{ fontSize:12, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:8 }}>DURATION</div>
                         <div style={{ display:"flex", gap:4 }}>
                           {[1,2,3,4,5,6,7,8].map(h => {
                             const isSel = (selected.duration || 1) === h;
-                            return <button key={h} type="button" onClick={() => updateBooking(selected.id, { duration: h })} className="btn" style={{ flex:1, padding:"6px 2px", fontSize:10, background: isSel ? "rgba(201,162,39,.25)" : "transparent", border: isSel ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.15)", color: isSel ? "#f0c040" : "#556677" }}>{h}h</button>;
+                            return <button key={h} type="button" onClick={() => updateBooking(selected.id, { duration: h })} className="btn" style={{ flex:1, padding:"10px 2px", fontSize:12, borderRadius:6, background: isSel ? "rgba(201,162,39,.25)" : "transparent", border: isSel ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.15)", color: isSel ? "#f0c040" : "#556677" }}>{h}h</button>;
                           })}
                         </div>
                       </div>
@@ -1005,34 +1005,33 @@ export default function App() {
 
                     {/* Admin Actions */}
                     {(() => {
-                      const ab = { fontSize:13, padding:"13px 18px", borderRadius:8, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", letterSpacing:1 };
+                      const ab = { fontSize:13, padding:"13px 18px", borderRadius:8, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", letterSpacing:1, textAlign:"center" };
+                      const sendBtnW = 80;
                       return (
-                      <div style={{ marginTop:14, display:"flex", flexDirection:"column", gap:10 }}>
-                        <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:2, color:"#c9a227", marginBottom:2 }}>ADMIN ACTIONS</div>
+                      <div style={{ marginTop:14, display:"grid", gridTemplateColumns:`1fr ${sendBtnW}px`, gap:10, alignItems:"start" }}>
+                        <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:2, color:"#c9a227", gridColumn:"1/-1", marginBottom:-2 }}>ADMIN ACTIONS</div>
                         {selected.status === "pending" ? (
                           <>
-                            <button className="btn ok"     style={ab} onClick={() => updateStatus(selected.id, "approved")}>✅ APPROVE BOOKING</button>
-                            <button className="btn blue"   style={ab} onClick={() => updateStatus(selected.id, "scheduled_call")}>📞 SCHEDULE A CALL</button>
-                            <button className="btn danger" style={ab} onClick={() => updateStatus(selected.id, "denied")}>❌ DENY BOOKING</button>
+                            <button className="btn ok"     style={{ ...ab, gridColumn:"1/-1" }} onClick={() => updateStatus(selected.id, "approved")}>✅ APPROVE BOOKING</button>
+                            <button className="btn blue"   style={{ ...ab, gridColumn:"1/-1" }} onClick={() => updateStatus(selected.id, "scheduled_call")}>📞 SCHEDULE A CALL</button>
+                            <button className="btn danger" style={{ ...ab, gridColumn:"1/-1" }} onClick={() => updateStatus(selected.id, "denied")}>❌ DENY BOOKING</button>
                           </>
                         ) : (
-                          <button className="btn ghost" style={ab} onClick={() => updateStatus(selected.id, "pending")}>↩ RESET TO PENDING</button>
+                          <button className="btn ghost" style={{ ...ab, gridColumn:"1/-1" }} onClick={() => updateStatus(selected.id, "pending")}>↩ RESET TO PENDING</button>
                         )}
-                        {/* Contact dropdown */}
-                        <div style={{ display:"flex", gap:6 }}>
-                          <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ flex:1, fontSize:13, padding:"13px 12px", borderRadius:8, background:"transparent", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", cursor:"pointer", textAlign:"center", textAlignLast:"center" }}>
-                            {selected.email && <option value="confirmation">📧 Resend Confirmation</option>}
-                            {selected.email && <option value="reminder">📧 Send Reminder</option>}
-                            {selected.phone && <option value="whatsapp">💬 WhatsApp Client</option>}
-                          </select>
-                          <button className="btn ghost" style={{ ...ab, flexShrink:0, padding:"7px 18px" }} onClick={() => {
-                            if (contactAction === "confirmation") sendConfirmation(selected);
-                            else if (contactAction === "reminder") sendReminder(selected);
-                            else if (contactAction === "whatsapp") window.open(`https://wa.me/${waPhone(selected.phone)}?text=${encodeURIComponent(`Hi ${selected.client}, this is EZ Tech Solutions. We're reaching out about your ${Array.isArray(selected.service) ? selected.service[0] : selected.service} appointment on ${selected.date} at ${selected.time}. Please let us know if you have any questions.`)}`, "_blank");
-                          }}>SEND</button>
-                        </div>
-                        <button className="btn ghost" style={ab} onClick={() => downloadBookingIcs(selected)}>📅 DOWNLOAD .ICS</button>
-                        <div style={{ marginTop:2 }}>
+                        {/* Contact dropdown — col 1 only, SEND in col 2 */}
+                        <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ fontSize:13, padding:"13px 12px", borderRadius:8, background:"transparent", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", cursor:"pointer", textAlign:"center", textAlignLast:"center", width:"100%" }}>
+                          {selected.email && <option value="confirmation">📧 Resend Confirmation</option>}
+                          {selected.email && <option value="reminder">📧 Send Reminder</option>}
+                          {selected.phone && <option value="whatsapp">💬 WhatsApp Client</option>}
+                        </select>
+                        <button className="btn ghost" style={{ ...ab, padding:"13px 8px" }} onClick={() => {
+                          if (contactAction === "confirmation") sendConfirmation(selected);
+                          else if (contactAction === "reminder") sendReminder(selected);
+                          else if (contactAction === "whatsapp") window.open(`https://wa.me/${waPhone(selected.phone)}?text=${encodeURIComponent(`Hi ${selected.client}, this is EZ Tech Solutions. We're reaching out about your ${Array.isArray(selected.service) ? selected.service[0] : selected.service} appointment on ${selected.date} at ${selected.time}. Please let us know if you have any questions.`)}`, "_blank");
+                        }}>SEND</button>
+                        <button className="btn ghost" style={{ ...ab, gridColumn:"1/-1" }} onClick={() => downloadBookingIcs(selected)}>📅 DOWNLOAD .ICS</button>
+                        <div style={{ gridColumn:"1/-1" }}>
                           {deleteConfirm ? (
                             <div>
                               <div style={{ padding:10, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:8, fontSize:12, color:"#fca5a5", marginBottom:8 }}>

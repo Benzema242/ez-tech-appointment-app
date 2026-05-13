@@ -1020,7 +1020,7 @@ export default function App() {
                         )}
                         {/* Contact dropdown */}
                         <div style={{ display:"flex", gap:6 }}>
-                          <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ flex:1, fontSize:13, padding:"13px 12px", borderRadius:8, background:"transparent", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", cursor:"pointer" }}>
+                          <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ flex:1, fontSize:13, padding:"13px 12px", borderRadius:8, background:"transparent", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", cursor:"pointer", textAlign:"center", textAlignLast:"center" }}>
                             {selected.email && <option value="confirmation">📧 Resend Confirmation</option>}
                             {selected.email && <option value="reminder">📧 Send Reminder</option>}
                             {selected.phone && <option value="whatsapp">💬 WhatsApp Client</option>}

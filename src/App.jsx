@@ -188,6 +188,7 @@ export default function App() {
   const [editMode, setEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   // ── Load bookings from Supabase ────────────────────────────────────────
   useEffect(() => {
@@ -267,6 +268,24 @@ export default function App() {
     const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([csv], { type:"text/csv" })), download: `ez-tech-bookings-${todayStr}.csv` });
     a.click();
+  };
+
+  const exportPDF = () => {
+    const rows = filtered.map(b => {
+      const svcs = Array.isArray(b.service) ? b.service.join(", ") : (b.service || "");
+      const st = safeStatus(b.status);
+      return `<tr>
+        <td>${b.client}</td><td>${b.date}</td><td>${b.time}</td>
+        <td>${svcs}</td><td>${b.phone}</td>
+        <td style="color:${st.color};font-weight:700">${st.label}</td>
+        <td>${b.price ? `$${b.price}` : "—"}</td>
+      </tr>`;
+    }).join("");
+    printDoc(`Bookings Export — ${todayStr}`, `
+      <table class="dispatch">
+        <tr><th>Client</th><th>Date</th><th>Time</th><th>Services</th><th>Phone</th><th>Status</th><th>Price</th></tr>
+        ${rows}
+      </table>`);
   };
 
   const downloadBookingIcs = (b) => {
@@ -820,7 +839,27 @@ export default function App() {
                   ))}
                 </select>
                 <button className="btn ghost" style={{ padding:"8px 10px", fontSize:11, flexShrink:0, color: editMode ? "#f0c040" : "#7788aa" }} onClick={toggleEditMode}>{editMode ? "DONE" : "SEL"}</button>
-                {!editMode && <button className="btn ghost" style={{ padding:"8px 10px", fontSize:11, flexShrink:0 }} onClick={exportCSV} title="Download CSV">CSV</button>}
+                {!editMode && (
+                  <div style={{ position:"relative", flexShrink:0 }}>
+                    <button className="btn ghost" style={{ padding:"8px 10px", fontSize:11 }} onClick={() => setShowExportMenu(v => !v)}>⬇ EXP</button>
+                    {showExportMenu && (
+                      <>
+                        <div style={{ position:"fixed", inset:0, zIndex:199 }} onClick={() => setShowExportMenu(false)} />
+                        <div style={{ position:"absolute", top:"calc(100% + 4px)", right:0, zIndex:200, background:"#0a1628", border:"1px solid rgba(201,162,39,.3)", borderRadius:4, minWidth:150, boxShadow:"0 8px 24px rgba(0,0,0,.6)", overflow:"hidden" }}>
+                          {[
+                            { label:"⬇ Download CSV", action: () => { exportCSV(); setShowExportMenu(false); } },
+                            { label:"🖨 Download PDF", action: () => { exportPDF(); setShowExportMenu(false); } },
+                          ].map(({ label, action }) => (
+                            <button key={label} onClick={action} style={{ display:"block", width:"100%", padding:"12px 16px", background:"transparent", border:"none", borderBottom:"1px solid rgba(201,162,39,.1)", color:"#c9a227", fontSize:12, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, cursor:"pointer", textAlign:"left" }}
+                              onMouseEnter={e => e.currentTarget.style.background="rgba(201,162,39,.1)"}
+                              onMouseLeave={e => e.currentTarget.style.background="transparent"}
+                            >{label}</button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
                 {!editMode && <button className="btn gold" style={{ padding:"8px 10px", fontSize:11, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋</button>}
               </div>
               <div style={{ display:"flex", gap:6, marginBottom:14, alignItems:"center", flexWrap:"wrap" }}>

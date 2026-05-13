@@ -312,25 +312,78 @@ export default function App() {
   };
 
   const printDoc = (title, bodyHtml) => {
+    const docRef = `EZT-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+    const dateStr = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
     const win = window.open('', '_blank');
-    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>${title}</title><style>
-      body{font-family:sans-serif;padding:32px;color:#111;font-size:14px;}
-      h1{font-size:22px;margin:0 0 4px;}
-      .sub{font-size:13px;color:#666;margin-bottom:24px;}
-      table{width:100%;border-collapse:collapse;margin-top:12px;}
-      th{text-align:left;padding:9px 12px;background:#f0f0f0;font-size:12px;border-bottom:2px solid #ccc;}
-      td{padding:10px 12px;font-size:13px;border-bottom:1px solid #eee;vertical-align:top;}
-      tr:nth-child(even) td{background:#fafafa;}
-      .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px;}
-      .stat-card{border:1px solid #ddd;border-radius:6px;padding:14px 18px;}
-      .stat-label{font-size:11px;color:#888;font-weight:700;letter-spacing:1px;margin-bottom:4px;}
-      .stat-val{font-size:24px;font-weight:900;color:#111;}
-      @media print{@page{margin:20mm}}
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>${title} — EZ Tech Solutions</title><style>
+      *{box-sizing:border-box;margin:0;padding:0;}
+      body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:13px;min-height:100vh;display:flex;flex-direction:column;}
+      /* ── Header ── */
+      .hdr{background:#050b1f;color:#fff;padding:22px 36px;display:flex;align-items:center;justify-content:space-between;}
+      .hdr-brand{display:flex;flex-direction:column;gap:3px;}
+      .hdr-name{font-size:26px;font-weight:900;letter-spacing:3px;color:#c9a227;font-family:'Arial Black',sans-serif;}
+      .hdr-tag{font-size:10px;letter-spacing:2px;color:#7788aa;text-transform:uppercase;}
+      .hdr-contact{text-align:right;font-size:11px;color:#8899aa;line-height:1.8;}
+      .hdr-contact span{color:#c9a227;font-weight:700;}
+      /* ── Gold rule ── */
+      .gold-rule{height:4px;background:linear-gradient(90deg,#c9a227,#f0c040,#c9a227);}
+      /* ── Doc info bar ── */
+      .doc-bar{background:#f7f5ef;border-bottom:1px solid #e0d9c8;padding:12px 36px;display:flex;align-items:center;justify-content:space-between;}
+      .doc-title{font-size:16px;font-weight:800;color:#050b1f;letter-spacing:.5px;}
+      .doc-meta{font-size:11px;color:#888;text-align:right;line-height:1.7;}
+      .doc-ref{font-size:11px;font-weight:700;color:#c9a227;letter-spacing:1px;}
+      /* ── Body ── */
+      .body{flex:1;padding:28px 36px;}
+      table{width:100%;border-collapse:collapse;margin-top:4px;}
+      th{text-align:left;padding:10px 14px;background:#050b1f;color:#c9a227;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+      td{padding:11px 14px;font-size:13px;border-bottom:1px solid #eee;vertical-align:top;color:#1a1a2e;}
+      td:first-child{font-weight:600;color:#444;width:36%;background:#fafaf8;}
+      tr:last-child td{border-bottom:none;}
+      /* Stats grid */
+      .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+      .stat-card{border:2px solid #e0d9c8;border-radius:6px;padding:14px 18px;background:#fafaf8;}
+      .stat-card.gold{border-color:#c9a227;}
+      .stat-label{font-size:10px;color:#888;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+      .stat-val{font-size:22px;font-weight:900;color:#050b1f;}
+      /* Dispatch table — no left-column bold */
+      .dispatch td:first-child{font-weight:400;background:#fff;width:auto;}
+      .dispatch tr:nth-child(even) td{background:#fafaf8;}
+      /* ── Footer ── */
+      .ftr-rule{height:3px;background:linear-gradient(90deg,#c9a227,#f0c040,#c9a227);margin-top:auto;}
+      .ftr{background:#050b1f;padding:16px 36px;display:flex;align-items:flex-start;gap:24px;}
+      .ftr-logo{font-size:14px;font-weight:900;letter-spacing:2px;color:#c9a227;white-space:nowrap;padding-top:2px;}
+      .ftr-disclaimer{font-size:9.5px;color:#7788aa;line-height:1.6;}
+      .ftr-disclaimer strong{color:#9aabb8;}
+      @media print{@page{margin:0;size:A4}body{min-height:0;}button{display:none;}}
     </style></head><body>
-      <h1>EZ Tech Solutions</h1>
-      <div class="sub">${title} · Generated ${new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
-      ${bodyHtml}
-      <script>setTimeout(()=>window.print(),300);</script>
+      <div class="hdr">
+        <div class="hdr-brand">
+          <div class="hdr-name">EZ TECH</div>
+          <div class="hdr-tag">Solutions · Nassau, Bahamas</div>
+        </div>
+        <div class="hdr-contact">
+          <span>(242) 805-0777</span><br/>
+          info@ez-techgroup.com<br/>
+          eztechbahamas.com
+        </div>
+      </div>
+      <div class="gold-rule"></div>
+      <div class="doc-bar">
+        <div class="doc-title">${title}</div>
+        <div class="doc-meta">
+          <div class="doc-ref">REF: ${docRef}</div>
+          <div>${dateStr}</div>
+        </div>
+      </div>
+      <div class="body">${bodyHtml}</div>
+      <div class="ftr-rule"></div>
+      <div class="ftr">
+        <div class="ftr-logo">EZ TECH</div>
+        <div class="ftr-disclaimer">
+          <strong>CONFIDENTIALITY NOTICE:</strong> This document and the information contained herein are the exclusive property of EZ Tech Solutions and are intended solely for authorised internal use. Unauthorised reproduction, distribution, disclosure, or use of this document — in whole or in part — without the prior written consent of EZ Tech Solutions is strictly prohibited. Any person found to have misused, falsified, or unlawfully distributed information contained in this document will be subject to civil and criminal prosecution to the fullest extent permitted under the laws of The Commonwealth of The Bahamas. EZ Tech Solutions reserves the right to pursue all available legal remedies in the event of any breach. By handling this document, the recipient acknowledges and accepts these terms.
+        </div>
+      </div>
+      <script>setTimeout(()=>window.print(),400);</script>
     </body></html>`);
     win.document.close();
   };
@@ -1117,7 +1170,7 @@ export default function App() {
                         const svcs = Array.isArray(b.service) ? b.service.join(', ') : (b.service||'—');
                         return `<tr><td>${b.date}<br/><small>${day}</small></td><td><strong>${b.client}</strong></td><td>${svcs}</td><td>${b.time}</td><td>${b.duration||1}h</td><td>${b.phone||'—'}</td><td>${b.status}</td></tr>`;
                       }).join('');
-                      printDoc('Dispatch Sheet — Next 7 Days', `<table><tr><th>Date</th><th>Client</th><th>Services</th><th>Time</th><th>Duration</th><th>Phone</th><th>Status</th></tr>${rows}</table>`);
+                      printDoc('Dispatch Sheet — Next 7 Days', `<table class="dispatch"><tr><th>Date</th><th>Client</th><th>Services</th><th>Time</th><th>Duration</th><th>Phone</th><th>Status</th></tr>${rows}</table>`);
                     }}>🖨 Print Dispatch</button>
                   )}
                 </div>

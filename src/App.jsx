@@ -501,7 +501,7 @@ export default function App() {
     .timeslot:hover{background:rgba(201,162,39,.15);}
     .timeslot.sel{background:#c9a227;color:#050d1a;}
     .timeslot.taken{background:rgba(100,100,100,.1);border-color:rgba(100,100,100,.2);color:#555;cursor:not-allowed;text-decoration:line-through;}
-    .cell{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:3px;cursor:pointer;font-size:13px;border:1px solid transparent;transition:all .15s;font-weight:500;}
+    .cell{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:3px;cursor:pointer;font-size:15px;border:1px solid transparent;transition:all .15s;font-weight:500;}
     .cell:hover{border-color:rgba(201,162,39,.4);background:rgba(201,162,39,.08);}
     .cell.today{border-color:#c9a227;color:#c9a227;font-weight:700;}
     .cell.has-app{background:rgba(34,197,94,.18);color:#4ade80;}
@@ -1104,16 +1104,16 @@ export default function App() {
 
           // ── Calendar Tab ──────────────────────────────────────────────
           <div style={{ flex:1, padding:24, overflowY:"auto", display:"flex", gap:20, flexWrap:"wrap" }}>
-            <div className="card" style={{ padding:18, minWidth:300, flex:"0 0 auto" }}>
-              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
-                <button className="btn ghost" style={{ padding:"5px 11px" }} onClick={() => { if(calM===0){setCalM(11);setCalY(y=>y-1);}else setCalM(m=>m-1); }}>‹</button>
-                <span style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040" }}>{MONTHS[calM]} {calY}</span>
-                <button className="btn ghost" style={{ padding:"5px 11px" }} onClick={() => { if(calM===11){setCalM(0);setCalY(y=>y+1);}else setCalM(m=>m+1); }}>›</button>
+            <div className="card" style={{ padding:20, minWidth:340, flex:"0 0 auto" }}>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
+                <button className="btn ghost" style={{ padding:"6px 14px", fontSize:16 }} onClick={() => { if(calM===0){setCalM(11);setCalY(y=>y-1);}else setCalM(m=>m-1); }}>‹</button>
+                <span style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040" }}>{MONTHS[calM]} {calY}</span>
+                <button className="btn ghost" style={{ padding:"6px 14px", fontSize:16 }} onClick={() => { if(calM===11){setCalM(0);setCalY(y=>y+1);}else setCalM(m=>m+1); }}>›</button>
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(7,minmax(0,40px))", gap:3, marginBottom:4 }}>
-                {DAYNAMES.map(d => <div key={d} style={{ textAlign:"center", fontFamily:"'Orbitron',sans-serif", fontSize:9, letterSpacing:1, color:"#c9a227", padding:"5px 0" }}>{d}</div>)}
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(7,minmax(0,46px))", gap:4, marginBottom:4 }}>
+                {DAYNAMES.map(d => <div key={d} style={{ textAlign:"center", fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:1, color:"#c9a227", padding:"6px 0" }}>{d}</div>)}
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(7,minmax(0,40px))", gap:3 }}>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(7,minmax(0,46px))", gap:4 }}>
                 {Array(firstDay(calY, calM)).fill(null).map((_,i) => <div key={`e${i}`} />)}
                 {Array(daysInMonth(calY, calM)).fill(null).map((_,i) => {
                   const d = i+1; const ds = fmtDate(calY, calM, d); const mark = dayMark(ds);
@@ -1125,17 +1125,17 @@ export default function App() {
                   return <div key={d} className={cls} onClick={() => setSelDay(ds === selDay ? null : ds)}>{d}</div>;
                 })}
               </div>
-              <div style={{ display:"flex", gap:14, marginTop:16, justifyContent:"center", flexWrap:"wrap" }}>
+              <div style={{ display:"flex", gap:18, marginTop:18, justifyContent:"center", flexWrap:"wrap" }}>
                 {[["#4ade80","Approved"],["#fbbf24","Pending"]].map(([c,l]) => (
-                  <div key={l} style={{ display:"flex", alignItems:"center", gap:5, fontSize:10, color:"#7788aa" }}>
-                    <div style={{ width:9, height:9, borderRadius:2, background:c }} />{l}
+                  <div key={l} style={{ display:"flex", alignItems:"center", gap:7, fontSize:13, color:"#7788aa" }}>
+                    <div style={{ width:13, height:13, borderRadius:3, background:c }} />{l}
                   </div>
                 ))}
               </div>
             </div>
 
             <div className="card" style={{ flex:"1 1 240px", padding:18, minWidth:260, overflowY:"auto" }}>
-              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:2, color:"#c9a227", marginBottom:14 }}>
+              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:14, letterSpacing:2, color:"#c9a227", marginBottom:16 }}>
                 {selDay ? `📅 ${selDay}` : "SELECT A DAY"}
               </div>
               {selDay ? (() => {
@@ -1155,8 +1155,8 @@ export default function App() {
                       const isEnd = b && (!nextT || coveredSlots[nextT]?.id !== b.id);
                       const st = b ? safeStatus(b.status) : null;
                       return (
-                        <div key={t} style={{ display:"flex", gap:8, minHeight:46 }}>
-                          <div style={{ width:62, paddingTop:14, fontSize:9, color: !b || isStart ? "#556677" : "transparent", textAlign:"right", flexShrink:0, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{t}</div>
+                        <div key={t} style={{ display:"flex", gap:8, minHeight:52 }}>
+                          <div style={{ width:70, paddingTop:16, fontSize:11, color: !b || isStart ? "#556677" : "transparent", textAlign:"right", flexShrink:0, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{t}</div>
                           <div style={{ flex:1 }}>
                             {!b ? (
                               <div style={{ height:46, borderTop:"1px solid rgba(201,162,39,.07)" }} />
@@ -1176,11 +1176,11 @@ export default function App() {
                                   const extra = svcs.length - 1;
                                   return (
                                     <>
-                                      <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:12, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.client}</div>
-                                      <div style={{ fontSize:10, color:st.color, marginTop:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                                      <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:14, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.client}</div>
+                                      <div style={{ fontSize:12, color:st.color, marginTop:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                                         {first.label}{extra > 0 ? ` +${extra}` : ""}
                                       </div>
-                                      {(b.duration || 1) > 1 && <div style={{ fontSize:9, color:"#7788aa", marginTop:2 }}>⏱ {b.duration}h</div>}
+                                      {(b.duration || 1) > 1 && <div style={{ fontSize:11, color:"#7788aa", marginTop:2 }}>⏱ {b.duration}h</div>}
                                     </>
                                   );
                                 })()}

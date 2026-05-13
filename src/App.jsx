@@ -618,6 +618,11 @@ export default function App() {
       .stat-val{font-size:18px!important;}
       .admin-hdr-btns .btn{padding:7px 8px!important;font-size:9px!important;letter-spacing:1px!important;}
     }
+    .filter-mobile-select{display:none!important;}
+    @media(max-width:600px){
+      .filter-mobile-select{display:block!important;flex:1;min-width:0;}
+      .filter-desktop-btns{display:none!important;}
+    }
     @media(max-width:480px){
       .admin-list,.admin-detail{padding:10px 12px!important;}
       .contact-grid{grid-template-columns:1fr!important;}
@@ -802,14 +807,21 @@ export default function App() {
                 style={{ marginBottom:10, fontSize:14, padding:"11px 14px" }}
               />
               <div style={{ display:"flex", gap:6, marginBottom:8, flexWrap:"wrap", alignItems:"center" }}>
-                <div className="filter-row" style={{ display:"flex", gap:6, flexWrap:"wrap", flex:1, minWidth:0 }}>
+                {/* Desktop: filter buttons */}
+                <div className="filter-desktop-btns filter-row" style={{ display:"flex", gap:6, flexWrap:"wrap", flex:1, minWidth:0 }}>
                   {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"]].map(([k,l]) => (
                     <button key={k} onClick={() => setFilter(k)} className="btn filter-btn" style={{ padding:"8px 13px", fontSize:12, background: filter===k ? "rgba(201,162,39,.2)" : "transparent", border:"1px solid rgba(201,162,39,.3)", color: filter===k ? "#f0c040" : "#7788aa" }}>{l}</button>
                   ))}
                 </div>
-                <button className="btn ghost" style={{ padding:"8px 13px", fontSize:12, flexShrink:0, color: editMode ? "#f0c040" : "#7788aa" }} onClick={toggleEditMode}>{editMode ? "DONE" : "SELECT"}</button>
-                {!editMode && <button className="btn ghost" style={{ padding:"8px 13px", fontSize:12, flexShrink:0 }} onClick={exportCSV} title="Download all bookings as CSV">⬇ CSV</button>}
-                {!editMode && <button className="btn gold" style={{ padding:"8px 14px", fontSize:12, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋ ADD</button>}
+                {/* Mobile: filter dropdown */}
+                <select className="filter-mobile-select" value={filter} onChange={e => setFilter(e.target.value)} style={{ padding:"9px 10px", fontSize:13, flex:1, minWidth:0, textAlign:"center", textAlignLast:"center" }}>
+                  {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"]].map(([k,l]) => (
+                    <option key={k} value={k}>{l}</option>
+                  ))}
+                </select>
+                <button className="btn ghost" style={{ padding:"8px 10px", fontSize:11, flexShrink:0, color: editMode ? "#f0c040" : "#7788aa" }} onClick={toggleEditMode}>{editMode ? "DONE" : "SEL"}</button>
+                {!editMode && <button className="btn ghost" style={{ padding:"8px 10px", fontSize:11, flexShrink:0 }} onClick={exportCSV} title="Download CSV">CSV</button>}
+                {!editMode && <button className="btn gold" style={{ padding:"8px 10px", fontSize:11, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋</button>}
               </div>
               <div style={{ display:"flex", gap:6, marginBottom:14, alignItems:"center", flexWrap:"wrap" }}>
                 <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ fontSize:13, padding:"9px 10px", colorScheme:"dark", flex:1, minWidth:0 }} title="From date" />
@@ -1360,11 +1372,11 @@ export default function App() {
                 </div>
                 <div style={{ fontSize:14, color:"#7788aa", marginBottom:20 }}>Gold = approved revenue · Green overlay = paid</div>
 
-                {/* Bar chart */}
-                <div className="card" style={{ padding:"20px 16px 10px", marginBottom:20 }}>
-                  <div style={{ display:"flex", alignItems:"flex-end", gap:4, height:180 }}>
+                {/* Bar chart — horizontally scrollable on mobile */}
+                <div className="card" style={{ padding:"20px 16px 10px", marginBottom:20, overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
+                  <div style={{ display:"flex", alignItems:"flex-end", gap:6, height:180, minWidth:660 }}>
                     {monthStats.map(m => (
-                      <div key={m.key} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:3, height:"100%" }}>
+                      <div key={m.key} style={{ flex:1, minWidth:44, display:"flex", flexDirection:"column", alignItems:"center", gap:3, height:"100%" }}>
                         <div style={{ flex:1, width:"100%", display:"flex", flexDirection:"column", justifyContent:"flex-end" }}>
                           {m.rev > 0 && (
                             <div style={{ fontSize:11, color:"#e8e0cc", textAlign:"center", marginBottom:4, fontFamily:"'Orbitron',sans-serif" }}>${m.rev >= 1000 ? `${(m.rev/1000).toFixed(1)}k` : m.rev}</div>

@@ -182,6 +182,8 @@ export default function App() {
   const [notesInput, setNotesInput] = useState("");
   const [editingPrice, setEditingPrice] = useState(false);
   const [priceInput, setPriceInput] = useState("");
+  const [editingDetails, setEditingDetails] = useState(false);
+  const [detailsForm, setDetailsForm] = useState({ client:"", phone:"", email:"", service:[] });
   const [editMode, setEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
@@ -735,7 +737,7 @@ export default function App() {
                   <div
                     key={b.id}
                     className={"row " + (!editMode && selected?.id === b.id ? "active" : "") + (editMode && selectedIds.has(b.id) ? " active" : "")}
-                    onClick={() => editMode ? toggleSelectId(b.id) : (() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); })()}
+                    onClick={() => editMode ? toggleSelectId(b.id) : (() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); })()}
                   >
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                       {editMode ? (
@@ -797,7 +799,7 @@ export default function App() {
 
                     {/* Mobile back button */}
                     <div className="mobile-back" style={{ marginBottom:14 }}>
-                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:12, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
+                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:12, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
                         ← Back to list
                       </button>
                     </div>
@@ -819,8 +821,6 @@ export default function App() {
                     {[
                       ["📅 Date",     selected.date],
                       ["🕐 Time",     selected.time],
-                      ["📞 Phone",    selected.phone],
-                      ["✉️ Email",    selected.email],
                       ["📡 Source",   (() => { const src = SOURCES.find(s2 => s2.id === selected.source); return src ? `${src.icon} ${src.label}` : "🌐 Website"; })()],
                       ["⏱ Duration", `${selected.duration || 1} hour${(selected.duration || 1) !== 1 ? "s" : ""}`],
                     ].map(([l,v]) => (
@@ -829,6 +829,58 @@ export default function App() {
                         <span style={{ fontSize:13, color:"#e8e0cc", fontWeight:500, textAlign:"right" }}>{v}</span>
                       </div>
                     ))}
+
+                    {/* Editable client details */}
+                    <div style={{ marginTop:10, padding:12, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
+                      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
+                        <div style={{ fontSize:10, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>CLIENT DETAILS</div>
+                        {!editingDetails && (
+                          <button onClick={() => { setDetailsForm({ client: selected.client || "", phone: selected.phone || "", email: selected.email || "", service: Array.isArray(selected.service) ? [...selected.service] : selected.service ? [selected.service] : [] }); setEditingDetails(true); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>✏️ Edit</button>
+                        )}
+                      </div>
+                      {editingDetails ? (
+                        <>
+                          <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                            <div>
+                              <div style={{ fontSize:10, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>NAME</div>
+                              <input value={detailsForm.client} onChange={e => setDetailsForm(p => ({ ...p, client: e.target.value }))} style={{ fontSize:13, width:"100%" }} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize:10, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>PHONE</div>
+                              <input value={detailsForm.phone} onChange={e => setDetailsForm(p => ({ ...p, phone: e.target.value }))} style={{ fontSize:13, width:"100%" }} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize:10, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>EMAIL</div>
+                              <input value={detailsForm.email} onChange={e => setDetailsForm(p => ({ ...p, email: e.target.value }))} style={{ fontSize:13, width:"100%" }} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize:10, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:6 }}>SERVICES</div>
+                              <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                                {SERVICES.map(s => {
+                                  const checked = detailsForm.service.includes(s.id);
+                                  return (
+                                    <button key={s.id} type="button"
+                                      onClick={() => setDetailsForm(p => ({ ...p, service: checked ? p.service.filter(x => x !== s.id) : [...p.service, s.id] }))}
+                                      style={{ padding:"5px 10px", fontSize:11, borderRadius:3, cursor:"pointer", background: checked ? "rgba(201,162,39,.2)" : "transparent", border: checked ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.2)", color: checked ? "#f0c040" : "#556677" }}>
+                                      {s.icon} {s.label}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ display:"flex", gap:8, marginTop:10 }}>
+                            <button className="btn gold" style={{ padding:"6px 14px", fontSize:10 }} onClick={() => { updateBooking(selected.id, { client: detailsForm.client, phone: detailsForm.phone, email: detailsForm.email, service: detailsForm.service }); setEditingDetails(false); }}>SAVE</button>
+                            <button className="btn ghost" style={{ padding:"6px 14px", fontSize:10 }} onClick={() => setEditingDetails(false)}>CANCEL</button>
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:13 }}><span style={{ color:"#7788aa" }}>📞 Phone</span><span style={{ color:"#e8e0cc" }}>{selected.phone || "—"}</span></div>
+                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:13, paddingTop:4 }}><span style={{ color:"#7788aa" }}>✉️ Email</span><span style={{ color:"#e8e0cc", textAlign:"right", maxWidth:"65%", wordBreak:"break-all" }}>{selected.email || "—"}</span></div>
+                        </div>
+                      )}
+                    </div>
 
                     {/* Editable Price */}
                     <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid rgba(201,162,39,.1)", gap:10 }}>

@@ -1220,8 +1220,8 @@ export default function App() {
             const approvalRate = bookings.length ? Math.round((approvedCount / bookings.length) * 100) : 0;
             return (
               <div style={{ flex:1, padding:24, overflowY:"auto" }}>
-                <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>REVENUE — LAST 12 MONTHS</div>
-                <div style={{ fontSize:12, color:"#7788aa", marginBottom:20 }}>Gold = approved revenue · Green overlay = paid</div>
+                <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>REVENUE — LAST 12 MONTHS</div>
+                <div style={{ fontSize:14, color:"#7788aa", marginBottom:20 }}>Gold = approved revenue · Green overlay = paid</div>
 
                 {/* Bar chart */}
                 <div className="card" style={{ padding:"20px 16px 10px", marginBottom:20 }}>
@@ -1230,7 +1230,7 @@ export default function App() {
                       <div key={m.key} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:3, height:"100%" }}>
                         <div style={{ flex:1, width:"100%", display:"flex", flexDirection:"column", justifyContent:"flex-end" }}>
                           {m.rev > 0 && (
-                            <div style={{ fontSize:7, color:"#7788aa", textAlign:"center", marginBottom:3, fontFamily:"'Orbitron',sans-serif" }}>${m.rev >= 1000 ? `${(m.rev/1000).toFixed(1)}k` : m.rev}</div>
+                            <div style={{ fontSize:9, color:"#7788aa", textAlign:"center", marginBottom:3, fontFamily:"'Orbitron',sans-serif" }}>${m.rev >= 1000 ? `${(m.rev/1000).toFixed(1)}k` : m.rev}</div>
                           )}
                           <div style={{ width:"100%", height:`${Math.max((m.rev/maxRev)*130, m.rev > 0 ? 4 : 0)}px`, background:"rgba(201,162,39,.35)", borderRadius:"2px 2px 0 0", position:"relative", overflow:"hidden", transition:"height .3s" }}>
                             {m.paid > 0 && (
@@ -1238,8 +1238,8 @@ export default function App() {
                             )}
                           </div>
                         </div>
-                        <div style={{ fontSize:7, color:"#556677", fontFamily:"'Orbitron',sans-serif", textAlign:"center", letterSpacing:.3 }}>{m.label}</div>
-                        {m.total > 0 && <div style={{ fontSize:7, color:"#445566" }}>{m.total}</div>}
+                        <div style={{ fontSize:9, color:"#556677", fontFamily:"'Orbitron',sans-serif", textAlign:"center", letterSpacing:.3 }}>{m.label}</div>
+                        {m.total > 0 && <div style={{ fontSize:9, color:"#445566" }}>{m.total}</div>}
                       </div>
                     ))}
                   </div>
@@ -1255,9 +1255,9 @@ export default function App() {
                     { l:"APPROVAL RATE",    v:`${approvalRate}%`, c:"#22c55e" },
                     { l:"TOTAL BOOKINGS",   v:bookings.length, c:"#c9a227" },
                   ].map(s => (
-                    <div key={s.l} className="card" style={{ padding:"14px 16px" }}>
-                      <div style={{ fontSize:8, letterSpacing:1.5, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:5 }}>{s.l}</div>
-                      <div style={{ fontSize:18, fontWeight:900, color:s.c, fontFamily:"'Orbitron',sans-serif" }}>{s.v}</div>
+                    <div key={s.l} className="card" style={{ padding:"16px 18px" }}>
+                      <div style={{ fontSize:11, letterSpacing:1.5, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>{s.l}</div>
+                      <div style={{ fontSize:22, fontWeight:900, color:s.c, fontFamily:"'Orbitron',sans-serif" }}>{s.v}</div>
                     </div>
                   ))}
                 </div>

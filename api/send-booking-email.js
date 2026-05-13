@@ -15,13 +15,13 @@ const FROM = 'EZ Tech Solutions <info@ez-techgroup.com>';
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
-  const { name, email, phone, services, date, time, notes } = req.body;
+  const { name, email, phone, services, date, time, notes, resendOnly } = req.body;
 
   const serviceList = Array.isArray(services) ? services.join(', ') : services;
 
   try {
-    // Admin notification
-    await transporter.sendMail({
+    // Admin notification (skipped on resend)
+    if (!resendOnly) await transporter.sendMail({
       from: FROM,
       to: 'info@ez-techgroup.com',
       subject: `New Booking — ${name}`,

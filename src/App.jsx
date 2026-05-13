@@ -184,6 +184,7 @@ export default function App() {
   const [priceInput, setPriceInput] = useState("");
   const [editingDetails, setEditingDetails] = useState(false);
   const [detailsForm, setDetailsForm] = useState({ client:"", phone:"", email:"", service:[] });
+  const [contactAction, setContactAction] = useState("confirmation");
   const [editMode, setEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
@@ -317,6 +318,15 @@ export default function App() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status:"reminder", name:booking.client, email:booking.email, phone:booking.phone, services:booking.service, date:booking.date, time:booking.time, duration:booking.duration, notes:booking.notes }),
     }).then(() => fire("📧 Reminder sent!")).catch(() => fire("❌ Failed to send reminder"));
+  };
+
+  const sendConfirmation = (booking) => {
+    if (!booking?.email) return;
+    fetch("/api/send-booking-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ resendOnly: true, name:booking.client, email:booking.email, phone:booking.phone, services:booking.service, date:booking.date, time:booking.time, notes:booking.notes }),
+    }).then(() => fire("📧 Confirmation resent!")).catch(() => fire("❌ Failed to resend confirmation"));
   };
 
   const submitAdminBooking = async () => {
@@ -1005,17 +1015,19 @@ export default function App() {
                       ) : (
                         <button className="btn ghost" onClick={() => updateStatus(selected.id, "pending")}>↩ RESET TO PENDING</button>
                       )}
-                      {selected.email && (
-                        <button className="btn ghost" style={{ fontSize:10 }} onClick={() => sendReminder(selected)}>📧 SEND REMINDER</button>
-                      )}
-                      {selected.phone && (
-                        <a
-                          href={`https://wa.me/${waPhone(selected.phone)}?text=${encodeURIComponent(`Hi ${selected.client}, this is EZ Tech Solutions. We're reaching out about your ${Array.isArray(selected.service) ? selected.service[0] : selected.service} appointment on ${selected.date} at ${selected.time}. Please let us know if you have any questions.`)}`}
-                          target="_blank" rel="noopener noreferrer"
-                          className="btn ghost"
-                          style={{ textDecoration:"none", textAlign:"center", fontSize:10, display:"block" }}
-                        >💬 WHATSAPP CLIENT</a>
-                      )}
+                      {/* Contact dropdown */}
+                      <div style={{ display:"flex", gap:6 }}>
+                        <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ flex:1, fontSize:11, padding:"7px 8px" }}>
+                          {selected.email && <option value="confirmation">📧 Resend Confirmation</option>}
+                          {selected.email && <option value="reminder">📧 Send Reminder</option>}
+                          {selected.phone && <option value="whatsapp">💬 WhatsApp Client</option>}
+                        </select>
+                        <button className="btn ghost" style={{ fontSize:10, flexShrink:0, padding:"7px 14px" }} onClick={() => {
+                          if (contactAction === "confirmation") sendConfirmation(selected);
+                          else if (contactAction === "reminder") sendReminder(selected);
+                          else if (contactAction === "whatsapp") window.open(`https://wa.me/${waPhone(selected.phone)}?text=${encodeURIComponent(`Hi ${selected.client}, this is EZ Tech Solutions. We're reaching out about your ${Array.isArray(selected.service) ? selected.service[0] : selected.service} appointment on ${selected.date} at ${selected.time}. Please let us know if you have any questions.`)}`, "_blank");
+                        }}>SEND</button>
+                      </div>
                       <button className="btn ghost" style={{ fontSize:10 }} onClick={() => downloadBookingIcs(selected)}>📅 DOWNLOAD .ICS</button>
                       <div style={{ marginTop:4 }}>
                         {deleteConfirm ? (

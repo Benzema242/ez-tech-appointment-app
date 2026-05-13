@@ -619,9 +619,17 @@ export default function App() {
       .admin-hdr-btns .btn{padding:7px 8px!important;font-size:9px!important;letter-spacing:1px!important;}
     }
     @media(max-width:480px){
-      .admin-list,.admin-detail{padding:12px 14px!important;}
+      .admin-list,.admin-detail{padding:10px 12px!important;}
       .contact-grid{grid-template-columns:1fr!important;}
       .reschedule-grid{grid-template-columns:1fr!important;}
+      .admin-hdr{padding:10px 12px!important;gap:8px!important;}
+      .admin-hdr .logo-circle{width:34px!important;height:34px!important;font-size:13px!important;}
+      .admin-tabs{padding:0 8px!important;}
+      .admin-tabs>button{padding:12px 12px!important;font-size:9px!important;letter-spacing:1px!important;}
+      .stats-bar{padding:8px 10px!important;gap:6px!important;}
+      .stat-card{flex:1 1 60px!important;padding:7px 8px!important;min-width:0!important;}
+      .stat-val{font-size:15px!important;}
+      .stat-card>div:first-child{font-size:7px!important;}
     }
   `;
 
@@ -734,10 +742,10 @@ export default function App() {
 
   // ── Admin View ─────────────────────────────────────────────────────────
   const AdminView = () => (
-    <div style={{ display:"flex", flexDirection:"column", height:"100vh" }}>
+    <div style={{ display:"flex", flexDirection:"column", height:"100vh", overflowX:"hidden", width:"100%" }}>
 
       {/* Admin Header */}
-      <div style={{ padding:"16px 24px", borderBottom:"1px solid rgba(201,162,39,.2)", background:"linear-gradient(180deg,rgba(10,22,40,.95),rgba(10,22,40,.85))", display:"flex", alignItems:"center", gap:14, flexWrap:"wrap" }}>
+      <div className="admin-hdr" style={{ padding:"16px 24px", borderBottom:"1px solid rgba(201,162,39,.2)", background:"linear-gradient(180deg,rgba(10,22,40,.95),rgba(10,22,40,.85))", display:"flex", alignItems:"center", gap:14, flexWrap:"wrap" }}>
         <div className="logo-circle">EZ</div>
         <div style={{ flex:1 }}>
           <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:14, fontWeight:900, color:"#fff", letterSpacing:2 }}>EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span></div>
@@ -773,9 +781,9 @@ export default function App() {
       </div>
 
       {/* Tab Navigation */}
-      <div style={{ padding:"0 24px", display:"flex", borderBottom:"1px solid rgba(201,162,39,.15)" }}>
+      <div className="admin-tabs" style={{ padding:"0 24px", display:"flex", borderBottom:"1px solid rgba(201,162,39,.15)", overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
         {[["bookings","📋 BOOKINGS"],["upcoming","🗓 UPCOMING"],["calendar","📅 CALENDAR"],["stats","📊 STATS"]].map(([k,l]) => (
-          <button key={k} onClick={() => setAdminTab(k)} style={{ padding:"14px 20px", background:"transparent", border:"none", borderBottom: adminTab===k ? "2px solid #c9a227" : "2px solid transparent", color: adminTab===k ? "#c9a227" : "#7788aa", fontFamily:"'Orbitron',sans-serif", fontSize:11, fontWeight:700, letterSpacing:1.5, cursor:"pointer", transition:"all .2s" }}>{l}</button>
+          <button key={k} onClick={() => setAdminTab(k)} style={{ padding:"14px 20px", background:"transparent", border:"none", borderBottom: adminTab===k ? "2px solid #c9a227" : "2px solid transparent", color: adminTab===k ? "#c9a227" : "#7788aa", fontFamily:"'Orbitron',sans-serif", fontSize:11, fontWeight:700, letterSpacing:1.5, cursor:"pointer", transition:"all .2s", flexShrink:0, whiteSpace:"nowrap" }}>{l}</button>
         ))}
       </div>
 
@@ -794,7 +802,7 @@ export default function App() {
                 style={{ marginBottom:10, fontSize:14, padding:"11px 14px" }}
               />
               <div style={{ display:"flex", gap:6, marginBottom:8, flexWrap:"wrap", alignItems:"center" }}>
-                <div className="filter-row" style={{ display:"flex", gap:6, flexWrap:"wrap", flex:1 }}>
+                <div className="filter-row" style={{ display:"flex", gap:6, flexWrap:"wrap", flex:1, minWidth:0 }}>
                   {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"]].map(([k,l]) => (
                     <button key={k} onClick={() => setFilter(k)} className="btn filter-btn" style={{ padding:"8px 13px", fontSize:12, background: filter===k ? "rgba(201,162,39,.2)" : "transparent", border:"1px solid rgba(201,162,39,.3)", color: filter===k ? "#f0c040" : "#7788aa" }}>{l}</button>
                   ))}
@@ -804,10 +812,10 @@ export default function App() {
                 {!editMode && <button className="btn gold" style={{ padding:"8px 14px", fontSize:12, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋ ADD</button>}
               </div>
               <div style={{ display:"flex", gap:6, marginBottom:14, alignItems:"center", flexWrap:"wrap" }}>
-                <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ fontSize:13, padding:"9px 10px", colorScheme:"dark", flex:1, minWidth:120 }} title="From date" />
+                <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ fontSize:13, padding:"9px 10px", colorScheme:"dark", flex:1, minWidth:0 }} title="From date" />
                 <span style={{ fontSize:13, color:"#556677", flexShrink:0 }}>to</span>
-                <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ fontSize:13, padding:"9px 10px", colorScheme:"dark", flex:1, minWidth:120 }} title="To date" />
-                {(dateFrom || dateTo) && <button onClick={() => { setDateFrom(""); setDateTo(""); }} style={{ background:"none", border:"none", color:"#556677", fontSize:13, cursor:"pointer", flexShrink:0, padding:"4px" }} title="Clear dates">✕</button>}
+                <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ fontSize:13, padding:"9px 10px", colorScheme:"dark", flex:1, minWidth:0 }} title="To date" />
+                <button onClick={() => { setDateFrom(""); setDateTo(""); }} disabled={!dateFrom && !dateTo} style={{ background: (dateFrom||dateTo) ? "rgba(201,162,39,.15)" : "transparent", border:`1px solid ${(dateFrom||dateTo) ? "rgba(201,162,39,.4)" : "rgba(100,100,100,.25)"}`, color:(dateFrom||dateTo) ? "#c9a227" : "#445566", fontSize:10, cursor:(dateFrom||dateTo) ? "pointer" : "default", flexShrink:0, padding:"9px 10px", borderRadius:3, fontFamily:"'Orbitron',sans-serif", letterSpacing:1, transition:"all .2s" }} title="Clear dates">CLEAR</button>
               </div>
 
               {editMode && filtered.length > 0 && (
@@ -1940,7 +1948,7 @@ export default function App() {
   );
 
   return (
-    <div style={{ minHeight:"100vh", background:"#050d1a", color:"#e8e0cc" }} className="circuit">
+    <div style={{ minHeight:"100vh", background:"#050d1a", color:"#e8e0cc", overflowX:"hidden", maxWidth:"100vw" }} className="circuit">
       <style>{css}</style>
       {toast && (
         <div className="slide-in" style={{ position:"fixed", top:20, right:20, zIndex:9999, padding:"12px 20px", background:"linear-gradient(135deg,#c9a227,#f0c040)", color:"#050d1a", borderRadius:4, fontFamily:"'Orbitron',sans-serif", fontSize:12, fontWeight:700, letterSpacing:1, boxShadow:"0 8px 24px rgba(0,0,0,.4)" }}>

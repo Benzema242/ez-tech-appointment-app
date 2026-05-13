@@ -641,16 +641,16 @@ export default function App() {
           { label:"Email", value:CONTACT.email, href:CONTACT.emailHref },
         ].map(({ label, value, href }) => (
           <div key={label} style={{ textAlign:"center" }}>
-            <div style={{ fontSize:"clamp(8px,1.4vw,10px)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:"clamp(0.5px,0.2vw,1.5px)", marginBottom:4 }}>{label.toUpperCase()}</div>
-            <a href={href} style={{ fontSize:"clamp(11px,2vw,14px)", color:"#8899aa", textDecoration:"none" }}>{value}</a>
+            <div style={{ fontSize:"clamp(9px,1.4vw,11px)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:"clamp(0.5px,0.2vw,1.5px)", marginBottom:4 }}>{label.toUpperCase()}</div>
+            <a href={href} style={{ fontSize:"clamp(12px,2vw,15px)", color:"#8899aa", textDecoration:"none" }}>{value}</a>
           </div>
         ))}
       </div>
-      <div style={{ fontSize:"clamp(9px,1.5vw,11px)", color:"#445566", letterSpacing:"clamp(0.3px,0.1vw,1px)", fontFamily:"'Orbitron',sans-serif" }}>
+      <div style={{ fontSize:"clamp(10px,1.5vw,12px)", color:"#445566", letterSpacing:"clamp(0.3px,0.1vw,1px)", fontFamily:"'Orbitron',sans-serif" }}>
         © {new Date().getFullYear()} EZ Tech Solutions · All Rights Reserved · Powered by <a href="https://nueradigital.com/" target="_blank" rel="noopener noreferrer" style={{ color:"#60a5fa", textDecoration:"underline dotted" }}>Nuera Digital</a>
       </div>
       <div style={{ marginTop:6 }}>
-        <a href="https://eztechbahamas.com/privacy" target="_blank" rel="noopener noreferrer" style={{ fontSize:"clamp(8px,1.2vw,10px)", color:"#334455", textDecoration:"none", fontFamily:"'Orbitron',sans-serif", letterSpacing:"clamp(0.3px,0.1vw,1px)" }}>Privacy Policy</a>
+        <a href="https://eztechbahamas.com/privacy" target="_blank" rel="noopener noreferrer" style={{ fontSize:"clamp(10px,1.5vw,12px)", color:"#ffffff", textDecoration:"underline dotted", textUnderlineOffset:"3px", fontFamily:"'Orbitron',sans-serif", letterSpacing:"clamp(0.3px,0.1vw,1px)" }}>Privacy Policy</a>
       </div>
     </div>
   );

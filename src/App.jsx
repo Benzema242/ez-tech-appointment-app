@@ -1017,7 +1017,7 @@ export default function App() {
                       )}
                       {/* Contact dropdown */}
                       <div style={{ display:"flex", gap:6 }}>
-                        <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ flex:1, fontSize:11, padding:"7px 8px" }}>
+                        <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ flex:1, fontSize:13, padding:"7px 8px" }}>
                           {selected.email && <option value="confirmation">📧 Resend Confirmation</option>}
                           {selected.email && <option value="reminder">📧 Send Reminder</option>}
                           {selected.phone && <option value="whatsapp">💬 WhatsApp Client</option>}

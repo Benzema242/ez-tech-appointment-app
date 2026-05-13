@@ -325,7 +325,7 @@ export default function App() {
       *{box-sizing:border-box;margin:0;padding:0;}
       body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:14px;min-height:100vh;display:flex;flex-direction:column;}
       /* ── Header ── */
-      .hdr{background:#fff;padding:22px 36px;display:flex;align-items:center;justify-content:space-between;}
+      .hdr{background:#fff;padding:16px 36px 0;display:flex;align-items:flex-end;justify-content:space-between;}
       .hdr-contact{text-align:right;font-size:12px;color:#444;line-height:2;}
       .hdr-contact span{color:#c9a227;font-weight:700;}
       /* ── Rules ── */
@@ -362,7 +362,7 @@ export default function App() {
       @media print{@page{margin:0;size:letter}body{height:11in;min-height:unset;}button{display:none;}}
     </style></head><body>
       <div class="hdr">
-        ${logoSrc ? `<img src="${logoSrc}" style="width:220px;height:220px;object-fit:contain;" />` : ''}
+        ${logoSrc ? `<img src="${logoSrc}" style="width:220px;height:220px;object-fit:contain;object-position:bottom left;" />` : ''}
         <div class="hdr-contact">
           <span>(242) 805-0777</span><br/>
           info@ez-techgroup.com<br/>

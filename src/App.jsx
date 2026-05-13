@@ -323,30 +323,32 @@ export default function App() {
     const win = window.open('', '_blank');
     win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>${title} — EZ Tech Solutions</title><style>
       *{box-sizing:border-box;margin:0;padding:0;}
-      body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:13px;min-height:100vh;display:flex;flex-direction:column;}
+      body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:14px;min-height:100vh;display:flex;flex-direction:column;}
       /* ── Header ── */
-      .hdr{background:#fff;padding:22px 36px;display:flex;align-items:center;}
+      .hdr{background:#fff;padding:22px 36px;display:flex;align-items:center;justify-content:space-between;}
+      .hdr-contact{text-align:right;font-size:12px;color:#444;line-height:2;}
+      .hdr-contact span{color:#c9a227;font-weight:700;}
       /* ── Rules ── */
       .gold-rule{height:4px;background:linear-gradient(90deg,#c9a227,#f0c040,#c9a227);}
       .blue-rule{height:4px;background:linear-gradient(90deg,#1e40af,#3b82f6,#1e40af);}
       /* ── Doc info bar ── */
-      .doc-bar{background:#f7f5ef;border-bottom:1px solid #e0d9c8;padding:12px 36px;display:flex;align-items:center;justify-content:space-between;}
-      .doc-title{font-size:16px;font-weight:800;color:#050b1f;letter-spacing:.5px;}
-      .doc-meta{font-size:11px;color:#888;text-align:right;line-height:1.7;}
-      .doc-ref{font-size:11px;font-weight:700;color:#c9a227;letter-spacing:1px;}
+      .doc-bar{background:#f7f5ef;border-bottom:1px solid #e0d9c8;padding:13px 36px;display:flex;align-items:center;justify-content:space-between;}
+      .doc-title{font-size:18px;font-weight:800;color:#050b1f;letter-spacing:.5px;}
+      .doc-meta{font-size:12px;color:#888;text-align:right;line-height:1.7;}
+      .doc-ref{font-size:12px;font-weight:700;color:#c9a227;letter-spacing:1px;}
       /* ── Body ── */
       .body{flex:1;padding:28px 36px;}
       table{width:100%;border-collapse:collapse;margin-top:4px;}
-      th{text-align:left;padding:10px 14px;background:#050b1f;color:#c9a227;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
-      td{padding:11px 14px;font-size:13px;border-bottom:1px solid #eee;vertical-align:top;color:#1a1a2e;}
+      th{text-align:left;padding:11px 14px;background:#050b1f;color:#c9a227;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+      td{padding:12px 14px;font-size:14px;border-bottom:1px solid #eee;vertical-align:top;color:#1a1a2e;}
       td:first-child{font-weight:600;color:#444;width:36%;background:#fafaf8;}
       tr:last-child td{border-bottom:none;}
       /* Stats grid */
       .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
       .stat-card{border:2px solid #e0d9c8;border-radius:6px;padding:14px 18px;background:#fafaf8;}
       .stat-card.gold{border-color:#c9a227;}
-      .stat-label{font-size:10px;color:#888;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
-      .stat-val{font-size:22px;font-weight:900;color:#050b1f;}
+      .stat-label{font-size:11px;color:#888;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+      .stat-val{font-size:24px;font-weight:900;color:#050b1f;}
       /* Dispatch table — no left-column bold */
       .dispatch td:first-child{font-weight:400;background:#fff;width:auto;}
       .dispatch tr:nth-child(even) td{background:#fafaf8;}
@@ -355,12 +357,17 @@ export default function App() {
       .ftr-gold{height:4px;background:linear-gradient(90deg,#c9a227,#f0c040,#c9a227);}
       .ftr-blue{height:4px;background:linear-gradient(90deg,#1e40af,#3b82f6,#1e40af);}
       .ftr{background:#fff;padding:16px 36px;}
-      .ftr-disclaimer{font-size:9.5px;color:#111;line-height:1.6;}
+      .ftr-disclaimer{font-size:10px;color:#111;line-height:1.6;}
       .ftr-disclaimer strong{color:#111;}
-      @media print{@page{margin:0;size:A4}body{min-height:0;}button{display:none;}}
+      @media print{@page{margin:0;size:letter}body{height:11in;min-height:unset;}button{display:none;}}
     </style></head><body>
       <div class="hdr">
-        ${logoSrc ? `<img src="${logoSrc}" style="width:110px;height:110px;object-fit:contain;" />` : ''}
+        ${logoSrc ? `<img src="${logoSrc}" style="height:80px;width:auto;object-fit:contain;" />` : ''}
+        <div class="hdr-contact">
+          <span>(242) 805-0777</span><br/>
+          info@ez-techgroup.com<br/>
+          eztechbahamas.com
+        </div>
       </div>
       <div class="gold-rule"></div>
       <div class="blue-rule"></div>

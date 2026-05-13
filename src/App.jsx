@@ -311,6 +311,30 @@ export default function App() {
     a.click();
   };
 
+  const printDoc = (title, bodyHtml) => {
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>${title}</title><style>
+      body{font-family:sans-serif;padding:32px;color:#111;font-size:14px;}
+      h1{font-size:22px;margin:0 0 4px;}
+      .sub{font-size:13px;color:#666;margin-bottom:24px;}
+      table{width:100%;border-collapse:collapse;margin-top:12px;}
+      th{text-align:left;padding:9px 12px;background:#f0f0f0;font-size:12px;border-bottom:2px solid #ccc;}
+      td{padding:10px 12px;font-size:13px;border-bottom:1px solid #eee;vertical-align:top;}
+      tr:nth-child(even) td{background:#fafafa;}
+      .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px;}
+      .stat-card{border:1px solid #ddd;border-radius:6px;padding:14px 18px;}
+      .stat-label{font-size:11px;color:#888;font-weight:700;letter-spacing:1px;margin-bottom:4px;}
+      .stat-val{font-size:24px;font-weight:900;color:#111;}
+      @media print{@page{margin:20mm}}
+    </style></head><body>
+      <h1>EZ Tech Solutions</h1>
+      <div class="sub">${title} · Generated ${new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+      ${bodyHtml}
+      <script>setTimeout(()=>window.print(),300);</script>
+    </body></html>`);
+    win.document.close();
+  };
+
   const sendReminder = (booking) => {
     if (!booking?.email) return;
     fetch("/api/send-status-email", {
@@ -485,6 +509,7 @@ export default function App() {
     .gold{background:linear-gradient(135deg,#c9a227,#f0c040);color:#050d1a;}
     .ghost{background:transparent;border:1px solid rgba(201,162,39,.4);color:#c9a227;}
     .ghost:hover{background:rgba(201,162,39,.1);}
+    .filter-btn:hover{border-color:#c9a227!important;color:#f0c040!important;background:rgba(201,162,39,.15)!important;}
     .danger{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;}
     .danger:hover{background:rgba(239,68,68,.25);}
     .ok{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:#4ade80;}
@@ -708,31 +733,31 @@ export default function App() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search by client name…"
-                style={{ marginBottom:10, fontSize:12, padding:"9px 12px" }}
+                style={{ marginBottom:10, fontSize:14, padding:"11px 14px" }}
               />
               <div style={{ display:"flex", gap:6, marginBottom:8, flexWrap:"wrap", alignItems:"center" }}>
                 <div className="filter-row" style={{ display:"flex", gap:6, flexWrap:"wrap", flex:1 }}>
                   {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"]].map(([k,l]) => (
-                    <button key={k} onClick={() => setFilter(k)} className="btn" style={{ padding:"6px 11px", fontSize:10, background: filter===k ? "rgba(201,162,39,.2)" : "transparent", border:"1px solid rgba(201,162,39,.3)", color: filter===k ? "#f0c040" : "#7788aa" }}>{l}</button>
+                    <button key={k} onClick={() => setFilter(k)} className="btn filter-btn" style={{ padding:"8px 13px", fontSize:12, background: filter===k ? "rgba(201,162,39,.2)" : "transparent", border:"1px solid rgba(201,162,39,.3)", color: filter===k ? "#f0c040" : "#7788aa" }}>{l}</button>
                   ))}
                 </div>
-                <button className="btn ghost" style={{ padding:"7px 12px", fontSize:10, flexShrink:0, color: editMode ? "#f0c040" : "#7788aa" }} onClick={toggleEditMode}>{editMode ? "DONE" : "SELECT"}</button>
-                {!editMode && <button className="btn ghost" style={{ padding:"7px 12px", fontSize:10, flexShrink:0 }} onClick={exportCSV} title="Download all bookings as CSV">⬇ CSV</button>}
-                {!editMode && <button className="btn gold" style={{ padding:"7px 14px", fontSize:10, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋ ADD</button>}
+                <button className="btn ghost" style={{ padding:"8px 13px", fontSize:12, flexShrink:0, color: editMode ? "#f0c040" : "#7788aa" }} onClick={toggleEditMode}>{editMode ? "DONE" : "SELECT"}</button>
+                {!editMode && <button className="btn ghost" style={{ padding:"8px 13px", fontSize:12, flexShrink:0 }} onClick={exportCSV} title="Download all bookings as CSV">⬇ CSV</button>}
+                {!editMode && <button className="btn gold" style={{ padding:"8px 14px", fontSize:12, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋ ADD</button>}
               </div>
               <div style={{ display:"flex", gap:6, marginBottom:14, alignItems:"center", flexWrap:"wrap" }}>
-                <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ fontSize:11, padding:"5px 8px", colorScheme:"dark", flex:1, minWidth:120 }} title="From date" />
-                <span style={{ fontSize:10, color:"#556677", flexShrink:0 }}>to</span>
-                <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ fontSize:11, padding:"5px 8px", colorScheme:"dark", flex:1, minWidth:120 }} title="To date" />
-                {(dateFrom || dateTo) && <button onClick={() => { setDateFrom(""); setDateTo(""); }} style={{ background:"none", border:"none", color:"#556677", fontSize:11, cursor:"pointer", flexShrink:0, padding:"4px" }} title="Clear dates">✕</button>}
+                <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ fontSize:13, padding:"9px 10px", colorScheme:"dark", flex:1, minWidth:120 }} title="From date" />
+                <span style={{ fontSize:13, color:"#556677", flexShrink:0 }}>to</span>
+                <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ fontSize:13, padding:"9px 10px", colorScheme:"dark", flex:1, minWidth:120 }} title="To date" />
+                {(dateFrom || dateTo) && <button onClick={() => { setDateFrom(""); setDateTo(""); }} style={{ background:"none", border:"none", color:"#556677", fontSize:13, cursor:"pointer", flexShrink:0, padding:"4px" }} title="Clear dates">✕</button>}
               </div>
 
               {editMode && filtered.length > 0 && (
                 <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10, padding:"6px 4px" }}>
-                  <button onClick={() => setSelectedIds(selectedIds.size === filtered.length ? new Set() : new Set(filtered.map(b => b.id)))} style={{ background:"none", border:"none", color:"#c9a227", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>
+                  <button onClick={() => setSelectedIds(selectedIds.size === filtered.length ? new Set() : new Set(filtered.map(b => b.id)))} style={{ background:"none", border:"none", color:"#c9a227", fontSize:13, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>
                     {selectedIds.size === filtered.length ? "Deselect All" : "Select All"}
                   </button>
-                  <span style={{ fontSize:11, color:"#7788aa" }}>{selectedIds.size} selected</span>
+                  <span style={{ fontSize:13, color:"#7788aa" }}>{selectedIds.size} selected</span>
                 </div>
               )}
 
@@ -808,10 +833,28 @@ export default function App() {
                   <div style={{ padding:24 }} className="slide-in">
 
                     {/* Mobile back button */}
-                    <div className="mobile-back" style={{ marginBottom:14 }}>
+                    <div className="mobile-back" style={{ marginBottom:14, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
                       <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:12, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
                         ← Back to list
                       </button>
+                      <button onClick={() => {
+                        const services = Array.isArray(selected.service) ? selected.service.join(', ') : (selected.service || '—');
+                        printDoc(`Booking — ${selected.client}`, `
+                          <table>
+                            <tr><th>Field</th><th>Details</th></tr>
+                            <tr><td>Client</td><td>${selected.client}</td></tr>
+                            <tr><td>Phone</td><td>${selected.phone || '—'}</td></tr>
+                            <tr><td>Email</td><td>${selected.email || '—'}</td></tr>
+                            <tr><td>Services</td><td>${services}</td></tr>
+                            <tr><td>Date</td><td>${selected.date}</td></tr>
+                            <tr><td>Time</td><td>${selected.time} (Nassau time)</td></tr>
+                            <tr><td>Duration</td><td>${selected.duration || 1} hour${(selected.duration||1)!==1?'s':''}</td></tr>
+                            <tr><td>Status</td><td>${selected.status}</td></tr>
+                            <tr><td>Price</td><td>${selected.price != null ? '$'+selected.price : '—'}</td></tr>
+                            <tr><td>Paid</td><td>${selected.paid ? 'Yes' : 'No'}</td></tr>
+                            <tr><td>Notes</td><td>${selected.notes || '—'}</td></tr>
+                          </table>`);
+                      }} style={{ background:"none", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", padding:"5px 10px", borderRadius:4 }}>🖨 Print</button>
                     </div>
 
                     {/* Header */}
@@ -1064,7 +1107,20 @@ export default function App() {
               .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
             return (
               <div style={{ flex:1, padding:24, overflowY:"auto" }}>
-                <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>NEXT 7 DAYS</div>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:4 }}>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>NEXT 7 DAYS</div>
+                  {upcoming.length > 0 && (
+                    <button className="btn ghost" style={{ fontSize:12, padding:"6px 14px" }} onClick={() => {
+                      const rows = upcoming.map(b => {
+                        const diff = Math.round((new Date(b.date+"T00:00:00") - new Date(todayStr+"T00:00:00")) / 86400000);
+                        const day = diff===0?"Today":diff===1?"Tomorrow":`In ${diff} days`;
+                        const svcs = Array.isArray(b.service) ? b.service.join(', ') : (b.service||'—');
+                        return `<tr><td>${b.date}<br/><small>${day}</small></td><td><strong>${b.client}</strong></td><td>${svcs}</td><td>${b.time}</td><td>${b.duration||1}h</td><td>${b.phone||'—'}</td><td>${b.status}</td></tr>`;
+                      }).join('');
+                      printDoc('Dispatch Sheet — Next 7 Days', `<table><tr><th>Date</th><th>Client</th><th>Services</th><th>Time</th><th>Duration</th><th>Phone</th><th>Status</th></tr>${rows}</table>`);
+                    }}>🖨 Print Dispatch</button>
+                  )}
+                </div>
                 <div style={{ fontSize:14, color:"#7788aa", marginBottom:20 }}>{upcoming.length} appointment{upcoming.length !== 1 ? "s" : ""} coming up</div>
                 {upcoming.length === 0 ? (
                   <div style={{ textAlign:"center", padding:"40px 0", color:"#445566", fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:1 }}>NO UPCOMING APPOINTMENTS</div>
@@ -1220,7 +1276,22 @@ export default function App() {
             const approvalRate = bookings.length ? Math.round((approvedCount / bookings.length) * 100) : 0;
             return (
               <div style={{ flex:1, padding:24, overflowY:"auto" }}>
-                <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>REVENUE — LAST 12 MONTHS</div>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:4 }}>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>REVENUE — LAST 12 MONTHS</div>
+                  <button className="btn ghost" style={{ fontSize:12, padding:"6px 14px" }} onClick={() => {
+                    const rows = monthStats.map(m => `<tr><td>${m.label} ${m.year}</td><td>${m.total}</td><td>$${m.rev}</td><td>$${m.paid}</td></tr>`).join('');
+                    printDoc('Revenue Report — Last 12 Months', `
+                      <div class="stat-grid">
+                        <div class="stat-card"><div class="stat-label">12-MONTH REVENUE</div><div class="stat-val">$${totalRev}</div></div>
+                        <div class="stat-card"><div class="stat-label">TOTAL PAID</div><div class="stat-val">$${totalPaid}</div></div>
+                        <div class="stat-card"><div class="stat-label">MONTHLY AVG</div><div class="stat-val">$${avgRev}</div></div>
+                        <div class="stat-card"><div class="stat-label">BEST MONTH</div><div class="stat-val">${bestMonth.label} $${bestMonth.rev}</div></div>
+                        <div class="stat-card"><div class="stat-label">APPROVAL RATE</div><div class="stat-val">${approvalRate}%</div></div>
+                        <div class="stat-card"><div class="stat-label">TOTAL BOOKINGS</div><div class="stat-val">${bookings.length}</div></div>
+                      </div>
+                      <table style="margin-top:24px"><tr><th>Month</th><th>Bookings</th><th>Revenue</th><th>Paid</th></tr>${rows}</table>`);
+                  }}>🖨 Print Report</button>
+                </div>
                 <div style={{ fontSize:14, color:"#7788aa", marginBottom:20 }}>Gold = approved revenue · Green overlay = paid</div>
 
                 {/* Bar chart */}

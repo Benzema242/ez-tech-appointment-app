@@ -362,7 +362,7 @@ export default function App() {
       @media print{@page{margin:0;size:letter}body{height:11in;min-height:unset;}button{display:none;}}
     </style></head><body>
       <div class="hdr">
-        ${logoSrc ? `<img src="${logoSrc}" style="height:80px;width:auto;object-fit:contain;" />` : ''}
+        ${logoSrc ? `<img src="${logoSrc}" style="width:220px;height:220px;object-fit:contain;" />` : ''}
         <div class="hdr-contact">
           <span>(242) 805-0777</span><br/>
           info@ez-techgroup.com<br/>

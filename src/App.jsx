@@ -1004,47 +1004,52 @@ export default function App() {
                     </div>
 
                     {/* Admin Actions */}
-                    <div style={{ marginTop:14, display:"flex", flexDirection:"column", gap:8 }}>
-                      <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:10, letterSpacing:2, color:"#c9a227", marginBottom:4 }}>ADMIN ACTIONS</div>
-                      {selected.status === "pending" ? (
-                        <>
-                          <button className="btn ok"     onClick={() => updateStatus(selected.id, "approved")}>✅ APPROVE BOOKING</button>
-                          <button className="btn blue"   onClick={() => updateStatus(selected.id, "scheduled_call")}>📞 SCHEDULE A CALL</button>
-                          <button className="btn danger" onClick={() => updateStatus(selected.id, "denied")}>❌ DENY BOOKING</button>
-                        </>
-                      ) : (
-                        <button className="btn ghost" onClick={() => updateStatus(selected.id, "pending")}>↩ RESET TO PENDING</button>
-                      )}
-                      {/* Contact dropdown */}
-                      <div style={{ display:"flex", gap:6 }}>
-                        <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ flex:1, fontSize:13, padding:"7px 8px" }}>
-                          {selected.email && <option value="confirmation">📧 Resend Confirmation</option>}
-                          {selected.email && <option value="reminder">📧 Send Reminder</option>}
-                          {selected.phone && <option value="whatsapp">💬 WhatsApp Client</option>}
-                        </select>
-                        <button className="btn ghost" style={{ fontSize:10, flexShrink:0, padding:"7px 14px" }} onClick={() => {
-                          if (contactAction === "confirmation") sendConfirmation(selected);
-                          else if (contactAction === "reminder") sendReminder(selected);
-                          else if (contactAction === "whatsapp") window.open(`https://wa.me/${waPhone(selected.phone)}?text=${encodeURIComponent(`Hi ${selected.client}, this is EZ Tech Solutions. We're reaching out about your ${Array.isArray(selected.service) ? selected.service[0] : selected.service} appointment on ${selected.date} at ${selected.time}. Please let us know if you have any questions.`)}`, "_blank");
-                        }}>SEND</button>
-                      </div>
-                      <button className="btn ghost" style={{ fontSize:10 }} onClick={() => downloadBookingIcs(selected)}>📅 DOWNLOAD .ICS</button>
-                      <div style={{ marginTop:4 }}>
-                        {deleteConfirm ? (
-                          <div>
-                            <div style={{ padding:10, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:11, color:"#fca5a5", marginBottom:8 }}>
-                              ⚠️ Permanently delete this booking?
-                            </div>
-                            <div style={{ display:"flex", gap:8 }}>
-                              <button className="btn ghost" style={{ flex:1, fontSize:10 }} onClick={() => setDeleteConfirm(false)}>CANCEL</button>
-                              <button className="btn danger" style={{ flex:1, fontSize:10 }} onClick={() => deleteBooking(selected.id)}>YES, DELETE</button>
-                            </div>
-                          </div>
+                    {(() => {
+                      const ab = { fontSize:13, padding:"13px 18px", borderRadius:8, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", letterSpacing:1 };
+                      return (
+                      <div style={{ marginTop:14, display:"flex", flexDirection:"column", gap:10 }}>
+                        <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:2, color:"#c9a227", marginBottom:2 }}>ADMIN ACTIONS</div>
+                        {selected.status === "pending" ? (
+                          <>
+                            <button className="btn ok"     style={ab} onClick={() => updateStatus(selected.id, "approved")}>✅ APPROVE BOOKING</button>
+                            <button className="btn blue"   style={ab} onClick={() => updateStatus(selected.id, "scheduled_call")}>📞 SCHEDULE A CALL</button>
+                            <button className="btn danger" style={ab} onClick={() => updateStatus(selected.id, "denied")}>❌ DENY BOOKING</button>
+                          </>
                         ) : (
-                          <button className="btn danger" style={{ width:"100%", opacity:.7 }} onClick={() => setDeleteConfirm(true)}>🗑 DELETE BOOKING</button>
+                          <button className="btn ghost" style={ab} onClick={() => updateStatus(selected.id, "pending")}>↩ RESET TO PENDING</button>
                         )}
+                        {/* Contact dropdown */}
+                        <div style={{ display:"flex", gap:6 }}>
+                          <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ flex:1, fontSize:13, padding:"7px 8px" }}>
+                            {selected.email && <option value="confirmation">📧 Resend Confirmation</option>}
+                            {selected.email && <option value="reminder">📧 Send Reminder</option>}
+                            {selected.phone && <option value="whatsapp">💬 WhatsApp Client</option>}
+                          </select>
+                          <button className="btn ghost" style={{ ...ab, flexShrink:0, padding:"7px 18px" }} onClick={() => {
+                            if (contactAction === "confirmation") sendConfirmation(selected);
+                            else if (contactAction === "reminder") sendReminder(selected);
+                            else if (contactAction === "whatsapp") window.open(`https://wa.me/${waPhone(selected.phone)}?text=${encodeURIComponent(`Hi ${selected.client}, this is EZ Tech Solutions. We're reaching out about your ${Array.isArray(selected.service) ? selected.service[0] : selected.service} appointment on ${selected.date} at ${selected.time}. Please let us know if you have any questions.`)}`, "_blank");
+                          }}>SEND</button>
+                        </div>
+                        <button className="btn ghost" style={ab} onClick={() => downloadBookingIcs(selected)}>📅 DOWNLOAD .ICS</button>
+                        <div style={{ marginTop:2 }}>
+                          {deleteConfirm ? (
+                            <div>
+                              <div style={{ padding:10, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:8, fontSize:12, color:"#fca5a5", marginBottom:8 }}>
+                                ⚠️ Permanently delete this booking?
+                              </div>
+                              <div style={{ display:"flex", gap:8 }}>
+                                <button className="btn ghost"  style={{ ...ab, flex:1 }} onClick={() => setDeleteConfirm(false)}>CANCEL</button>
+                                <button className="btn danger" style={{ ...ab, flex:1 }} onClick={() => deleteBooking(selected.id)}>YES, DELETE</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button className="btn danger" style={{ ...ab, width:"100%", opacity:.7 }} onClick={() => setDeleteConfirm(true)}>🗑 DELETE BOOKING</button>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                      );
+                    })()}
                   </div>
                 );
               })()}

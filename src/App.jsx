@@ -1354,7 +1354,7 @@ export default function App() {
                       <div key={m.key} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:3, height:"100%" }}>
                         <div style={{ flex:1, width:"100%", display:"flex", flexDirection:"column", justifyContent:"flex-end" }}>
                           {m.rev > 0 && (
-                            <div style={{ fontSize:9, color:"#7788aa", textAlign:"center", marginBottom:3, fontFamily:"'Orbitron',sans-serif" }}>${m.rev >= 1000 ? `${(m.rev/1000).toFixed(1)}k` : m.rev}</div>
+                            <div style={{ fontSize:11, color:"#e8e0cc", textAlign:"center", marginBottom:4, fontFamily:"'Orbitron',sans-serif" }}>${m.rev >= 1000 ? `${(m.rev/1000).toFixed(1)}k` : m.rev}</div>
                           )}
                           <div style={{ width:"100%", height:`${Math.max((m.rev/maxRev)*130, m.rev > 0 ? 4 : 0)}px`, background:"rgba(201,162,39,.35)", borderRadius:"2px 2px 0 0", position:"relative", overflow:"hidden", transition:"height .3s" }}>
                             {m.paid > 0 && (
@@ -1362,8 +1362,8 @@ export default function App() {
                             )}
                           </div>
                         </div>
-                        <div style={{ fontSize:9, color:"#556677", fontFamily:"'Orbitron',sans-serif", textAlign:"center", letterSpacing:.3 }}>{m.label}</div>
-                        {m.total > 0 && <div style={{ fontSize:9, color:"#445566" }}>{m.total}</div>}
+                        <div style={{ fontSize:11, color:"#ffffff", fontFamily:"'Orbitron',sans-serif", textAlign:"center", letterSpacing:.3, marginTop:2 }}>{m.label}</div>
+                        {m.total > 0 && <div style={{ fontSize:11, color:"#c9a227", textAlign:"center", fontWeight:700 }}>{m.total}</div>}
                       </div>
                     ))}
                   </div>

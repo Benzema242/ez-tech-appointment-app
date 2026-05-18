@@ -66,7 +66,8 @@ const fmtDate = isoStr => {
   return `${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 };
 
-const PAYMENT_METHODS = ["Bank Transfer", "Island Luck"];
+const PAYMENT_METHODS = ["Bank Transfer", "Island Luck", "Cash App", "PayPal"];
+const PAYMENT_EMOJI = { "Bank Transfer": "🏦", "Island Luck": "🎰", "Cash App": "💵", "PayPal": "🅿️" };
 
 const BLANK = () => {
   const sd = todayStr();
@@ -937,7 +938,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                         border: `1px solid ${form.payment_method === m ? "#c9a227" : "rgba(201,162,39,.2)"}`,
                         color: form.payment_method === m ? "#f0c040" : "#556677",
                         fontFamily:"'Exo 2',sans-serif", fontWeight:600 }}>
-                      {m === "Bank Transfer" ? "🏦 Bank Transfer" : "🎰 Island Luck"}
+                      {PAYMENT_EMOJI[m]} {m}
                     </button>
                   ))}
                 </div>
@@ -1032,7 +1033,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                         border: `1px solid ${renewForm.payment_method === m ? "#c9a227" : "rgba(201,162,39,.2)"}`,
                         color: renewForm.payment_method === m ? "#f0c040" : "#556677",
                         fontFamily:"'Exo 2',sans-serif", fontWeight:600 }}>
-                      {m === "Bank Transfer" ? "🏦 Bank Transfer" : "🎰 Island Luck"}
+                      {PAYMENT_EMOJI[m]} {m}
                     </button>
                   ))}
                 </div>

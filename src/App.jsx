@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 // Contact form now uses Resend via /api/send-contact-email
 import { supabase } from "./supabase";
+import SubscriptionsAdmin from "./SubscriptionsAdmin";
 
 // ─── SERVICES CATALOG ──────────────────────────────────────────────────────
 const SERVICES = [
@@ -92,7 +93,8 @@ export default function App() {
   // ── Routing & Auth ─────────────────────────────────────────────────────
   const getHash = () => window.location.hash;
   const isAdminRoute = () => getHash() === "#/admin";
-  const [mode, setMode] = useState(() => isAdminRoute() ? "admin" : "client");
+  const isSubsRoute  = () => getHash() === "#/subscriptions";
+  const [mode, setMode] = useState(() => isAdminRoute() ? "admin" : isSubsRoute() ? "subscriptions" : "client");
   const [adminAuthed, setAdminAuthed] = useState(() => sessionStorage.getItem(SESSION_KEY) === "1");
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState(false);
@@ -119,7 +121,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    const onHash = () => setMode(isAdminRoute() ? "admin" : "client");
+    const onHash = () => setMode(isAdminRoute() ? "admin" : isSubsRoute() ? "subscriptions" : "client");
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
@@ -777,6 +779,7 @@ export default function App() {
         </div>
         <div className="admin-hdr-btns" style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
           <button className="btn ghost" style={{ padding:"8px 12px", fontSize:10 }} onClick={() => { setShowChangePwModal(true); setChangePwError(""); setChangePwForm({ old:"", newPw:"", confirm:"" }); }}>🔑 CHANGE PW</button>
+          <button className="btn ghost" style={{ padding:"8px 12px", fontSize:10 }} onClick={() => { window.location.hash = "#/subscriptions"; }}>📱 SUBSCRIPTIONS</button>
           <button className="btn ghost" onClick={goClient}>👤 CLIENT VIEW</button>
           <button className="btn danger" style={{ padding:"10px 14px", fontSize:10 }} onClick={logout}>LOGOUT</button>
         </div>
@@ -1990,7 +1993,7 @@ export default function App() {
   };
 
   // ── Root Render ────────────────────────────────────────────────────────
-  if (loading) return (
+  if (loading && mode !== "subscriptions") return (
     <div style={{ minHeight:"100vh", background:"#050d1a", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:16 }} className="circuit">
       <style>{css}</style>
       <div className="logo-circle" style={{ width:60, height:60, fontSize:22 }}>EZ</div>
@@ -2006,9 +2009,11 @@ export default function App() {
           {toast}
         </div>
       )}
-      {mode === "admin"
-        ? (adminAuthed ? AdminView() : AdminGate())
-        : ClientView()
+      {mode === "subscriptions"
+        ? <SubscriptionsAdmin onGoClient={goClient} />
+        : mode === "admin"
+          ? (adminAuthed ? AdminView() : AdminGate())
+          : ClientView()
       }
     </div>
   );

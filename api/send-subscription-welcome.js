@@ -20,7 +20,7 @@ const fmtDate = isoStr => {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
-  const { name, email, phone, plan, duration_months, price, devices, username, password, start_date, expiration } = req.body;
+  const { name, email, phone, plan, duration_months, price, devices, username, password, start_date, expiration, payment_method } = req.body;
 
   if (!email) return res.status(400).json({ error: 'No email address provided' });
 
@@ -67,6 +67,11 @@ export default async function handler(req, res) {
                 <td style="padding:8px 0;border-bottom:1px solid rgba(201,162,39,.08);color:#7788aa;font-size:13px;">Amount Paid</td>
                 <td style="padding:8px 0;border-bottom:1px solid rgba(201,162,39,.08);font-weight:700;font-size:13px;color:#22c55e;">$${price}</td>
               </tr>
+              ${payment_method ? `
+              <tr>
+                <td style="padding:8px 0;border-bottom:1px solid rgba(201,162,39,.08);color:#7788aa;font-size:13px;">Payment Via</td>
+                <td style="padding:8px 0;border-bottom:1px solid rgba(201,162,39,.08);font-size:13px;">${payment_method}</td>
+              </tr>` : ''}
               <tr>
                 <td style="padding:8px 0;border-bottom:1px solid rgba(201,162,39,.08);color:#7788aa;font-size:13px;">Start Date</td>
                 <td style="padding:8px 0;border-bottom:1px solid rgba(201,162,39,.08);font-size:13px;">${fmtDate(start_date)}</td>

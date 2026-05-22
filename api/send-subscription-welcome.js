@@ -10,7 +10,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const FROM = 'EZ Tech Solutions <info@ez-techgroup.com>';
+const FROM  = 'EZ Tech Solutions <info@ez-techgroup.com>';
+const ADMIN = 'info@ez-techgroup.com';
 
 const fmtDate = isoStr => {
   if (!isoStr) return '—';
@@ -112,6 +113,42 @@ export default async function handler(req, res) {
 
           <p style="margin:0;font-size:13px;color:#8899aa;text-align:center;line-height:1.6;">Enjoy your <strong style="color:${planColor};">${plan}</strong> subscription!<br>
           <span style="font-size:11px;color:#445566;">— EZ Tech Solutions · Your Ultimate Streaming Platform</span></p>
+        </div>
+      `,
+    });
+
+    // Admin notification
+    const row = (label, value, color) => `
+      <tr>
+        <td style="padding:7px 0;border-bottom:1px solid rgba(201,162,39,.08);color:#7788aa;font-size:13px;width:130px;">${label}</td>
+        <td style="padding:7px 0;border-bottom:1px solid rgba(201,162,39,.08);font-size:13px;${color ? `color:${color};font-weight:700;` : ''}">${value || '—'}</td>
+      </tr>`;
+    await transporter.sendMail({
+      from: FROM,
+      to: ADMIN,
+      subject: `🆕 New ${plan} Subscription — ${name}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:580px;margin:0 auto;background:#050d1a;color:#e8e0cc;padding:32px;border-radius:8px;">
+          <div style="font-size:18px;font-weight:900;color:#f0c040;letter-spacing:1px;margin-bottom:4px;">🆕 New Subscription Added</div>
+          <div style="font-size:12px;color:#7788aa;margin-bottom:24px;">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}</div>
+          <div style="background:rgba(10,22,40,.8);border:1px solid rgba(201,162,39,.2);border-radius:6px;padding:20px;margin-bottom:20px;">
+            <div style="font-size:11px;color:#c9a227;letter-spacing:1.5px;margin-bottom:14px;">CLIENT & PLAN</div>
+            <table style="width:100%;border-collapse:collapse;">
+              ${row('Name',    name)}
+              ${row('Phone',   phone ? `<a href="tel:${phone}" style="color:#c9a227;text-decoration:none;">${phone}</a>` : '—')}
+              ${row('Email',   email ? `<a href="mailto:${email}" style="color:#c9a227;text-decoration:none;">${email}</a>` : '—')}
+              ${row('Plan',    plan, planColor)}
+              ${row('Duration', `${duration_months} month${duration_months !== 1 ? 's' : ''}`)}
+              ${row('Devices', devices || 2)}
+              ${row('Amount',  `$${price}`, '#22c55e')}
+              ${payment_method ? row('Payment Via', payment_method) : ''}
+              ${row('Starts',  fmtDate(start_date))}
+              ${row('Expires', fmtDate(expiration), '#f0c040')}
+              ${username ? row('Username', `<span style="font-family:monospace;">${username}</span>`) : ''}
+              ${password ? row('Password', `<span style="font-family:monospace;">${password}</span>`) : ''}
+            </table>
+          </div>
+          <p style="margin:0;font-size:11px;color:#445566;text-align:center;">EZ Tech Solutions · Subscription Manager</p>
         </div>
       `,
     });

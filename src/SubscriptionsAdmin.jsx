@@ -66,8 +66,8 @@ const fmtDate = isoStr => {
   return `${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 };
 
-const PAYMENT_METHODS = ["Bank Transfer", "Island Luck", "Cash App", "PayPal"];
-const PAYMENT_EMOJI = { "Bank Transfer": "🏦", "Island Luck": "🎰", "Cash App": "💵", "PayPal": "🅿️" };
+const PAYMENT_METHODS = ["Cash", "Bank Transfer", "Island Luck", "Cash App", "PayPal"];
+const PAYMENT_EMOJI = { "Cash": "💵", "Bank Transfer": "🏦", "Island Luck": "🎰", "Cash App": "💸", "PayPal": "🅿️" };
 
 const BLANK = () => {
   const sd = todayStr();

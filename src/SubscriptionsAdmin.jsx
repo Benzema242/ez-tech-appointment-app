@@ -127,6 +127,10 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const [logPayForm, setLogPayForm]           = useState({ amount:"", payment_method:"Cash", note:"", paid_at:todayStr() });
   const [loggingPay, setLoggingPay]           = useState(false);
 
+  const [bulkSel, setBulkSel]               = useState(new Set());
+  const [bulkDelConfirm, setBulkDelConfirm] = useState(false);
+  const [bulkReminding, setBulkReminding]   = useState(false);
+
   useEffect(() => {
     if (!authed) return;
     supabase
@@ -402,6 +406,63 @@ export default function SubscriptionsAdmin({ onGoClient }) {
     fire("🔄 Renewed!" + (selected.email ? " · Confirmation email sent" : ""));
   };
 
+  // ── Bulk actions ──────────────────────────────────────────────────────────
+  const toggleBulk = id => setBulkSel(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+
+  const bulkExport = () => {
+    const toExport = subs.filter(s => bulkSel.has(s.id));
+    const headers = ["Name","Phone","Email","Plan","Duration (mo)","Price","Devices","Username","Status","Start Date","Expiration","Payment Method","Notes"];
+    const rows = toExport.map(s => [
+      s.name, s.phone, s.email, s.plan, s.duration_months, s.price, s.devices,
+      s.username, s.status,
+      s.start_date || "",
+      s.expiration ? new Date(s.expiration).toISOString().slice(0, 10) : "",
+      s.payment_method, s.notes,
+    ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`));
+    const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const a = Object.assign(document.createElement("a"), {
+      href: URL.createObjectURL(new Blob([csv], { type:"text/csv" })),
+      download: `subscriptions-selected-${new Date().toISOString().slice(0, 10)}.csv`,
+    });
+    a.click();
+    URL.revokeObjectURL(a.href);
+    fire(`📥 Exported ${toExport.length} subscription${toExport.length!==1?"s":""}`);
+  };
+
+  const bulkRemind = async () => {
+    if (bulkReminding) return;
+    setBulkReminding(true);
+    const toRemind = subs.filter(s => bulkSel.has(s.id) && s.email);
+    let sent = 0;
+    for (const sub of toRemind) {
+      try {
+        await fetch("/api/send-subscription-reminder", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: sub.name, email: sub.email, phone: sub.phone, plan: sub.plan, expiration: sub.expiration, manual: true }),
+        });
+        sent++;
+      } catch {}
+    }
+    fire(`📧 ${sent} reminder${sent!==1?"s":""} sent`);
+    setBulkReminding(false);
+  };
+
+  const bulkDelete = async () => {
+    const ids = [...bulkSel];
+    const { error } = await supabase.from("subscriptions").delete().in("id", ids);
+    if (error) { fire("❌ Bulk delete failed"); return; }
+    setSubs(p => p.filter(s => !bulkSel.has(s.id)));
+    if (selected && bulkSel.has(selected.id)) setSelected(null);
+    setBulkSel(new Set());
+    setBulkDelConfirm(false);
+    fire(`🗑 Deleted ${ids.length} subscription${ids.length!==1?"s":""}`);
+  };
+
   // ── Payment log ───────────────────────────────────────────────────────────
   const logPayment = async () => {
     if (!selected || loggingPay) return;
@@ -657,6 +718,43 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                 ))}
               </div>
 
+              {/* Bulk action bar */}
+              {bulkSel.size > 0 && (
+                <div style={{ marginBottom:8 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:6, padding:"8px 10px", background:"rgba(201,162,39,.08)", border:"1px solid rgba(201,162,39,.25)", borderRadius:4, flexWrap:"wrap" }}>
+                    <span style={{ fontSize:12, color:"#f0c040", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, flex:1 }}>
+                      {bulkSel.size} selected
+                    </span>
+                    <button className="btn ghost" style={{ padding:"5px 10px", fontSize:11 }} onClick={bulkExport}>⬇ CSV</button>
+                    <button className="btn blue"  style={{ padding:"5px 10px", fontSize:11 }} onClick={bulkRemind} disabled={bulkReminding}>
+                      {bulkReminding ? "SENDING…" : "📧 REMIND"}
+                    </button>
+                    <button className="btn danger" style={{ padding:"5px 10px", fontSize:11 }} onClick={() => setBulkDelConfirm(true)}>🗑 DELETE</button>
+                    <button onClick={() => { setBulkSel(new Set()); setBulkDelConfirm(false); }}
+                      style={{ background:"none", border:"none", color:"#556677", fontSize:18, cursor:"pointer", lineHeight:1, padding:"0 2px" }}>✕</button>
+                  </div>
+                  {bulkDelConfirm && (
+                    <div style={{ marginTop:6, padding:"10px 12px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4 }}>
+                      <div style={{ fontSize:13, color:"#fca5a5", marginBottom:8 }}>⚠️ Permanently delete {bulkSel.size} subscription{bulkSel.size!==1?"s":""}?</div>
+                      <div style={{ display:"flex", gap:6 }}>
+                        <button className="btn danger" style={{ flex:1, padding:"7px", fontSize:12 }} onClick={bulkDelete}>YES, DELETE</button>
+                        <button className="btn ghost"  style={{ flex:1, padding:"7px", fontSize:12 }} onClick={() => setBulkDelConfirm(false)}>CANCEL</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Select all / deselect all */}
+              {!loading && filtered.length > 0 && (
+                <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:6 }}>
+                  <button onClick={() => setBulkSel(bulkSel.size === filtered.length ? new Set() : new Set(filtered.map(s => s.id)))}
+                    style={{ background:"none", border:"none", color:"#556677", fontSize:12, cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
+                    {bulkSel.size === filtered.length && filtered.length > 0 ? "✕ Deselect all" : "☐ Select all"}
+                  </button>
+                </div>
+              )}
+
               {loading ? (
                 <div style={{ textAlign:"center", padding:30, color:"#556677", fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:2 }} className="pulse">LOADING…</div>
               ) : filtered.length === 0 ? (
@@ -668,6 +766,10 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     onClick={() => { setSelected(sub); setDeleteConfirm(false); setEditNotes(false); setReminderConfirm(false); setShowPw(false); }}
                     style={{ ...rowColor(sub), borderRadius:4, cursor:"pointer", padding:"12px 14px", marginBottom:8, transition:"all .15s", outline:selected?.id===sub.id?"2px solid rgba(201,162,39,.5)":"none" }}>
                     <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8 }}>
+                      <input type="checkbox" checked={bulkSel.has(sub.id)}
+                        onChange={e => { e.stopPropagation(); toggleBulk(sub.id); }}
+                        onClick={e => e.stopPropagation()}
+                        style={{ marginTop:3, width:14, height:14, cursor:"pointer", accentColor:"#c9a227", flexShrink:0 }} />
                       <div style={{ flex:1, minWidth:0 }}>
                         <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:17, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{sub.name}</div>
                         <div style={{ fontSize:14, color:"#7788aa", marginTop:3 }}>

@@ -12,6 +12,9 @@ const waPhone = phone => {
   return d;
 };
 
+const waRenewalMsg = sub =>
+  encodeURIComponent(`Hi ${sub.name}, your ${sub.plan} subscription expires on ${fmtDate(sub.expiration)}. Please contact us to renew and avoid any interruption to your service. 📞 (242) 805-0777`);
+
 const formatPhone = v => {
   const d = (v || "").replace(/\D/g, "");
   if (!d) return "";
@@ -577,9 +580,16 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                           {sub.duration_months}mo · ${sub.price}
                         </div>
                         <div style={{ fontSize:12, marginTop:4, color:ei.color }}>{ei.text}</div>
+                        {(sub.reminded_7d || sub.reminded_2d || sub.reminded_expired) && (
+                          <div style={{ display:"flex", gap:4, marginTop:5, flexWrap:"wrap" }}>
+                            {sub.reminded_7d      && <span style={{ fontSize:9, padding:"2px 5px", borderRadius:2, background:"rgba(201,162,39,.15)", border:"1px solid rgba(201,162,39,.3)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>7D ✓</span>}
+                            {sub.reminded_2d      && <span style={{ fontSize:9, padding:"2px 5px", borderRadius:2, background:"rgba(245,158,11,.15)", border:"1px solid rgba(245,158,11,.3)", color:"#f59e0b", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>2D ✓</span>}
+                            {sub.reminded_expired && <span style={{ fontSize:9, padding:"2px 5px", borderRadius:2, background:"rgba(239,68,68,.15)", border:"1px solid rgba(239,68,68,.3)",  color:"#ef4444", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>EXP ✓</span>}
+                          </div>
+                        )}
                       </div>
                       {sub.phone && (
-                        <a href={`https://wa.me/${waPhone(sub.phone)}`} target="_blank" rel="noopener noreferrer"
+                        <a href={`https://wa.me/${waPhone(sub.phone)}?text=${waRenewalMsg(sub)}`} target="_blank" rel="noopener noreferrer"
                           onClick={e => e.stopPropagation()}
                           style={{ flexShrink:0, padding:"5px 9px", borderRadius:3, background:"rgba(37,211,102,.12)", border:"1px solid rgba(37,211,102,.25)", color:"#25d366", fontSize:13, textDecoration:"none" }}>
                           💬
@@ -641,7 +651,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                           <span style={{ fontSize:14, color:"#7788aa" }}>📞 Phone</span>
                           <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                             <span style={{ fontSize:14, color:"#e8e0cc" }}>{selected.phone}</span>
-                            <a href={`https://wa.me/${waPhone(selected.phone)}`} target="_blank" rel="noopener noreferrer"
+                            <a href={`https://wa.me/${waPhone(selected.phone)}?text=${waRenewalMsg(selected)}`} target="_blank" rel="noopener noreferrer"
                               style={{ padding:"4px 10px", borderRadius:3, background:"rgba(37,211,102,.12)", border:"1px solid rgba(37,211,102,.25)", color:"#25d366", fontSize:11, textDecoration:"none", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
                               💬 WA
                             </a>
@@ -683,15 +693,27 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                           </button>
                         </div>
                         {selected.username && (
-                          <div style={{ display:"flex", justifyContent:"space-between", padding:"6px 0", borderBottom:"1px solid rgba(201,162,39,.08)" }}>
+                          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0", borderBottom:"1px solid rgba(201,162,39,.08)" }}>
                             <span style={{ fontSize:14, color:"#7788aa" }}>Username</span>
-                            <span style={{ fontSize:13, color:"#e8e0cc", fontFamily:"monospace" }}>{selected.username}</span>
+                            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                              <span style={{ fontSize:13, color:"#e8e0cc", fontFamily:"monospace" }}>{selected.username}</span>
+                              <button onClick={() => { navigator.clipboard.writeText(selected.username); fire("📋 Username copied"); }}
+                                style={{ background:"none", border:"1px solid rgba(201,162,39,.25)", borderRadius:3, color:"#c9a227", fontSize:10, padding:"2px 7px", cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
+                                COPY
+                              </button>
+                            </div>
                           </div>
                         )}
                         {selected.password && (
-                          <div style={{ display:"flex", justifyContent:"space-between", padding:"6px 0" }}>
+                          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0" }}>
                             <span style={{ fontSize:14, color:"#7788aa" }}>Password</span>
-                            <span style={{ fontSize:13, color:"#e8e0cc", fontFamily:"monospace" }}>{showPw ? selected.password : "••••••••"}</span>
+                            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                              <span style={{ fontSize:13, color:"#e8e0cc", fontFamily:"monospace" }}>{showPw ? selected.password : "••••••••"}</span>
+                              <button onClick={() => { navigator.clipboard.writeText(selected.password); fire("📋 Password copied"); }}
+                                style={{ background:"none", border:"1px solid rgba(201,162,39,.25)", borderRadius:3, color:"#c9a227", fontSize:10, padding:"2px 7px", cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
+                                COPY
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>

@@ -124,7 +124,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const [payments, setPayments]               = useState([]);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
   const [showLogPayment, setShowLogPayment]   = useState(false);
-  const [logPayForm, setLogPayForm]           = useState({ amount:"", payment_method:"Cash", note:"", paid_at:todayStr() });
+  const [logPayForm, setLogPayForm]           = useState({ amount:"", payment_method:"Cash", note:"", paid_at:todayStr(), sendReceipt:true });
   const [loggingPay, setLoggingPay]           = useState(false);
 
   const [bulkSel, setBulkSel]               = useState(new Set());
@@ -153,6 +153,25 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       .order("paid_at", { ascending: false })
       .then(({ data }) => { setPayments(data || []); setPaymentsLoading(false); });
   }, [selected?.id]);
+
+  useEffect(() => {
+    if (!authed) return;
+    const channel = supabase
+      .channel("subscriptions-realtime")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "subscriptions" }, ({ new: row }) => {
+        setSubs(p => p.some(s => s.id === row.id) ? p : [...p, row].sort((a, b) => new Date(a.expiration) - new Date(b.expiration)));
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "subscriptions" }, ({ new: row }) => {
+        setSubs(p => p.map(s => s.id === row.id ? row : s));
+        setSelected(sel => sel?.id === row.id ? row : sel);
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "subscriptions" }, ({ old: row }) => {
+        setSubs(p => p.filter(s => s.id !== row.id));
+        setSelected(sel => sel?.id === row.id ? null : sel);
+      })
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, [authed]);
 
   const fire = msg => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
@@ -476,8 +495,23 @@ export default function SubscriptionsAdmin({ onGoClient }) {
     }).select().single();
     if (error) { fire("❌ Failed to log payment"); setLoggingPay(false); return; }
     setPayments(p => [data, ...p]);
+    if (logPayForm.sendReceipt && selected.email) {
+      fetch("/api/send-payment-receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name:           selected.name,
+          email:          selected.email,
+          plan:           selected.plan,
+          amount:         parseInt(logPayForm.amount) || 0,
+          payment_method: logPayForm.payment_method,
+          note:           logPayForm.note.trim(),
+          paid_at:        new Date(logPayForm.paid_at + "T12:00:00").toISOString(),
+        }),
+      }).catch(() => {});
+    }
     setShowLogPayment(false);
-    fire("✅ Payment logged");
+    fire("✅ Payment logged" + (logPayForm.sendReceipt && selected.email ? " · Receipt sent" : ""));
     setLoggingPay(false);
   };
 
@@ -958,7 +992,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
                         <div style={{ fontSize:12, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>PAYMENT HISTORY</div>
                         <button
-                          onClick={() => { setLogPayForm({ amount:String(selected.price||""), payment_method:selected.payment_method||"Cash", note:"", paid_at:todayStr() }); setShowLogPayment(true); }}
+                          onClick={() => { setLogPayForm({ amount:String(selected.price||""), payment_method:selected.payment_method||"Cash", note:"", paid_at:todayStr(), sendReceipt:!!selected.email }); setShowLogPayment(true); }}
                           style={{ background:"none", border:"1px solid rgba(201,162,39,.3)", borderRadius:3, color:"#c9a227", fontSize:12, padding:"3px 9px", cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
                           ＋ LOG
                         </button>
@@ -1570,6 +1604,15 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                 <input value={logPayForm.note} onChange={e => setLogPayForm(f => ({ ...f, note:e.target.value }))}
                   placeholder="e.g. Renewal, Extra device…" />
               </div>
+
+              {selected.email && (
+                <label style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer" }}>
+                  <input type="checkbox" checked={logPayForm.sendReceipt}
+                    onChange={e => setLogPayForm(f => ({ ...f, sendReceipt:e.target.checked }))}
+                    style={{ width:14, height:14, cursor:"pointer", accentColor:"#c9a227" }} />
+                  <span style={{ fontSize:13, color:"#c8bfa8" }}>📧 Send receipt to <span style={{ color:"#c9a227" }}>{selected.email}</span></span>
+                </label>
+              )}
             </div>
 
             <div style={{ display:"flex", gap:10, marginTop:22, justifyContent:"flex-end" }}>

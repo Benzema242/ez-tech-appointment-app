@@ -425,6 +425,36 @@ export default function SubscriptionsAdmin({ onGoClient }) {
     <label style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>{text}</label>
   );
 
+  const exportCSV = () => {
+    const headers = ["Name","Phone","Email","Plan","Duration (mo)","Price","Devices","Username","Status","Start Date","Expiration","Payment Method","Notes"];
+    const rows = filtered.map(s => [
+      s.name, s.phone, s.email, s.plan, s.duration_months, s.price, s.devices,
+      s.username, s.status,
+      s.start_date || "",
+      s.expiration ? new Date(s.expiration).toISOString().slice(0, 10) : "",
+      s.payment_method, s.notes,
+    ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`));
+    const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const a = Object.assign(document.createElement("a"), {
+      href: URL.createObjectURL(new Blob([csv], { type:"text/csv" })),
+      download: `subscriptions-${new Date().toISOString().slice(0, 10)}.csv`,
+    });
+    a.click();
+    URL.revokeObjectURL(a.href);
+    fire(`📥 Exported ${filtered.length} subscription${filtered.length !== 1 ? "s" : ""}`);
+  };
+
+  const toggleStatus = async (sub, e) => {
+    e.stopPropagation();
+    const cycle = { active:"cancelled", cancelled:"expired", expired:"active" };
+    const next = cycle[sub.status] ?? "active";
+    const { error } = await supabase.from("subscriptions").update({ status:next }).eq("id", sub.id);
+    if (error) { fire("❌ Error updating status"); return; }
+    setSubs(p => p.map(s => s.id === sub.id ? { ...s, status:next } : s));
+    if (selected?.id === sub.id) setSelected(s => ({ ...s, status:next }));
+    fire(`✅ ${sub.name} → ${next}`);
+  };
+
   // ── Auth gate ─────────────────────────────────────────────────────────────
   if (!authed) {
     return (
@@ -529,6 +559,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                   value={search} onChange={e => setSearch(e.target.value)}
                   style={{ flex:1, fontSize:15, padding:"9px 12px" }}
                 />
+                <button className="btn ghost" style={{ padding:"9px 12px", fontSize:12, whiteSpace:"nowrap" }} onClick={exportCSV} title="Export filtered list as CSV">⬇ CSV</button>
                 <button className="btn gold" style={{ padding:"9px 14px", fontSize:12, whiteSpace:"nowrap" }} onClick={openAdd}>＋ ADD</button>
               </div>
 
@@ -587,13 +618,26 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                           </div>
                         )}
                       </div>
-                      {sub.phone && (
-                        <a href={`https://wa.me/${waPhone(sub.phone)}?text=${waRenewalMsg(sub)}`} target="_blank" rel="noopener noreferrer"
-                          onClick={e => e.stopPropagation()}
-                          style={{ flexShrink:0, padding:"5px 9px", borderRadius:3, background:"rgba(37,211,102,.12)", border:"1px solid rgba(37,211,102,.25)", color:"#25d366", fontSize:15, textDecoration:"none" }}>
-                          💬
-                        </a>
-                      )}
+                      <div style={{ display:"flex", flexDirection:"column", gap:5, alignItems:"flex-end", flexShrink:0 }}>
+                        {sub.phone && (
+                          <a href={`https://wa.me/${waPhone(sub.phone)}?text=${waRenewalMsg(sub)}`} target="_blank" rel="noopener noreferrer"
+                            onClick={e => e.stopPropagation()}
+                            style={{ padding:"5px 9px", borderRadius:3, background:"rgba(37,211,102,.12)", border:"1px solid rgba(37,211,102,.25)", color:"#25d366", fontSize:15, textDecoration:"none" }}>
+                            💬
+                          </a>
+                        )}
+                        <button
+                          onClick={e => toggleStatus(sub, e)}
+                          style={{
+                            padding:"3px 8px", borderRadius:3, fontSize:11, fontFamily:"'Orbitron',sans-serif",
+                            letterSpacing:.5, fontWeight:700, cursor:"pointer", border:"none",
+                            background: sub.status==="active"?"rgba(34,197,94,.15)":sub.status==="cancelled"?"rgba(119,136,170,.15)":"rgba(239,68,68,.15)",
+                            color:       sub.status==="active"?"#4ade80":sub.status==="cancelled"?"#7788aa":"#f87171",
+                          }}
+                          title="Click to cycle status">
+                          {(sub.status || "active").toUpperCase()}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );

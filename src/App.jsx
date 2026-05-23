@@ -204,6 +204,24 @@ export default function App() {
       });
   }, []);
 
+  useEffect(() => {
+    const channel = supabase
+      .channel("bookings-realtime")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "bookings" }, ({ new: row }) => {
+        setBookings(p => p.some(b => b.id === row.id) ? p : [...p, row].sort((a, b) => a.date.localeCompare(b.date)));
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "bookings" }, ({ new: row }) => {
+        setBookings(p => p.map(b => b.id === row.id ? row : b));
+        setSelected(sel => sel?.id === row.id ? row : sel);
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "bookings" }, ({ old: row }) => {
+        setBookings(p => p.filter(b => b.id !== row.id));
+        setSelected(sel => sel?.id === row.id ? null : sel);
+      })
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, []);
+
   // ── Toast ──────────────────────────────────────────────────────────────
   const fire = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
@@ -261,14 +279,14 @@ export default function App() {
 
   const resetClient = () => { setStep(1); setForm({ firstName:"", lastName:"", email:"", phone:"", services:[], date:"", time:"", notes:"", duration:1 }); setSubmitted(false); };
 
-  const exportCSV = () => {
+  const exportCSV = (list, label = "bookings") => {
     const headers = ["Client","Phone","Email","Services","Date","Time","Duration (hrs)","Status","Price","Notes","Booked On"];
-    const rows = bookings.map(b => [
+    const rows = list.map(b => [
       b.client, b.phone, b.email || "", Array.isArray(b.service) ? b.service.join("; ") : (b.service || ""),
       b.date, b.time, b.duration || 1, b.status, b.price ?? "", b.notes || "", (b.created_at || "").slice(0,10),
     ]);
     const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
-    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([csv], { type:"text/csv" })), download: `ez-tech-bookings-${todayStr}.csv` });
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([csv], { type:"text/csv" })), download: `ez-tech-${label}-${todayStr}.csv` });
     a.click();
   };
 
@@ -479,6 +497,15 @@ export default function App() {
     setEditMode(false);
     setBulkDeleteConfirm(false);
     fire(`🗑 ${ids.length} booking${ids.length !== 1 ? "s" : ""} deleted`);
+  };
+
+  const bulkSetStatus = async (status) => {
+    const ids = [...selectedIds];
+    const { error } = await supabase.from("bookings").update({ status }).in("id", ids);
+    if (error) { fire("❌ Error updating status"); return; }
+    setBookings(p => p.map(b => selectedIds.has(b.id) ? { ...b, status } : b));
+    if (selected && selectedIds.has(selected.id)) setSelected(s => ({ ...s, status }));
+    fire(`✅ ${ids.length} booking${ids.length !== 1 ? "s" : ""} → ${status}`);
   };
 
   const toggleEditMode = () => {
@@ -849,7 +876,7 @@ export default function App() {
                         <div style={{ position:"fixed", inset:0, zIndex:199 }} onClick={() => setShowExportMenu(false)} />
                         <div style={{ position:"absolute", top:"calc(100% + 4px)", right:0, zIndex:200, background:"#0a1628", border:"1px solid rgba(201,162,39,.3)", borderRadius:4, minWidth:150, boxShadow:"0 8px 24px rgba(0,0,0,.6)", overflow:"hidden" }}>
                           {[
-                            { label:"⬇ Download CSV", action: () => { exportCSV(); setShowExportMenu(false); } },
+                            { label:"⬇ Download CSV", action: () => { exportCSV(filtered, "bookings"); setShowExportMenu(false); } },
                             { label:"🖨 Download PDF", action: () => { exportPDF(); setShowExportMenu(false); } },
                           ].map(({ label, action }) => (
                             <button key={label} onClick={action} style={{ display:"block", width:"100%", padding:"12px 16px", background:"transparent", border:"none", borderBottom:"1px solid rgba(201,162,39,.1)", color:"#c9a227", fontSize:14, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, cursor:"pointer", textAlign:"left" }}
@@ -915,21 +942,24 @@ export default function App() {
                 );
               })}
 
-              {/* Bulk delete bar */}
+              {/* Bulk action bar */}
               {editMode && selectedIds.size > 0 && (
-                <div style={{ marginTop:14, padding:12, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4 }}>
-                  {bulkDeleteConfirm ? (
-                    <>
-                      <div style={{ fontSize:14, color:"#fca5a5", marginBottom:10 }}>⚠️ Permanently delete {selectedIds.size} booking{selectedIds.size !== 1 ? "s" : ""}?</div>
+                <div style={{ marginTop:10 }}>
+                  <div style={{ display:"flex", gap:6, flexWrap:"wrap", padding:"8px 10px", background:"rgba(201,162,39,.08)", border:"1px solid rgba(201,162,39,.25)", borderRadius:4, marginBottom:6 }}>
+                    <span style={{ fontSize:12, color:"#f0c040", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, alignSelf:"center", flex:1 }}>{selectedIds.size} selected</span>
+                    <button className="btn ok"    style={{ padding:"5px 10px", fontSize:11 }} onClick={() => bulkSetStatus("approved")}>✅ APPROVE</button>
+                    <button className="btn danger" style={{ padding:"5px 10px", fontSize:11 }} onClick={() => bulkSetStatus("denied")}>❌ DENY</button>
+                    <button className="btn ghost"  style={{ padding:"5px 10px", fontSize:11 }} onClick={() => exportCSV(bookings.filter(b => selectedIds.has(b.id)), "selected")}>⬇ CSV</button>
+                    <button className="btn danger" style={{ padding:"5px 10px", fontSize:11 }} onClick={() => setBulkDeleteConfirm(true)}>🗑 DELETE</button>
+                  </div>
+                  {bulkDeleteConfirm && (
+                    <div style={{ padding:"10px 12px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4 }}>
+                      <div style={{ fontSize:13, color:"#fca5a5", marginBottom:8 }}>⚠️ Permanently delete {selectedIds.size} booking{selectedIds.size !== 1 ? "s" : ""}?</div>
                       <div style={{ display:"flex", gap:8 }}>
-                        <button className="btn danger" style={{ flex:1, padding:"8px", fontSize:12 }} onClick={bulkDelete}>YES, DELETE</button>
-                        <button className="btn ghost" style={{ flex:1, padding:"8px", fontSize:12 }} onClick={() => setBulkDeleteConfirm(false)}>CANCEL</button>
+                        <button className="btn danger" style={{ flex:1, padding:"7px", fontSize:12 }} onClick={bulkDelete}>YES, DELETE</button>
+                        <button className="btn ghost"  style={{ flex:1, padding:"7px", fontSize:12 }} onClick={() => setBulkDeleteConfirm(false)}>CANCEL</button>
                       </div>
-                    </>
-                  ) : (
-                    <button className="btn danger" style={{ width:"100%", padding:"10px", fontSize:13 }} onClick={() => setBulkDeleteConfirm(true)}>
-                      🗑 DELETE {selectedIds.size} BOOKING{selectedIds.size !== 1 ? "S" : ""}
-                    </button>
+                    </div>
                   )}
                 </div>
               )}

@@ -121,6 +121,12 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const [calY, setCalY] = useState(new Date().getFullYear());
   const [calDay, setCalDay] = useState(null);
 
+  const [payments, setPayments]               = useState([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
+  const [showLogPayment, setShowLogPayment]   = useState(false);
+  const [logPayForm, setLogPayForm]           = useState({ amount:"", payment_method:"Cash", note:"", paid_at:todayStr() });
+  const [loggingPay, setLoggingPay]           = useState(false);
+
   useEffect(() => {
     if (!authed) return;
     supabase
@@ -132,6 +138,17 @@ export default function SubscriptionsAdmin({ onGoClient }) {
         setLoading(false);
       });
   }, [authed]);
+
+  useEffect(() => {
+    if (!selected) { setPayments([]); return; }
+    setPaymentsLoading(true);
+    supabase
+      .from("payments")
+      .select("*")
+      .eq("subscription_id", selected.id)
+      .order("paid_at", { ascending: false })
+      .then(({ data }) => { setPayments(data || []); setPaymentsLoading(false); });
+  }, [selected?.id]);
 
   const fire = msg => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
@@ -237,6 +254,14 @@ export default function SubscriptionsAdmin({ onGoClient }) {
         .single();
       if (error) { fire("❌ Error adding"); setSaving(false); return; }
       setSubs(p => [...p, data].sort((a, b) => new Date(a.expiration) - new Date(b.expiration)));
+      // Log initial payment
+      supabase.from("payments").insert({
+        subscription_id: data.id,
+        amount: payload.price,
+        payment_method: payload.payment_method,
+        note: "Initial subscription",
+        paid_at: new Date((payload.start_date || todayStr()) + "T12:00:00").toISOString(),
+      }).then(() => {});
       // Send welcome email if client has an email address
       if (payload.email) {
         fetch("/api/send-subscription-welcome", {
@@ -346,6 +371,14 @@ export default function SubscriptionsAdmin({ onGoClient }) {
     const updated = { ...selected, ...patch };
     setSubs(p => p.map(s => s.id === selected.id ? updated : s));
     setSelected(updated);
+    // Log renewal payment
+    supabase.from("payments").insert({
+      subscription_id: selected.id,
+      amount: patch.price,
+      payment_method: renewForm.payment_method,
+      note: `Renewal — ${patch.duration_months}mo`,
+      paid_at: new Date().toISOString(),
+    }).then(({ data }) => { if (data?.[0]) setPayments(p => [data[0], ...p]); });
     // Send renewal email
     if (selected.email) {
       fetch("/api/send-subscription-renewal", {
@@ -367,6 +400,24 @@ export default function SubscriptionsAdmin({ onGoClient }) {
     setRenewing(false);
     setShowRenewModal(false);
     fire("🔄 Renewed!" + (selected.email ? " · Confirmation email sent" : ""));
+  };
+
+  // ── Payment log ───────────────────────────────────────────────────────────
+  const logPayment = async () => {
+    if (!selected || loggingPay) return;
+    setLoggingPay(true);
+    const { data, error } = await supabase.from("payments").insert({
+      subscription_id: selected.id,
+      amount:          parseInt(logPayForm.amount) || 0,
+      payment_method:  logPayForm.payment_method,
+      note:            logPayForm.note.trim(),
+      paid_at:         new Date(logPayForm.paid_at + "T12:00:00").toISOString(),
+    }).select().single();
+    if (error) { fire("❌ Failed to log payment"); setLoggingPay(false); return; }
+    setPayments(p => [data, ...p]);
+    setShowLogPayment(false);
+    fire("✅ Payment logged");
+    setLoggingPay(false);
   };
 
   // ── Computed ──────────────────────────────────────────────────────────────
@@ -789,6 +840,34 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                           {selected.notes || "No notes"}
                         </div>
                       )}
+                    </div>
+
+                    {/* Payment History */}
+                    <div style={{ marginBottom:16, padding:12, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
+                        <div style={{ fontSize:12, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>PAYMENT HISTORY</div>
+                        <button
+                          onClick={() => { setLogPayForm({ amount:String(selected.price||""), payment_method:selected.payment_method||"Cash", note:"", paid_at:todayStr() }); setShowLogPayment(true); }}
+                          style={{ background:"none", border:"1px solid rgba(201,162,39,.3)", borderRadius:3, color:"#c9a227", fontSize:12, padding:"3px 9px", cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
+                          ＋ LOG
+                        </button>
+                      </div>
+                      {paymentsLoading ? (
+                        <div style={{ fontSize:13, color:"#556677", textAlign:"center", padding:"8px 0" }} className="pulse">Loading…</div>
+                      ) : payments.length === 0 ? (
+                        <div style={{ fontSize:14, color:"#445566", fontStyle:"italic" }}>No payment records yet</div>
+                      ) : payments.map(pay => (
+                        <div key={pay.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", padding:"7px 0", borderBottom:"1px solid rgba(201,162,39,.07)" }}>
+                          <div>
+                            <div style={{ fontSize:14, color:"#e8e0cc" }}>
+                              {PAYMENT_EMOJI[pay.payment_method] || "💳"} {pay.payment_method}
+                              {pay.note ? <span style={{ fontSize:12, color:"#7788aa", marginLeft:6 }}>· {pay.note}</span> : null}
+                            </div>
+                            <div style={{ fontSize:12, color:"#556677", marginTop:2 }}>{fmtDate(pay.paid_at)}</div>
+                          </div>
+                          <div style={{ fontSize:16, fontWeight:700, color:"#22c55e", flexShrink:0 }}>${pay.amount}</div>
+                        </div>
+                      ))}
                     </div>
 
                     {/* Renew */}
@@ -1267,6 +1346,66 @@ export default function SubscriptionsAdmin({ onGoClient }) {
               <button className="btn ghost" onClick={() => setShowRenewModal(false)}>CANCEL</button>
               <button className="btn ok" disabled={!renewForm.price || renewing} onClick={submitRenewal}>
                 {renewing ? "RENEWING…" : "✓ CONFIRM RENEWAL"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Log Payment Modal */}
+      {showLogPayment && selected && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.8)", zIndex:2000, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}
+          onClick={() => setShowLogPayment(false)}>
+          <div className="card slide-in" style={{ width:"100%", maxWidth:400, padding:28 }} onClick={e => e.stopPropagation()}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>💵 LOG PAYMENT</div>
+              <button className="btn ghost" style={{ padding:"4px 10px", fontSize:14 }} onClick={() => setShowLogPayment(false)}>✕</button>
+            </div>
+
+            <div style={{ padding:"8px 12px", background:"rgba(201,162,39,.06)", border:"1px solid rgba(201,162,39,.15)", borderRadius:4, marginBottom:18, fontSize:14, color:"#c9a227", fontWeight:600 }}>
+              {selected.name}
+            </div>
+
+            <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                <div>
+                  {lbl("AMOUNT ($) *")}
+                  <input type="number" min="0" value={logPayForm.amount} autoFocus
+                    onChange={e => setLogPayForm(f => ({ ...f, amount:e.target.value }))} placeholder="0" />
+                </div>
+                <div>
+                  {lbl("DATE")}
+                  <input type="date" value={logPayForm.paid_at}
+                    onChange={e => setLogPayForm(f => ({ ...f, paid_at:e.target.value }))} />
+                </div>
+              </div>
+
+              <div>
+                {lbl("PAYMENT METHOD")}
+                <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                  {PAYMENT_METHODS.map(m => (
+                    <button key={m} type="button" onClick={() => setLogPayForm(f => ({ ...f, payment_method:m }))}
+                      style={{ flex:"1 1 80px", padding:"8px 6px", fontSize:13, borderRadius:3, cursor:"pointer", transition:"all .15s",
+                        background: logPayForm.payment_method === m ? "rgba(201,162,39,.2)" : "transparent",
+                        border: `1px solid ${logPayForm.payment_method === m ? "#c9a227" : "rgba(201,162,39,.2)"}`,
+                        color: logPayForm.payment_method === m ? "#f0c040" : "#556677",
+                        fontFamily:"'Exo 2',sans-serif", fontWeight:600 }}>
+                      {PAYMENT_EMOJI[m]} {m}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                {lbl("NOTE (optional)")}
+                <input value={logPayForm.note} onChange={e => setLogPayForm(f => ({ ...f, note:e.target.value }))}
+                  placeholder="e.g. Renewal, Extra device…" />
+              </div>
+            </div>
+
+            <div style={{ display:"flex", gap:10, marginTop:22, justifyContent:"flex-end" }}>
+              <button className="btn ghost" onClick={() => setShowLogPayment(false)}>CANCEL</button>
+              <button className="btn gold" disabled={!logPayForm.amount || loggingPay} onClick={logPayment}>
+                {loggingPay ? "SAVING…" : "💾 SAVE PAYMENT"}
               </button>
             </div>
           </div>

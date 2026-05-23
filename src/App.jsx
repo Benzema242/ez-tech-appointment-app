@@ -771,8 +771,11 @@ export default function App() {
     <div style={{ display:"flex", flexDirection:"column", height:"100vh", overflowX:"hidden", width:"100%" }}>
 
       {/* Admin Header */}
-      <div className="admin-hdr" style={{ padding:"12px 24px", borderBottom:"1px solid rgba(201,162,39,.2)", background:"linear-gradient(180deg,rgba(10,22,40,.95),rgba(10,22,40,.85))", display:"flex", alignItems:"center", justifyContent:"space-between", gap:14, flexWrap:"wrap" }}>
+      <div className="admin-hdr" style={{ position:"relative", padding:"12px 24px", borderBottom:"1px solid rgba(201,162,39,.2)", background:"linear-gradient(180deg,rgba(10,22,40,.95),rgba(10,22,40,.85))", display:"flex", alignItems:"center", justifyContent:"space-between", gap:14, flexWrap:"wrap" }}>
         <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO-wide.png`} alt="EZ Tech" style={{ height:80, width:"auto", flexShrink:0 }} />
+        <div style={{ position:"absolute", left:0, right:0, textAlign:"center", pointerEvents:"none" }}>
+          <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:20, fontWeight:900, color:"#f0c040", letterSpacing:2 }}>BOOKING MANAGER</div>
+        </div>
         <div className="admin-hdr-btns" style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
           <button className="btn ghost" style={{ padding:"8px 12px", fontSize:12 }} onClick={() => { setShowChangePwModal(true); setChangePwError(""); setChangePwForm({ old:"", newPw:"", confirm:"" }); }}>🔑 CHANGE PW</button>
           <button className="btn ghost" style={{ padding:"8px 12px", fontSize:12 }} onClick={() => { window.location.hash = "#/subscriptions"; }}>📱 SUBSCRIPTIONS</button>

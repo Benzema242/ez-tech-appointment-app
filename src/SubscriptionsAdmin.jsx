@@ -480,6 +480,15 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const iptvSubs   = subs.filter(s => s.plan === "IPTV"        && s.status === "active" && daysUntil(s.expiration) > 0).length;
   const movieSubs  = subs.filter(s => s.plan === "Movies & TV" && s.status === "active" && daysUntil(s.expiration) > 0).length;
 
+  const projWindow = n => subs.filter(s => { const d = daysUntil(s.expiration); return s.status === "active" && d > 0 && d <= n; });
+  const proj30subs = projWindow(30);
+  const proj60subs = projWindow(60);
+  const proj90subs = projWindow(90);
+  const proj30rev  = proj30subs.reduce((sum, s) => sum + (s.price || 0), 0);
+  const proj60rev  = proj60subs.reduce((sum, s) => sum + (s.price || 0), 0);
+  const proj90rev  = proj90subs.reduce((sum, s) => sum + (s.price || 0), 0);
+  const upcoming30 = [...proj30subs].sort((a, b) => new Date(a.expiration) - new Date(b.expiration));
+
   const lbl = (text) => (
     <label style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>{text}</label>
   );
@@ -1102,7 +1111,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
             </div>
 
             {/* Summary cards */}
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))", gap:12 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))", gap:12, marginBottom:32 }}>
               {[
                 { l:"12-MONTH REVENUE",  v:`$${totalRev12}`,                      c:"#c9a227" },
                 { l:"MONTHLY AVG",       v:`$${avgRev}`,                          c:"#a78bfa" },
@@ -1119,6 +1128,57 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                 </div>
               ))}
             </div>
+
+            {/* Revenue Projection */}
+            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>REVENUE PROJECTION</div>
+            <div style={{ fontSize:15, color:"#7788aa", marginBottom:16 }}>Expected renewal revenue if all active subscriptions renew</div>
+
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))", gap:12, marginBottom:24 }}>
+              {[
+                { l:"NEXT 30 DAYS", v:`$${proj30rev}`, c:"#22c55e", sub:`${proj30subs.length} sub${proj30subs.length!==1?"s":""}` },
+                { l:"NEXT 60 DAYS", v:`$${proj60rev}`, c:"#c9a227", sub:`${proj60subs.length} sub${proj60subs.length!==1?"s":""}` },
+                { l:"NEXT 90 DAYS", v:`$${proj90rev}`, c:"#a78bfa", sub:`${proj90subs.length} sub${proj90subs.length!==1?"s":""}` },
+              ].map(s => (
+                <div key={s.l} className="card" style={{ padding:"16px 18px" }}>
+                  <div style={{ fontSize:13, letterSpacing:1.5, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>{s.l}</div>
+                  <div style={{ fontSize:28, fontWeight:900, color:s.c, fontFamily:"'Orbitron',sans-serif" }}>{s.v}</div>
+                  <div style={{ fontSize:12, color:"#556677", marginTop:4 }}>{s.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            {upcoming30.length > 0 ? (
+              <div className="card" style={{ padding:"16px 20px" }}>
+                <div style={{ fontSize:12, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:12 }}>UPCOMING RENEWALS — NEXT 30 DAYS</div>
+                {upcoming30.map(sub => {
+                  const days = daysUntil(sub.expiration);
+                  const urgency = days <= 2 ? "#ef4444" : days <= 7 ? "#f59e0b" : "#22c55e";
+                  return (
+                    <div key={sub.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"9px 0", borderBottom:"1px solid rgba(201,162,39,.08)", cursor:"pointer" }}
+                      onClick={() => { setTab("list"); setSelected(sub); }}>
+                      <div>
+                        <div style={{ fontSize:14, fontWeight:600, color:"#e8e0cc" }}>{sub.name}</div>
+                        <div style={{ fontSize:12, color:"#7788aa", marginTop:2 }}>
+                          <span style={{ color:sub.plan==="IPTV"?"#60a5fa":"#c4b5fd" }}>{sub.plan}</span>
+                          {" · "}{fmtDate(sub.expiration)}
+                          {sub.phone && (
+                            <a href={`https://wa.me/${waPhone(sub.phone)}?text=${waRenewalMsg(sub)}`} target="_blank" rel="noopener noreferrer"
+                              onClick={e => e.stopPropagation()}
+                              style={{ marginLeft:8, color:"#25d366", textDecoration:"none" }}>💬</a>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ textAlign:"right", flexShrink:0 }}>
+                        <div style={{ fontSize:15, fontWeight:700, color:"#22c55e" }}>${sub.price}</div>
+                        <div style={{ fontSize:12, color:urgency, marginTop:2 }}>{days}d left</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ padding:"20px", textAlign:"center", color:"#445566", fontSize:14 }}>No renewals due in the next 30 days</div>
+            )}
           </div>
         )}
       </div>

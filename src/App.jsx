@@ -344,31 +344,31 @@ export default function App() {
     const win = window.open('', '_blank');
     win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>${title} — EZ Tech Solutions</title><style>
       *{box-sizing:border-box;margin:0;padding:0;}
-      body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:14px;min-height:100vh;display:flex;flex-direction:column;}
+      body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:16px;min-height:100vh;display:flex;flex-direction:column;}
       /* ── Header ── */
       .hdr{background:#fff;padding:16px 36px 0;display:flex;align-items:flex-end;justify-content:space-between;}
-      .hdr-contact{text-align:right;font-size:12px;color:#444;line-height:2;}
+      .hdr-contact{text-align:right;font-size:14px;color:#444;line-height:2;}
       .hdr-contact span{color:#c9a227;font-weight:700;}
       /* ── Rules ── */
       .gold-rule{height:4px;background:linear-gradient(90deg,#c9a227,#f0c040,#c9a227);}
       .blue-rule{height:4px;background:linear-gradient(90deg,#1e40af,#3b82f6,#1e40af);}
       /* ── Doc info bar ── */
       .doc-bar{background:#f7f5ef;border-bottom:1px solid #e0d9c8;padding:13px 36px;display:flex;align-items:center;justify-content:space-between;}
-      .doc-title{font-size:18px;font-weight:800;color:#050b1f;letter-spacing:.5px;}
-      .doc-meta{font-size:12px;color:#888;text-align:right;line-height:1.7;}
-      .doc-ref{font-size:12px;font-weight:700;color:#c9a227;letter-spacing:1px;}
+      .doc-title{font-size:20px;font-weight:800;color:#050b1f;letter-spacing:.5px;}
+      .doc-meta{font-size:14px;color:#888;text-align:right;line-height:1.7;}
+      .doc-ref{font-size:14px;font-weight:700;color:#c9a227;letter-spacing:1px;}
       /* ── Body ── */
       .body{flex:1;padding:28px 36px;}
       table{width:100%;border-collapse:collapse;margin-top:4px;}
-      th{text-align:left;padding:11px 14px;background:#050b1f;color:#c9a227;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
-      td{padding:12px 14px;font-size:14px;border-bottom:1px solid #eee;vertical-align:top;color:#1a1a2e;}
+      th{text-align:left;padding:11px 14px;background:#050b1f;color:#c9a227;font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+      td{padding:12px 14px;font-size:16px;border-bottom:1px solid #eee;vertical-align:top;color:#1a1a2e;}
       td:first-child{font-weight:600;color:#444;width:36%;background:#fafaf8;}
       tr:last-child td{border-bottom:none;}
       /* Stats grid */
       .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
       .stat-card{border:2px solid #e0d9c8;border-radius:6px;padding:14px 18px;background:#fafaf8;}
       .stat-card.gold{border-color:#c9a227;}
-      .stat-label{font-size:11px;color:#888;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+      .stat-label{font-size:13px;color:#888;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
       .stat-val{font-size:24px;font-weight:900;color:#050b1f;}
       /* Dispatch table — no left-column bold */
       .dispatch td:first-child{font-weight:400;background:#fff;width:auto;}
@@ -378,7 +378,7 @@ export default function App() {
       .ftr-gold{height:4px;background:linear-gradient(90deg,#c9a227,#f0c040,#c9a227);}
       .ftr-blue{height:4px;background:linear-gradient(90deg,#1e40af,#3b82f6,#1e40af);}
       .ftr{background:#fff;padding:16px 36px;}
-      .ftr-disclaimer{font-size:10px;color:#111;line-height:1.6;}
+      .ftr-disclaimer{font-size:12px;color:#111;line-height:1.6;}
       .ftr-disclaimer strong{color:#111;}
       @media print{@page{margin:0;size:letter}body{height:11in;min-height:unset;}button{display:none;}}
     </style></head><body>
@@ -579,10 +579,10 @@ export default function App() {
     ::-webkit-scrollbar{width:5px;height:5px;}
     ::-webkit-scrollbar-track{background:#0a1628;}
     ::-webkit-scrollbar-thumb{background:#c9a227;border-radius:2px;}
-    input,select,textarea{background:rgba(255,255,255,.05);border:1px solid rgba(201,162,39,.3);color:#e8e0cc;padding:11px 14px;font-family:'Exo 2',sans-serif;font-size:14px;width:100%;border-radius:3px;outline:none;transition:all .2s;}
+    input,select,textarea{background:rgba(255,255,255,.05);border:1px solid rgba(201,162,39,.3);color:#e8e0cc;padding:11px 14px;font-family:'Exo 2',sans-serif;font-size:16px;width:100%;border-radius:3px;outline:none;transition:all .2s;}
     input:focus,select:focus,textarea:focus{border-color:#c9a227;box-shadow:0 0 0 2px rgba(201,162,39,.15);}
     select option{background:#0a1628;}
-    .btn{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;cursor:pointer;border:none;border-radius:3px;transition:all .2s;padding:10px 18px;}
+    .btn{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;cursor:pointer;border:none;border-radius:3px;transition:all .2s;padding:10px 18px;}
     .btn:hover{filter:brightness(1.15);transform:translateY(-1px);}
     .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
     .gold{background:linear-gradient(135deg,#c9a227,#f0c040);color:#050d1a;}
@@ -601,11 +601,11 @@ export default function App() {
     @keyframes sl{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
     .pulse{animation:p 1.8s infinite;}
     @keyframes p{0%,100%{opacity:1;}50%{opacity:.4;}}
-    .timeslot{padding:9px 10px;border-radius:3px;cursor:pointer;font-size:12px;font-weight:600;text-align:center;border:1px solid rgba(201,162,39,.25);background:rgba(201,162,39,.05);color:#c9a227;transition:all .15s;}
+    .timeslot{padding:9px 10px;border-radius:3px;cursor:pointer;font-size:14px;font-weight:600;text-align:center;border:1px solid rgba(201,162,39,.25);background:rgba(201,162,39,.05);color:#c9a227;transition:all .15s;}
     .timeslot:hover{background:rgba(201,162,39,.15);}
     .timeslot.sel{background:#c9a227;color:#050d1a;}
     .timeslot.taken{background:rgba(100,100,100,.1);border-color:rgba(100,100,100,.2);color:#555;cursor:not-allowed;text-decoration:line-through;}
-    .cell{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:3px;cursor:pointer;font-size:15px;border:1px solid transparent;transition:all .15s;font-weight:500;}
+    .cell{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:3px;cursor:pointer;font-size:17px;border:1px solid transparent;transition:all .15s;font-weight:500;}
     .cell:hover{border-color:rgba(201,162,39,.4);background:rgba(201,162,39,.08);}
     .cell.today{border-color:#c9a227;color:#c9a227;font-weight:700;}
     .cell.has-app{background:rgba(34,197,94,.18);color:#4ade80;}
@@ -615,11 +615,11 @@ export default function App() {
     .row{padding:13px 14px;border-radius:4px;cursor:pointer;border:1px solid rgba(201,162,39,.1);background:rgba(201,162,39,.03);transition:all .15s;margin-bottom:8px;}
     .row:hover{background:rgba(201,162,39,.08);border-color:rgba(201,162,39,.3);}
     .row.active{background:rgba(201,162,39,.12);border-color:rgba(201,162,39,.5);}
-    .logo-circle{width:42px;height:42px;border-radius:50%;border:2px solid #c9a227;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;color:#fff;background:linear-gradient(135deg,#1e3a5f,#0a1628);box-shadow:0 0 12px rgba(201,162,39,.4);flex-shrink:0;}
+    .logo-circle{width:42px;height:42px;border-radius:50%;border:2px solid #c9a227;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:18px;color:#fff;background:linear-gradient(135deg,#1e3a5f,#0a1628);box-shadow:0 0 12px rgba(201,162,39,.4);flex-shrink:0;}
     .shake{animation:shake .4s ease;}
     @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
-    .svc-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.25);border-radius:3px;font-size:11px;color:#c9a227;}
-    .fs-error{font-size:11px;color:#f87171;margin-top:5px;display:block;}
+    .svc-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.25);border-radius:3px;font-size:13px;color:#c9a227;}
+    .fs-error{font-size:13px;color:#f87171;margin-top:5px;display:block;}
     .side-col{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;position:sticky;top:20px;align-self:flex-start;}
     .side-photo{width:100%;border-radius:8px;object-fit:cover;border:1px solid rgba(201,162,39,.25);display:block;box-shadow:0 4px 18px rgba(0,0,0,.5);}
     @media(max-width:1080px){.side-col{display:none;}}
@@ -636,8 +636,8 @@ export default function App() {
       .filter-row .btn{flex-shrink:0;}
       .stats-bar{padding:10px 14px!important;gap:8px!important;}
       .stat-card{padding:10px 12px!important;flex:1 1 80px!important;}
-      .stat-val{font-size:18px!important;}
-      .admin-hdr-btns .btn{padding:7px 8px!important;font-size:9px!important;letter-spacing:1px!important;}
+      .stat-val{font-size:22px!important;}
+      .admin-hdr-btns .btn{padding:7px 8px!important;font-size:13px!important;letter-spacing:1px!important;}
     }
     .filter-mobile-select{display:none!important;}
     @media(max-width:600px){
@@ -649,12 +649,12 @@ export default function App() {
       .contact-grid{grid-template-columns:1fr!important;}
       .reschedule-grid{grid-template-columns:1fr!important;}
       .admin-hdr{padding:10px 12px!important;gap:8px!important;}
-      .admin-hdr .logo-circle{width:34px!important;height:34px!important;font-size:13px!important;}
+      .admin-hdr .logo-circle{width:34px!important;height:34px!important;font-size:17px!important;}
       .admin-tabs{padding:0 8px!important;}
-      .admin-tabs>button{padding:12px 12px!important;font-size:9px!important;letter-spacing:1px!important;}
+      .admin-tabs>button{padding:12px 12px!important;font-size:13px!important;letter-spacing:1px!important;}
       .stats-bar{padding:8px 10px!important;gap:6px!important;}
       .stat-card{flex:1 1 60px!important;padding:7px 8px!important;min-width:0!important;}
-      .stat-val{font-size:15px!important;}
+      .stat-val{font-size:17px!important;}
       .stat-card>div:first-child{font-size:7px!important;}
     }
   `;
@@ -711,14 +711,14 @@ export default function App() {
             <span style={{ fontSize: compact ? 18 : 22, flexShrink:0 }}>{s.icon}</span>
             <div style={{ flex:1, minWidth:0 }}>
               <div style={{ fontWeight:600, color: on ? "#f0c040" : "#e8e0cc", fontSize: compact ? 12 : 13 }}>{s.label}</div>
-              {s.note && !compact && <div style={{ fontSize:11, color:"#c9a227", marginTop:2 }}>{s.note}</div>}
+              {s.note && !compact && <div style={{ fontSize:13, color:"#c9a227", marginTop:2 }}>{s.note}</div>}
             </div>
             <div style={{
               width:18, height:18, borderRadius:"50%", flexShrink:0,
               border: on ? "none" : "1px solid rgba(201,162,39,.3)",
               background: on ? "#c9a227" : "transparent",
               display:"flex", alignItems:"center", justifyContent:"center",
-              fontSize:11, color:"#050d1a", fontWeight:900,
+              fontSize:13, color:"#050d1a", fontWeight:900,
               transition:"all .15s",
             }}>{on ? "✓" : ""}</div>
           </div>
@@ -732,14 +732,14 @@ export default function App() {
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", padding:16 }} className="circuit">
       <div className="card slide-in" style={{ width:"100%", maxWidth:380, padding:"36px 32px" }}>
         <div style={{ textAlign:"center", marginBottom:28 }}>
-          <div className="logo-circle" style={{ width:56, height:56, fontSize:20, margin:"0 auto 14px" }}>EZ</div>
-          <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:900, color:"#fff", letterSpacing:2 }}>
+          <div className="logo-circle" style={{ width:56, height:56, fontSize:22, margin:"0 auto 14px" }}>EZ</div>
+          <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:900, color:"#fff", letterSpacing:2 }}>
             EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span>
           </div>
-          <div style={{ fontSize:11, color:"#7788aa", letterSpacing:2, marginTop:6, fontFamily:"'Orbitron',sans-serif" }}>ADMIN ACCESS</div>
+          <div style={{ fontSize:13, color:"#7788aa", letterSpacing:2, marginTop:6, fontFamily:"'Orbitron',sans-serif" }}>ADMIN ACCESS</div>
         </div>
         <div style={{ marginBottom:14 }}>
-          <label htmlFor="admin-pw" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:6 }}>PASSWORD</label>
+          <label htmlFor="admin-pw" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:6 }}>PASSWORD</label>
           <input
             id="admin-pw"
             ref={pwRef}
@@ -752,13 +752,13 @@ export default function App() {
             className={pwError ? "shake" : ""}
             style={ pwError ? { borderColor:"#ef4444", boxShadow:"0 0 0 2px rgba(239,68,68,.2)" } : {} }
           />
-          {pwError && <div style={{ fontSize:11, color:"#f87171", marginTop:6 }}>Incorrect password. Try again.</div>}
+          {pwError && <div style={{ fontSize:13, color:"#f87171", marginTop:6 }}>Incorrect password. Try again.</div>}
         </div>
-        <button className="btn gold" style={{ width:"100%", padding:"13px", fontSize:12, letterSpacing:2 }} onClick={tryLogin} disabled={loginLoading}>
+        <button className="btn gold" style={{ width:"100%", padding:"13px", fontSize:14, letterSpacing:2 }} onClick={tryLogin} disabled={loginLoading}>
           {loginLoading ? "VERIFYING…" : "UNLOCK DASHBOARD"}
         </button>
         <div style={{ textAlign:"center", marginTop:16 }}>
-          <button onClick={goClient} style={{ background:"none", border:"none", color:"#556677", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>
+          <button onClick={goClient} style={{ background:"none", border:"none", color:"#556677", fontSize:13, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>
             ← Back to booking page
           </button>
         </div>
@@ -774,14 +774,14 @@ export default function App() {
       <div className="admin-hdr" style={{ padding:"16px 24px", borderBottom:"1px solid rgba(201,162,39,.2)", background:"linear-gradient(180deg,rgba(10,22,40,.95),rgba(10,22,40,.85))", display:"flex", alignItems:"center", gap:14, flexWrap:"wrap" }}>
         <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO2.png`} alt="EZ Tech" style={{ height:56, width:"auto", flexShrink:0 }} />
         <div style={{ flex:1 }}>
-          <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:14, fontWeight:900, color:"#fff", letterSpacing:2 }}>EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span></div>
-          <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, marginTop:1 }}>ADMIN DASHBOARD · BENZ</div>
+          <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:16, fontWeight:900, color:"#fff", letterSpacing:2 }}>EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span></div>
+          <div style={{ fontSize:12, color:"#7788aa", letterSpacing:1, marginTop:1 }}>ADMIN DASHBOARD · BENZ</div>
         </div>
         <div className="admin-hdr-btns" style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-          <button className="btn ghost" style={{ padding:"8px 12px", fontSize:10 }} onClick={() => { setShowChangePwModal(true); setChangePwError(""); setChangePwForm({ old:"", newPw:"", confirm:"" }); }}>🔑 CHANGE PW</button>
-          <button className="btn ghost" style={{ padding:"8px 12px", fontSize:10 }} onClick={() => { window.location.hash = "#/subscriptions"; }}>📱 SUBSCRIPTIONS</button>
+          <button className="btn ghost" style={{ padding:"8px 12px", fontSize:12 }} onClick={() => { setShowChangePwModal(true); setChangePwError(""); setChangePwForm({ old:"", newPw:"", confirm:"" }); }}>🔑 CHANGE PW</button>
+          <button className="btn ghost" style={{ padding:"8px 12px", fontSize:12 }} onClick={() => { window.location.hash = "#/subscriptions"; }}>📱 SUBSCRIPTIONS</button>
           <button className="btn ghost" onClick={goClient}>👤 CLIENT VIEW</button>
-          <button className="btn danger" style={{ padding:"10px 14px", fontSize:10 }} onClick={logout}>LOGOUT</button>
+          <button className="btn danger" style={{ padding:"10px 14px", fontSize:12 }} onClick={logout}>LOGOUT</button>
         </div>
       </div>
 
@@ -796,13 +796,13 @@ export default function App() {
           { l:"REVENUE",  v:`$${revenue}`, sub: paidRevenue > 0 ? `$${paidRevenue} paid` : null, c:"#34d399" },
         ].map(s => (
           <div key={s.l} className="card stat-card" style={{ padding:"12px 18px", flex:"1 1 100px" }}>
-            <div style={{ fontSize:9, letterSpacing:2, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:4 }}>{s.l}</div>
-            <div className="stat-val" style={{ fontFamily:"'Orbitron',sans-serif", fontSize:22, fontWeight:900, color:s.c }}>
+            <div style={{ fontSize:11, letterSpacing:2, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:4 }}>{s.l}</div>
+            <div className="stat-val" style={{ fontFamily:"'Orbitron',sans-serif", fontSize:24, fontWeight:900, color:s.c }}>
               {s.v}
-              {s.l==="PENDING" && pendingCount > 0 && <span className="pulse" style={{ marginLeft:6, fontSize:14 }}>●</span>}
-              {s.l==="TODAY" && todayCount > 0 && <span className="pulse" style={{ marginLeft:6, fontSize:14 }}>●</span>}
+              {s.l==="PENDING" && pendingCount > 0 && <span className="pulse" style={{ marginLeft:6, fontSize:16 }}>●</span>}
+              {s.l==="TODAY" && todayCount > 0 && <span className="pulse" style={{ marginLeft:6, fontSize:16 }}>●</span>}
             </div>
-            {s.sub && <div style={{ fontSize:9, color:"#34d399", marginTop:3, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{s.sub}</div>}
+            {s.sub && <div style={{ fontSize:11, color:"#34d399", marginTop:3, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{s.sub}</div>}
           </div>
         ))}
       </div>
@@ -810,7 +810,7 @@ export default function App() {
       {/* Tab Navigation */}
       <div className="admin-tabs" style={{ padding:"0 24px", display:"flex", borderBottom:"1px solid rgba(201,162,39,.15)", overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
         {[["bookings","📋 BOOKINGS"],["upcoming","🗓 UPCOMING"],["calendar","📅 CALENDAR"],["stats","📊 STATS"]].map(([k,l]) => (
-          <button key={k} onClick={() => setAdminTab(k)} style={{ padding:"14px 20px", background:"transparent", border:"none", borderBottom: adminTab===k ? "2px solid #c9a227" : "2px solid transparent", color: adminTab===k ? "#c9a227" : "#7788aa", fontFamily:"'Orbitron',sans-serif", fontSize:11, fontWeight:700, letterSpacing:1.5, cursor:"pointer", transition:"all .2s", flexShrink:0, whiteSpace:"nowrap" }}>{l}</button>
+          <button key={k} onClick={() => setAdminTab(k)} style={{ padding:"14px 20px", background:"transparent", border:"none", borderBottom: adminTab===k ? "2px solid #c9a227" : "2px solid transparent", color: adminTab===k ? "#c9a227" : "#7788aa", fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, letterSpacing:1.5, cursor:"pointer", transition:"all .2s", flexShrink:0, whiteSpace:"nowrap" }}>{l}</button>
         ))}
       </div>
 
@@ -826,25 +826,25 @@ export default function App() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search by client name…"
-                style={{ marginBottom:10, fontSize:14, padding:"11px 14px" }}
+                style={{ marginBottom:10, fontSize:16, padding:"11px 14px" }}
               />
               <div style={{ display:"flex", gap:6, marginBottom:8, flexWrap:"wrap", alignItems:"center" }}>
                 {/* Desktop: filter buttons */}
                 <div className="filter-desktop-btns filter-row" style={{ display:"flex", gap:6, flexWrap:"wrap", flex:1, minWidth:0 }}>
                   {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"]].map(([k,l]) => (
-                    <button key={k} onClick={() => setFilter(k)} className="btn filter-btn" style={{ padding:"8px 13px", fontSize:12, background: filter===k ? "rgba(201,162,39,.2)" : "transparent", border:"1px solid rgba(201,162,39,.3)", color: filter===k ? "#f0c040" : "#7788aa" }}>{l}</button>
+                    <button key={k} onClick={() => setFilter(k)} className="btn filter-btn" style={{ padding:"8px 13px", fontSize:14, background: filter===k ? "rgba(201,162,39,.2)" : "transparent", border:"1px solid rgba(201,162,39,.3)", color: filter===k ? "#f0c040" : "#7788aa" }}>{l}</button>
                   ))}
                 </div>
                 {/* Mobile: filter dropdown */}
-                <select className="filter-mobile-select" value={filter} onChange={e => setFilter(e.target.value)} style={{ padding:"9px 10px", fontSize:13, flex:1, minWidth:0, textAlign:"center", textAlignLast:"center" }}>
+                <select className="filter-mobile-select" value={filter} onChange={e => setFilter(e.target.value)} style={{ padding:"9px 10px", fontSize:15, flex:1, minWidth:0, textAlign:"center", textAlignLast:"center" }}>
                   {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"]].map(([k,l]) => (
                     <option key={k} value={k}>{l}</option>
                   ))}
                 </select>
-                <button className="btn ghost" style={{ padding:"8px 10px", fontSize:11, flexShrink:0, color: editMode ? "#f0c040" : "#7788aa" }} onClick={toggleEditMode}>{editMode ? "DONE" : "SEL"}</button>
+                <button className="btn ghost" style={{ padding:"8px 10px", fontSize:13, flexShrink:0, color: editMode ? "#f0c040" : "#7788aa" }} onClick={toggleEditMode}>{editMode ? "DONE" : "SEL"}</button>
                 {!editMode && (
                   <div style={{ position:"relative", flexShrink:0 }}>
-                    <button className="btn ghost" style={{ padding:"8px 10px", fontSize:11 }} onClick={() => setShowExportMenu(v => !v)}>⬇ EXP</button>
+                    <button className="btn ghost" style={{ padding:"8px 10px", fontSize:13 }} onClick={() => setShowExportMenu(v => !v)}>⬇ EXP</button>
                     {showExportMenu && (
                       <>
                         <div style={{ position:"fixed", inset:0, zIndex:199 }} onClick={() => setShowExportMenu(false)} />
@@ -853,7 +853,7 @@ export default function App() {
                             { label:"⬇ Download CSV", action: () => { exportCSV(); setShowExportMenu(false); } },
                             { label:"🖨 Download PDF", action: () => { exportPDF(); setShowExportMenu(false); } },
                           ].map(({ label, action }) => (
-                            <button key={label} onClick={action} style={{ display:"block", width:"100%", padding:"12px 16px", background:"transparent", border:"none", borderBottom:"1px solid rgba(201,162,39,.1)", color:"#c9a227", fontSize:12, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, cursor:"pointer", textAlign:"left" }}
+                            <button key={label} onClick={action} style={{ display:"block", width:"100%", padding:"12px 16px", background:"transparent", border:"none", borderBottom:"1px solid rgba(201,162,39,.1)", color:"#c9a227", fontSize:14, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, cursor:"pointer", textAlign:"left" }}
                               onMouseEnter={e => e.currentTarget.style.background="rgba(201,162,39,.1)"}
                               onMouseLeave={e => e.currentTarget.style.background="transparent"}
                             >{label}</button>
@@ -863,21 +863,21 @@ export default function App() {
                     )}
                   </div>
                 )}
-                {!editMode && <button className="btn gold" style={{ padding:"8px 10px", fontSize:11, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋</button>}
+                {!editMode && <button className="btn gold" style={{ padding:"8px 10px", fontSize:13, flexShrink:0 }} onClick={() => { setShowAddModal(true); setAdminConfirmOverlap(false); }}>＋</button>}
               </div>
               <div style={{ display:"flex", gap:6, marginBottom:14, alignItems:"center", flexWrap:"wrap" }}>
-                <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ fontSize:13, padding:"9px 10px", colorScheme:"dark", flex:1, minWidth:0 }} title="From date" />
-                <span style={{ fontSize:13, color:"#556677", flexShrink:0 }}>to</span>
-                <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ fontSize:13, padding:"9px 10px", colorScheme:"dark", flex:1, minWidth:0 }} title="To date" />
-                <button onClick={() => { setDateFrom(""); setDateTo(""); }} disabled={!dateFrom && !dateTo} style={{ background: (dateFrom||dateTo) ? "rgba(201,162,39,.15)" : "transparent", border:`1px solid ${(dateFrom||dateTo) ? "rgba(201,162,39,.4)" : "rgba(100,100,100,.25)"}`, color:(dateFrom||dateTo) ? "#c9a227" : "#445566", fontSize:10, cursor:(dateFrom||dateTo) ? "pointer" : "default", flexShrink:0, padding:"9px 10px", borderRadius:3, fontFamily:"'Orbitron',sans-serif", letterSpacing:1, transition:"all .2s" }} title="Clear dates">CLEAR</button>
+                <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ fontSize:15, padding:"9px 10px", colorScheme:"dark", flex:1, minWidth:0 }} title="From date" />
+                <span style={{ fontSize:15, color:"#556677", flexShrink:0 }}>to</span>
+                <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ fontSize:15, padding:"9px 10px", colorScheme:"dark", flex:1, minWidth:0 }} title="To date" />
+                <button onClick={() => { setDateFrom(""); setDateTo(""); }} disabled={!dateFrom && !dateTo} style={{ background: (dateFrom||dateTo) ? "rgba(201,162,39,.15)" : "transparent", border:`1px solid ${(dateFrom||dateTo) ? "rgba(201,162,39,.4)" : "rgba(100,100,100,.25)"}`, color:(dateFrom||dateTo) ? "#c9a227" : "#445566", fontSize:12, cursor:(dateFrom||dateTo) ? "pointer" : "default", flexShrink:0, padding:"9px 10px", borderRadius:3, fontFamily:"'Orbitron',sans-serif", letterSpacing:1, transition:"all .2s" }} title="Clear dates">CLEAR</button>
               </div>
 
               {editMode && filtered.length > 0 && (
                 <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10, padding:"6px 4px" }}>
-                  <button onClick={() => setSelectedIds(selectedIds.size === filtered.length ? new Set() : new Set(filtered.map(b => b.id)))} style={{ background:"none", border:"none", color:"#c9a227", fontSize:13, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>
+                  <button onClick={() => setSelectedIds(selectedIds.size === filtered.length ? new Set() : new Set(filtered.map(b => b.id)))} style={{ background:"none", border:"none", color:"#c9a227", fontSize:15, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>
                     {selectedIds.size === filtered.length ? "Deselect All" : "Select All"}
                   </button>
-                  <span style={{ fontSize:13, color:"#7788aa" }}>{selectedIds.size} selected</span>
+                  <span style={{ fontSize:15, color:"#7788aa" }}>{selectedIds.size} selected</span>
                 </div>
               )}
 
@@ -896,21 +896,21 @@ export default function App() {
                   >
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                       {editMode ? (
-                        <div style={{ width:20, height:20, borderRadius:"50%", flexShrink:0, border: selectedIds.has(b.id) ? "none" : "1px solid rgba(201,162,39,.4)", background: selectedIds.has(b.id) ? "#c9a227" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, color:"#050d1a", fontWeight:900, transition:"all .15s" }}>
+                        <div style={{ width:20, height:20, borderRadius:"50%", flexShrink:0, border: selectedIds.has(b.id) ? "none" : "1px solid rgba(201,162,39,.4)", background: selectedIds.has(b.id) ? "#c9a227" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, color:"#050d1a", fontWeight:900, transition:"all .15s" }}>
                           {selectedIds.has(b.id) ? "✓" : ""}
                         </div>
                       ) : (
-                        <span style={{ fontSize:20 }}>{first.icon}</span>
+                        <span style={{ fontSize:22 }}>{first.icon}</span>
                       )}
                       <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:16, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.client}</div>
-                        <div style={{ fontSize:13, color:"#7788aa", marginTop:2, display:"flex", alignItems:"center", gap:6 }}>
+                        <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:18, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.client}</div>
+                        <div style={{ fontSize:15, color:"#7788aa", marginTop:2, display:"flex", alignItems:"center", gap:6 }}>
                           <span style={{ overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{first.label}</span>
-                          {extra > 0 && <span style={{ flexShrink:0, padding:"1px 6px", background:"rgba(201,162,39,.15)", border:"1px solid rgba(201,162,39,.3)", borderRadius:3, fontSize:9, color:"#c9a227" }}>+{extra} more</span>}
+                          {extra > 0 && <span style={{ flexShrink:0, padding:"1px 6px", background:"rgba(201,162,39,.15)", border:"1px solid rgba(201,162,39,.3)", borderRadius:3, fontSize:11, color:"#c9a227" }}>+{extra} more</span>}
                         </div>
-                        <div style={{ fontSize:13, color:"#c9a227", marginTop:3, fontFamily:"'Orbitron',sans-serif" }}>{relativeDate(b.date)} · {b.time}</div>
+                        <div style={{ fontSize:15, color:"#c9a227", marginTop:3, fontFamily:"'Orbitron',sans-serif" }}>{relativeDate(b.date)} · {b.time}</div>
                       </div>
-                      <span style={{ padding:"3px 8px", borderRadius:3, fontSize:9, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:st.color, background:st.bg, border:`1px solid ${st.border}`, whiteSpace:"nowrap" }}>{st.label}</span>
+                      <span style={{ padding:"3px 8px", borderRadius:3, fontSize:11, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:st.color, background:st.bg, border:`1px solid ${st.border}`, whiteSpace:"nowrap" }}>{st.label}</span>
                     </div>
                   </div>
                 );
@@ -921,14 +921,14 @@ export default function App() {
                 <div style={{ marginTop:14, padding:12, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4 }}>
                   {bulkDeleteConfirm ? (
                     <>
-                      <div style={{ fontSize:12, color:"#fca5a5", marginBottom:10 }}>⚠️ Permanently delete {selectedIds.size} booking{selectedIds.size !== 1 ? "s" : ""}?</div>
+                      <div style={{ fontSize:14, color:"#fca5a5", marginBottom:10 }}>⚠️ Permanently delete {selectedIds.size} booking{selectedIds.size !== 1 ? "s" : ""}?</div>
                       <div style={{ display:"flex", gap:8 }}>
-                        <button className="btn danger" style={{ flex:1, padding:"8px", fontSize:10 }} onClick={bulkDelete}>YES, DELETE</button>
-                        <button className="btn ghost" style={{ flex:1, padding:"8px", fontSize:10 }} onClick={() => setBulkDeleteConfirm(false)}>CANCEL</button>
+                        <button className="btn danger" style={{ flex:1, padding:"8px", fontSize:12 }} onClick={bulkDelete}>YES, DELETE</button>
+                        <button className="btn ghost" style={{ flex:1, padding:"8px", fontSize:12 }} onClick={() => setBulkDeleteConfirm(false)}>CANCEL</button>
                       </div>
                     </>
                   ) : (
-                    <button className="btn danger" style={{ width:"100%", padding:"10px", fontSize:11 }} onClick={() => setBulkDeleteConfirm(true)}>
+                    <button className="btn danger" style={{ width:"100%", padding:"10px", fontSize:13 }} onClick={() => setBulkDeleteConfirm(true)}>
                       🗑 DELETE {selectedIds.size} BOOKING{selectedIds.size !== 1 ? "S" : ""}
                     </button>
                   )}
@@ -941,7 +941,7 @@ export default function App() {
               {!selected ? (
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", color:"rgba(201,162,39,.3)", padding:40 }}>
                   <div style={{ fontSize:56, marginBottom:14 }}>📋</div>
-                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:2, textAlign:"center" }}>SELECT A BOOKING</div>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:2, textAlign:"center" }}>SELECT A BOOKING</div>
                 </div>
               ) : (() => {
                 const svcs = svcList(selected.service);
@@ -954,7 +954,7 @@ export default function App() {
 
                     {/* Mobile back button */}
                     <div className="mobile-back" style={{ marginBottom:14, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:12, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
+                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:14, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
                         ← Back to list
                       </button>
                       <button onClick={() => {
@@ -974,21 +974,21 @@ export default function App() {
                             <tr><td>Paid</td><td>${selected.paid ? 'Yes' : 'No'}</td></tr>
                             <tr><td>Notes</td><td>${selected.notes || '—'}</td></tr>
                           </table>`);
-                      }} style={{ background:"none", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", padding:"5px 10px", borderRadius:4 }}>🖨 Print</button>
+                      }} style={{ background:"none", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontSize:13, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", padding:"5px 10px", borderRadius:4 }}>🖨 Print</button>
                     </div>
 
                     {/* Header */}
                     <div style={{ display:"flex", alignItems:"flex-start", gap:12, marginBottom:20 }}>
                       <span style={{ fontSize:32, flexShrink:0 }}>{first.icon}</span>
                       <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040" }}>{selected.client}</div>
+                        <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:700, color:"#f0c040" }}>{selected.client}</div>
                         <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginTop:6 }}>
                           {svcs.map(s => (
                             <span key={s.id} className="svc-chip">{s.icon} {s.label}</span>
                           ))}
                         </div>
                       </div>
-                      <span style={{ padding:"4px 10px", borderRadius:3, fontSize:10, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:st.color, background:st.bg, border:`1px solid ${st.border}`, whiteSpace:"nowrap", flexShrink:0 }}>{st.label}</span>
+                      <span style={{ padding:"4px 10px", borderRadius:3, fontSize:12, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:st.color, background:st.bg, border:`1px solid ${st.border}`, whiteSpace:"nowrap", flexShrink:0 }}>{st.label}</span>
                     </div>
 
                     {[
@@ -998,43 +998,43 @@ export default function App() {
                       ["⏱ Duration", `${selected.duration || 1} hour${(selected.duration || 1) !== 1 ? "s" : ""}`],
                     ].map(([l,v]) => (
                       <div key={l} style={{ display:"flex", justifyContent:"space-between", padding:"10px 0", borderBottom:"1px solid rgba(201,162,39,.1)", gap:10 }}>
-                        <span style={{ fontSize:15, color:"#7788aa" }}>{l}</span>
-                        <span style={{ fontSize:15, color:"#e8e0cc", fontWeight:500, textAlign:"right" }}>{v}</span>
+                        <span style={{ fontSize:17, color:"#7788aa" }}>{l}</span>
+                        <span style={{ fontSize:17, color:"#e8e0cc", fontWeight:500, textAlign:"right" }}>{v}</span>
                       </div>
                     ))}
 
                     {/* Editable client details */}
                     <div style={{ marginTop:10, padding:12, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
                       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
-                        <div style={{ fontSize:10, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>CLIENT DETAILS</div>
+                        <div style={{ fontSize:12, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>CLIENT DETAILS</div>
                         {!editingDetails && (
-                          <button onClick={() => { setDetailsForm({ client: selected.client || "", phone: selected.phone || "", email: selected.email || "", service: Array.isArray(selected.service) ? [...selected.service] : selected.service ? [selected.service] : [] }); setEditingDetails(true); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>✏️ Edit</button>
+                          <button onClick={() => { setDetailsForm({ client: selected.client || "", phone: selected.phone || "", email: selected.email || "", service: Array.isArray(selected.service) ? [...selected.service] : selected.service ? [selected.service] : [] }); setEditingDetails(true); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:13, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>✏️ Edit</button>
                         )}
                       </div>
                       {editingDetails ? (
                         <>
                           <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
                             <div>
-                              <div style={{ fontSize:10, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>NAME</div>
-                              <input value={detailsForm.client} onChange={e => setDetailsForm(p => ({ ...p, client: e.target.value }))} style={{ fontSize:13, width:"100%" }} />
+                              <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>NAME</div>
+                              <input value={detailsForm.client} onChange={e => setDetailsForm(p => ({ ...p, client: e.target.value }))} style={{ fontSize:15, width:"100%" }} />
                             </div>
                             <div>
-                              <div style={{ fontSize:10, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>PHONE</div>
-                              <input value={detailsForm.phone} onChange={e => setDetailsForm(p => ({ ...p, phone: e.target.value }))} style={{ fontSize:13, width:"100%" }} />
+                              <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>PHONE</div>
+                              <input value={detailsForm.phone} onChange={e => setDetailsForm(p => ({ ...p, phone: e.target.value }))} style={{ fontSize:15, width:"100%" }} />
                             </div>
                             <div>
-                              <div style={{ fontSize:10, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>EMAIL</div>
-                              <input value={detailsForm.email} onChange={e => setDetailsForm(p => ({ ...p, email: e.target.value }))} style={{ fontSize:13, width:"100%" }} />
+                              <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>EMAIL</div>
+                              <input value={detailsForm.email} onChange={e => setDetailsForm(p => ({ ...p, email: e.target.value }))} style={{ fontSize:15, width:"100%" }} />
                             </div>
                             <div>
-                              <div style={{ fontSize:10, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:6 }}>SERVICES</div>
+                              <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:6 }}>SERVICES</div>
                               <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
                                 {SERVICES.map(s => {
                                   const checked = detailsForm.service.includes(s.id);
                                   return (
                                     <button key={s.id} type="button"
                                       onClick={() => setDetailsForm(p => ({ ...p, service: checked ? p.service.filter(x => x !== s.id) : [...p.service, s.id] }))}
-                                      style={{ padding:"5px 10px", fontSize:11, borderRadius:3, cursor:"pointer", background: checked ? "rgba(201,162,39,.2)" : "transparent", border: checked ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.2)", color: checked ? "#f0c040" : "#556677" }}>
+                                      style={{ padding:"5px 10px", fontSize:13, borderRadius:3, cursor:"pointer", background: checked ? "rgba(201,162,39,.2)" : "transparent", border: checked ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.2)", color: checked ? "#f0c040" : "#556677" }}>
                                       {s.icon} {s.label}
                                     </button>
                                   );
@@ -1043,60 +1043,60 @@ export default function App() {
                             </div>
                           </div>
                           <div style={{ display:"flex", gap:8, marginTop:10 }}>
-                            <button className="btn gold" style={{ padding:"6px 14px", fontSize:10 }} onClick={() => { updateBooking(selected.id, { client: detailsForm.client, phone: detailsForm.phone, email: detailsForm.email, service: detailsForm.service }); setEditingDetails(false); }}>SAVE</button>
-                            <button className="btn ghost" style={{ padding:"6px 14px", fontSize:10 }} onClick={() => setEditingDetails(false)}>CANCEL</button>
+                            <button className="btn gold" style={{ padding:"6px 14px", fontSize:12 }} onClick={() => { updateBooking(selected.id, { client: detailsForm.client, phone: detailsForm.phone, email: detailsForm.email, service: detailsForm.service }); setEditingDetails(false); }}>SAVE</button>
+                            <button className="btn ghost" style={{ padding:"6px 14px", fontSize:12 }} onClick={() => setEditingDetails(false)}>CANCEL</button>
                           </div>
                         </>
                       ) : (
                         <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
-                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:15 }}><span style={{ color:"#7788aa" }}>📞 Phone</span><span style={{ color:"#e8e0cc" }}>{selected.phone || "—"}</span></div>
-                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:15, paddingTop:4 }}><span style={{ color:"#7788aa" }}>✉️ Email</span><span style={{ color:"#e8e0cc", textAlign:"right", maxWidth:"65%", wordBreak:"break-all" }}>{selected.email || "—"}</span></div>
+                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:17 }}><span style={{ color:"#7788aa" }}>📞 Phone</span><span style={{ color:"#e8e0cc" }}>{selected.phone || "—"}</span></div>
+                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:17, paddingTop:4 }}><span style={{ color:"#7788aa" }}>✉️ Email</span><span style={{ color:"#e8e0cc", textAlign:"right", maxWidth:"65%", wordBreak:"break-all" }}>{selected.email || "—"}</span></div>
                         </div>
                       )}
                     </div>
 
                     {/* Editable Price */}
                     <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid rgba(201,162,39,.1)", gap:10 }}>
-                      <span style={{ fontSize:15, color:"#7788aa", flexShrink:0 }}>
+                      <span style={{ fontSize:17, color:"#7788aa", flexShrink:0 }}>
                         💰 {selected.price != null ? "Price" : "Est. Price"}
                       </span>
                       {editingPrice ? (
                         <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                          <span style={{ fontSize:13, color:"#e8e0cc" }}>$</span>
+                          <span style={{ fontSize:15, color:"#e8e0cc" }}>$</span>
                           <input
                             type="number"
                             min="0"
                             value={priceInput}
                             onChange={e => setPriceInput(e.target.value)}
-                            style={{ width:90, fontSize:12, padding:"5px 8px" }}
+                            style={{ width:90, fontSize:14, padding:"5px 8px" }}
                             autoFocus
                             onKeyDown={e => {
                               if (e.key === "Enter") { updateBooking(selected.id, { price: priceInput === "" ? null : Number(priceInput) }); setEditingPrice(false); }
                               if (e.key === "Escape") setEditingPrice(false);
                             }}
                           />
-                          <button className="btn gold" style={{ padding:"5px 10px", fontSize:10 }} onClick={() => { updateBooking(selected.id, { price: priceInput === "" ? null : Number(priceInput) }); setEditingPrice(false); }}>SAVE</button>
-                          <button className="btn ghost" style={{ padding:"5px 10px", fontSize:10 }} onClick={() => setEditingPrice(false)}>✕</button>
+                          <button className="btn gold" style={{ padding:"5px 10px", fontSize:12 }} onClick={() => { updateBooking(selected.id, { price: priceInput === "" ? null : Number(priceInput) }); setEditingPrice(false); }}>SAVE</button>
+                          <button className="btn ghost" style={{ padding:"5px 10px", fontSize:12 }} onClick={() => setEditingPrice(false)}>✕</button>
                         </div>
                       ) : (
                         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                          <span style={{ fontSize:15, fontWeight:500, color: selected.price != null ? "#34d399" : "#e8e0cc" }}>
+                          <span style={{ fontSize:17, fontWeight:500, color: selected.price != null ? "#34d399" : "#e8e0cc" }}>
                             {selected.price != null ? `$${selected.price}` : priceDisplay}
                           </span>
                           {selected.price != null && (
-                            <button onClick={() => { updateBooking(selected.id, { price: null }); }} style={{ background:"none", border:"none", color:"#556677", fontSize:10, cursor:"pointer" }} title="Clear custom price">✕</button>
+                            <button onClick={() => { updateBooking(selected.id, { price: null }); }} style={{ background:"none", border:"none", color:"#556677", fontSize:12, cursor:"pointer" }} title="Clear custom price">✕</button>
                           )}
-                          <button onClick={() => { setPriceInput(selected.price != null ? String(selected.price) : ""); setEditingPrice(true); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>✏️ Edit</button>
+                          <button onClick={() => { setPriceInput(selected.price != null ? String(selected.price) : ""); setEditingPrice(true); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:13, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>✏️ Edit</button>
                         </div>
                       )}
                     </div>
 
                     {/* Paid toggle */}
                     <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid rgba(201,162,39,.1)" }}>
-                      <span style={{ fontSize:15, color:"#7788aa" }}>💳 Payment</span>
+                      <span style={{ fontSize:17, color:"#7788aa" }}>💳 Payment</span>
                       <button
                         onClick={() => updateBooking(selected.id, { paid: !selected.paid })}
-                        style={{ padding:"4px 14px", fontSize:11, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, fontWeight:700, borderRadius:3, cursor:"pointer", transition:"all .15s",
+                        style={{ padding:"4px 14px", fontSize:13, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, fontWeight:700, borderRadius:3, cursor:"pointer", transition:"all .15s",
                           background: selected.paid ? "rgba(52,211,153,.15)" : "transparent",
                           border: `1px solid ${selected.paid ? "#34d399" : "rgba(201,162,39,.3)"}`,
                           color: selected.paid ? "#34d399" : "#556677" }}
@@ -1110,8 +1110,8 @@ export default function App() {
                       const last = history.sort((a,b) => b.date.localeCompare(a.date))[0];
                       return (
                         <div style={{ padding:"10px 12px", marginTop:10, background:"rgba(59,130,246,.06)", border:"1px solid rgba(59,130,246,.18)", borderRadius:4 }}>
-                          <div style={{ fontSize:10, color:"#60a5fa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>CLIENT HISTORY</div>
-                          <div style={{ fontSize:12, color:"#93bbf0" }}>
+                          <div style={{ fontSize:12, color:"#60a5fa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>CLIENT HISTORY</div>
+                          <div style={{ fontSize:14, color:"#93bbf0" }}>
                             {history.length} previous booking{history.length !== 1 ? "s" : ""} — last on {last.date}
                           </div>
                         </div>
@@ -1120,21 +1120,21 @@ export default function App() {
 
                     <div style={{ marginTop:14, padding:14, background:"rgba(201,162,39,.05)", border:"1px solid rgba(201,162,39,.15)", borderRadius:8 }}>
                       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
-                        <div style={{ fontSize:13, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>NOTES</div>
+                        <div style={{ fontSize:15, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>NOTES</div>
                         {!editingNotes && (
-                          <button onClick={() => { setNotesInput(selected.notes || ""); setEditingNotes(true); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:13, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>✏️ Edit</button>
+                          <button onClick={() => { setNotesInput(selected.notes || ""); setEditingNotes(true); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:15, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>✏️ Edit</button>
                         )}
                       </div>
                       {editingNotes ? (
                         <>
-                          <textarea value={notesInput} onChange={e => setNotesInput(e.target.value)} rows={4} style={{ fontSize:14, resize:"vertical", padding:"10px 12px", borderRadius:6 }} placeholder="Add notes…" />
+                          <textarea value={notesInput} onChange={e => setNotesInput(e.target.value)} rows={4} style={{ fontSize:16, resize:"vertical", padding:"10px 12px", borderRadius:6 }} placeholder="Add notes…" />
                           <div style={{ display:"flex", gap:8, marginTop:10 }}>
-                            <button className="btn gold" style={{ padding:"11px 18px", fontSize:13, borderRadius:8 }} onClick={() => { updateBooking(selected.id, { notes: notesInput }); setEditingNotes(false); }}>SAVE</button>
-                            <button className="btn ghost" style={{ padding:"11px 18px", fontSize:13, borderRadius:8 }} onClick={() => setEditingNotes(false)}>CANCEL</button>
+                            <button className="btn gold" style={{ padding:"11px 18px", fontSize:15, borderRadius:8 }} onClick={() => { updateBooking(selected.id, { notes: notesInput }); setEditingNotes(false); }}>SAVE</button>
+                            <button className="btn ghost" style={{ padding:"11px 18px", fontSize:15, borderRadius:8 }} onClick={() => setEditingNotes(false)}>CANCEL</button>
                           </div>
                         </>
                       ) : (
-                        <div style={{ fontSize:14, color: selected.notes ? "#c8bfa8" : "#445566", fontStyle: selected.notes ? "normal" : "italic" }}>
+                        <div style={{ fontSize:16, color: selected.notes ? "#c8bfa8" : "#445566", fontStyle: selected.notes ? "normal" : "italic" }}>
                           {selected.notes || "No notes — click Edit to add"}
                         </div>
                       )}
@@ -1142,25 +1142,25 @@ export default function App() {
 
                     {/* Reschedule */}
                     <div style={{ marginTop:18, padding:16, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:8 }}>
-                      <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:2, color:"#c9a227", marginBottom:14 }}>RESCHEDULE</div>
+                      <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, letterSpacing:2, color:"#c9a227", marginBottom:14 }}>RESCHEDULE</div>
                       <div className="reschedule-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:12 }}>
                         <div style={{ minWidth:0, paddingRight:10 }}>
-                          <div style={{ fontSize:12, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>DATE</div>
-                          <input type="date" value={selected.date} onChange={e => updateBooking(selected.id, { date: e.target.value })} style={{ fontSize:14, padding:"11px 10px", colorScheme:"dark", width:"100%", borderRadius:6 }} />
+                          <div style={{ fontSize:14, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>DATE</div>
+                          <input type="date" value={selected.date} onChange={e => updateBooking(selected.id, { date: e.target.value })} style={{ fontSize:16, padding:"11px 10px", colorScheme:"dark", width:"100%", borderRadius:6 }} />
                         </div>
                         <div style={{ minWidth:0 }}>
-                          <div style={{ fontSize:12, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>START TIME</div>
-                          <select value={selected.time} onChange={e => updateBooking(selected.id, { time: e.target.value })} style={{ fontSize:14, padding:"11px 8px", borderRadius:6, width:"100%" }}>
+                          <div style={{ fontSize:14, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>START TIME</div>
+                          <select value={selected.time} onChange={e => updateBooking(selected.id, { time: e.target.value })} style={{ fontSize:16, padding:"11px 8px", borderRadius:6, width:"100%" }}>
                             {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
                           </select>
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize:12, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:8 }}>DURATION</div>
+                        <div style={{ fontSize:14, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:8 }}>DURATION</div>
                         <div style={{ display:"flex", gap:4 }}>
                           {[1,2,3,4,5,6,7,8].map(h => {
                             const isSel = (selected.duration || 1) === h;
-                            return <button key={h} type="button" onClick={() => updateBooking(selected.id, { duration: h })} className="btn" style={{ flex:1, padding:"10px 2px", fontSize:12, borderRadius:6, background: isSel ? "rgba(201,162,39,.25)" : "transparent", border: isSel ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.15)", color: isSel ? "#f0c040" : "#556677" }}>{h}h</button>;
+                            return <button key={h} type="button" onClick={() => updateBooking(selected.id, { duration: h })} className="btn" style={{ flex:1, padding:"10px 2px", fontSize:14, borderRadius:6, background: isSel ? "rgba(201,162,39,.25)" : "transparent", border: isSel ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.15)", color: isSel ? "#f0c040" : "#556677" }}>{h}h</button>;
                           })}
                         </div>
                       </div>
@@ -1168,11 +1168,11 @@ export default function App() {
 
                     {/* Admin Actions */}
                     {(() => {
-                      const ab = { fontSize:13, padding:"13px 18px", borderRadius:8, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", letterSpacing:1, textAlign:"center" };
+                      const ab = { fontSize:15, padding:"13px 18px", borderRadius:8, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", letterSpacing:1, textAlign:"center" };
                       const sendBtnW = 80;
                       return (
                       <div style={{ marginTop:14, display:"grid", gridTemplateColumns:`1fr ${sendBtnW}px`, gap:10, alignItems:"start" }}>
-                        <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:2, color:"#c9a227", gridColumn:"1/-1", marginBottom:-2 }}>ADMIN ACTIONS</div>
+                        <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, letterSpacing:2, color:"#c9a227", gridColumn:"1/-1", marginBottom:-2 }}>ADMIN ACTIONS</div>
                         {selected.status === "pending" ? (
                           <>
                             <button className="btn ok"     style={{ ...ab, gridColumn:"1/-1" }} onClick={() => updateStatus(selected.id, "approved")}>✅ APPROVE BOOKING</button>
@@ -1183,7 +1183,7 @@ export default function App() {
                           <button className="btn ghost" style={{ ...ab, gridColumn:"1/-1" }} onClick={() => updateStatus(selected.id, "pending")}>↩ RESET TO PENDING</button>
                         )}
                         {/* Contact dropdown — col 1 only, SEND in col 2 */}
-                        <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ fontSize:13, padding:"13px 12px", borderRadius:8, background:"transparent", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", cursor:"pointer", textAlign:"center", textAlignLast:"center", width:"100%" }}>
+                        <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ fontSize:15, padding:"13px 12px", borderRadius:8, background:"transparent", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", cursor:"pointer", textAlign:"center", textAlignLast:"center", width:"100%" }}>
                           {selected.email && <option value="confirmation">📧 Resend Confirmation</option>}
                           {selected.email && <option value="reminder">📧 Send Reminder</option>}
                           {selected.phone && <option value="whatsapp">💬 WhatsApp Client</option>}
@@ -1197,7 +1197,7 @@ export default function App() {
                         <div style={{ gridColumn:"1/-1" }}>
                           {deleteConfirm ? (
                             <div>
-                              <div style={{ padding:10, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:8, fontSize:12, color:"#fca5a5", marginBottom:8 }}>
+                              <div style={{ padding:10, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:8, fontSize:14, color:"#fca5a5", marginBottom:8 }}>
                                 ⚠️ Permanently delete this booking?
                               </div>
                               <div style={{ display:"flex", gap:8 }}>
@@ -1228,9 +1228,9 @@ export default function App() {
             return (
               <div style={{ flex:1, padding:24, overflowY:"auto" }}>
                 <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:4 }}>
-                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>NEXT 7 DAYS</div>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>NEXT 7 DAYS</div>
                   {upcoming.length > 0 && (
-                    <button className="btn ghost" style={{ fontSize:12, padding:"6px 14px" }} onClick={() => {
+                    <button className="btn ghost" style={{ fontSize:14, padding:"6px 14px" }} onClick={() => {
                       const rows = upcoming.map(b => {
                         const diff = Math.round((new Date(b.date+"T00:00:00") - new Date(todayStr+"T00:00:00")) / 86400000);
                         const day = diff===0?"Today":diff===1?"Tomorrow":`In ${diff} days`;
@@ -1241,9 +1241,9 @@ export default function App() {
                     }}>🖨 Print Dispatch</button>
                   )}
                 </div>
-                <div style={{ fontSize:14, color:"#7788aa", marginBottom:20 }}>{upcoming.length} appointment{upcoming.length !== 1 ? "s" : ""} coming up</div>
+                <div style={{ fontSize:16, color:"#7788aa", marginBottom:20 }}>{upcoming.length} appointment{upcoming.length !== 1 ? "s" : ""} coming up</div>
                 {upcoming.length === 0 ? (
-                  <div style={{ textAlign:"center", padding:"40px 0", color:"#445566", fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:1 }}>NO UPCOMING APPOINTMENTS</div>
+                  <div style={{ textAlign:"center", padding:"40px 0", color:"#445566", fontFamily:"'Orbitron',sans-serif", fontSize:15, letterSpacing:1 }}>NO UPCOMING APPOINTMENTS</div>
                 ) : (
                   <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
                     {upcoming.map(b => {
@@ -1254,17 +1254,17 @@ export default function App() {
                         <div key={b.id} className="card" style={{ padding:"16px 20px", display:"flex", gap:16, alignItems:"flex-start", cursor:"pointer", border:`1px solid ${st.border}` }}
                           onClick={() => { setSelected(b); setDeleteConfirm(false); setAdminTab("bookings"); }}>
                           <div style={{ minWidth:64, textAlign:"center" }}>
-                            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, color:"#c9a227", letterSpacing:1 }}>{b.date.slice(5).replace("-","/")}</div>
-                            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color: diff === 0 ? "#f0c040" : "#e8e0cc", marginTop:3 }}>{dayLabel}</div>
-                            <div style={{ fontSize:13, color:"#7788aa", marginTop:3 }}>{b.time}</div>
+                            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, color:"#c9a227", letterSpacing:1 }}>{b.date.slice(5).replace("-","/")}</div>
+                            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color: diff === 0 ? "#f0c040" : "#e8e0cc", marginTop:3 }}>{dayLabel}</div>
+                            <div style={{ fontSize:15, color:"#7788aa", marginTop:3 }}>{b.time}</div>
                           </div>
                           <div style={{ flex:1, minWidth:0 }}>
-                            <div style={{ fontWeight:700, fontSize:15, color:"#e8e0cc", marginBottom:4 }}>{b.client}</div>
-                            <div style={{ fontSize:13, color:"#7788aa", marginBottom:6 }}>{Array.isArray(b.service) ? b.service.join(", ") : b.service}</div>
+                            <div style={{ fontWeight:700, fontSize:17, color:"#e8e0cc", marginBottom:4 }}>{b.client}</div>
+                            <div style={{ fontSize:15, color:"#7788aa", marginBottom:6 }}>{Array.isArray(b.service) ? b.service.join(", ") : b.service}</div>
                             <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-                              <span style={{ fontSize:12, color:st.color, background:st.bg, border:`1px solid ${st.border}`, borderRadius:3, padding:"3px 9px", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{st.label}</span>
-                              {b.duration && <span style={{ fontSize:12, color:"#7788aa" }}>{b.duration}h</span>}
-                              {b.phone && <span style={{ fontSize:12, color:"#7788aa" }}>{b.phone}</span>}
+                              <span style={{ fontSize:14, color:st.color, background:st.bg, border:`1px solid ${st.border}`, borderRadius:3, padding:"3px 9px", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{st.label}</span>
+                              {b.duration && <span style={{ fontSize:14, color:"#7788aa" }}>{b.duration}h</span>}
+                              {b.phone && <span style={{ fontSize:14, color:"#7788aa" }}>{b.phone}</span>}
                             </div>
                           </div>
                         </div>
@@ -1282,12 +1282,12 @@ export default function App() {
           <div style={{ flex:1, padding:24, overflowY:"auto", display:"flex", gap:20, flexWrap:"wrap" }}>
             <div className="card" style={{ padding:20, minWidth:340, flex:"0 0 auto" }}>
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
-                <button className="btn ghost" style={{ padding:"6px 14px", fontSize:16 }} onClick={() => { if(calM===0){setCalM(11);setCalY(y=>y-1);}else setCalM(m=>m-1); }}>‹</button>
-                <span style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040" }}>{MONTHS[calM]} {calY}</span>
-                <button className="btn ghost" style={{ padding:"6px 14px", fontSize:16 }} onClick={() => { if(calM===11){setCalM(0);setCalY(y=>y+1);}else setCalM(m=>m+1); }}>›</button>
+                <button className="btn ghost" style={{ padding:"6px 14px", fontSize:18 }} onClick={() => { if(calM===0){setCalM(11);setCalY(y=>y-1);}else setCalM(m=>m-1); }}>‹</button>
+                <span style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:700, color:"#f0c040" }}>{MONTHS[calM]} {calY}</span>
+                <button className="btn ghost" style={{ padding:"6px 14px", fontSize:18 }} onClick={() => { if(calM===11){setCalM(0);setCalY(y=>y+1);}else setCalM(m=>m+1); }}>›</button>
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(7,minmax(0,46px))", gap:4, marginBottom:4 }}>
-                {DAYNAMES.map(d => <div key={d} style={{ textAlign:"center", fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:1, color:"#c9a227", padding:"6px 0" }}>{d}</div>)}
+                {DAYNAMES.map(d => <div key={d} style={{ textAlign:"center", fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:1, color:"#c9a227", padding:"6px 0" }}>{d}</div>)}
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(7,minmax(0,46px))", gap:4 }}>
                 {Array(firstDay(calY, calM)).fill(null).map((_,i) => <div key={`e${i}`} />)}
@@ -1303,7 +1303,7 @@ export default function App() {
               </div>
               <div style={{ display:"flex", gap:18, marginTop:18, justifyContent:"center", flexWrap:"wrap" }}>
                 {[["#4ade80","Approved"],["#fbbf24","Pending"]].map(([c,l]) => (
-                  <div key={l} style={{ display:"flex", alignItems:"center", gap:7, fontSize:13, color:"#7788aa" }}>
+                  <div key={l} style={{ display:"flex", alignItems:"center", gap:7, fontSize:15, color:"#7788aa" }}>
                     <div style={{ width:13, height:13, borderRadius:3, background:c }} />{l}
                   </div>
                 ))}
@@ -1311,7 +1311,7 @@ export default function App() {
             </div>
 
             <div className="card" style={{ flex:"1 1 240px", padding:18, minWidth:260, overflowY:"auto" }}>
-              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:14, letterSpacing:2, color:"#c9a227", marginBottom:16 }}>
+              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:16, letterSpacing:2, color:"#c9a227", marginBottom:16 }}>
                 {selDay ? `📅 ${selDay}` : "SELECT A DAY"}
               </div>
               {selDay ? (() => {
@@ -1332,7 +1332,7 @@ export default function App() {
                       const st = b ? safeStatus(b.status) : null;
                       return (
                         <div key={t} style={{ display:"flex", gap:8, minHeight:52 }}>
-                          <div style={{ width:70, paddingTop:16, fontSize:11, color: !b || isStart ? "#556677" : "transparent", textAlign:"right", flexShrink:0, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{t}</div>
+                          <div style={{ width:70, paddingTop:16, fontSize:13, color: !b || isStart ? "#556677" : "transparent", textAlign:"right", flexShrink:0, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{t}</div>
                           <div style={{ flex:1 }}>
                             {!b ? (
                               <div style={{ height:46, borderTop:"1px solid rgba(201,162,39,.07)" }} />
@@ -1352,11 +1352,11 @@ export default function App() {
                                   const extra = svcs.length - 1;
                                   return (
                                     <>
-                                      <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:14, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.client}</div>
-                                      <div style={{ fontSize:12, color:st.color, marginTop:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                                      <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:16, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{b.client}</div>
+                                      <div style={{ fontSize:14, color:st.color, marginTop:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                                         {first.label}{extra > 0 ? ` +${extra}` : ""}
                                       </div>
-                                      {(b.duration || 1) > 1 && <div style={{ fontSize:11, color:"#7788aa", marginTop:2 }}>⏱ {b.duration}h</div>}
+                                      {(b.duration || 1) > 1 && <div style={{ fontSize:13, color:"#7788aa", marginTop:2 }}>⏱ {b.duration}h</div>}
                                     </>
                                   );
                                 })()}
@@ -1368,7 +1368,7 @@ export default function App() {
                     })}
                   </div>
                 );
-              })() : <div style={{ color:"#556677", padding:20, textAlign:"center", fontSize:13 }}>Click a day to see bookings</div>}
+              })() : <div style={{ color:"#556677", padding:20, textAlign:"center", fontSize:15 }}>Click a day to see bookings</div>}
             </div>
           </div>
 
@@ -1397,8 +1397,8 @@ export default function App() {
             return (
               <div style={{ flex:1, padding:24, overflowY:"auto" }}>
                 <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:4 }}>
-                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>REVENUE — LAST 12 MONTHS</div>
-                  <button className="btn ghost" style={{ fontSize:12, padding:"6px 14px" }} onClick={() => {
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>REVENUE — LAST 12 MONTHS</div>
+                  <button className="btn ghost" style={{ fontSize:14, padding:"6px 14px" }} onClick={() => {
                     const rows = monthStats.map(m => `<tr><td>${m.label} ${m.year}</td><td>${m.total}</td><td>$${m.rev}</td><td>$${m.paid}</td></tr>`).join('');
                     printDoc('Revenue Report — Last 12 Months', `
                       <div class="stat-grid">
@@ -1412,7 +1412,7 @@ export default function App() {
                       <table style="margin-top:24px"><tr><th>Month</th><th>Bookings</th><th>Revenue</th><th>Paid</th></tr>${rows}</table>`);
                   }}>🖨 Print Report</button>
                 </div>
-                <div style={{ fontSize:14, color:"#7788aa", marginBottom:20 }}>Gold = approved revenue · Green overlay = paid</div>
+                <div style={{ fontSize:16, color:"#7788aa", marginBottom:20 }}>Gold = approved revenue · Green overlay = paid</div>
 
                 {/* Bar chart — horizontally scrollable on mobile */}
                 <div className="card" style={{ padding:"20px 16px 10px", marginBottom:20, overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
@@ -1421,7 +1421,7 @@ export default function App() {
                       <div key={m.key} style={{ flex:1, minWidth:44, display:"flex", flexDirection:"column", alignItems:"center", gap:3, height:"100%" }}>
                         <div style={{ flex:1, width:"100%", display:"flex", flexDirection:"column", justifyContent:"flex-end" }}>
                           {m.rev > 0 && (
-                            <div style={{ fontSize:11, color:"#e8e0cc", textAlign:"center", marginBottom:4, fontFamily:"'Orbitron',sans-serif" }}>${m.rev >= 1000 ? `${(m.rev/1000).toFixed(1)}k` : m.rev}</div>
+                            <div style={{ fontSize:13, color:"#e8e0cc", textAlign:"center", marginBottom:4, fontFamily:"'Orbitron',sans-serif" }}>${m.rev >= 1000 ? `${(m.rev/1000).toFixed(1)}k` : m.rev}</div>
                           )}
                           <div style={{ width:"100%", height:`${Math.max((m.rev/maxRev)*130, m.rev > 0 ? 4 : 0)}px`, background:"rgba(201,162,39,.35)", borderRadius:"2px 2px 0 0", position:"relative", overflow:"hidden", transition:"height .3s" }}>
                             {m.paid > 0 && (
@@ -1429,8 +1429,8 @@ export default function App() {
                             )}
                           </div>
                         </div>
-                        <div style={{ fontSize:11, color:"#ffffff", fontFamily:"'Orbitron',sans-serif", textAlign:"center", letterSpacing:.3, marginTop:2 }}>{m.label}</div>
-                        {m.total > 0 && <div style={{ fontSize:11, color:"#c9a227", textAlign:"center", fontWeight:700 }}>{m.total}</div>}
+                        <div style={{ fontSize:13, color:"#ffffff", fontFamily:"'Orbitron',sans-serif", textAlign:"center", letterSpacing:.3, marginTop:2 }}>{m.label}</div>
+                        {m.total > 0 && <div style={{ fontSize:13, color:"#c9a227", textAlign:"center", fontWeight:700 }}>{m.total}</div>}
                       </div>
                     ))}
                   </div>
@@ -1447,8 +1447,8 @@ export default function App() {
                     { l:"TOTAL BOOKINGS",   v:bookings.length, c:"#c9a227" },
                   ].map(s => (
                     <div key={s.l} className="card" style={{ padding:"16px 18px" }}>
-                      <div style={{ fontSize:11, letterSpacing:1.5, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>{s.l}</div>
-                      <div style={{ fontSize:22, fontWeight:900, color:s.c, fontFamily:"'Orbitron',sans-serif" }}>{s.v}</div>
+                      <div style={{ fontSize:13, letterSpacing:1.5, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>{s.l}</div>
+                      <div style={{ fontSize:24, fontWeight:900, color:s.c, fontFamily:"'Orbitron',sans-serif" }}>{s.v}</div>
                     </div>
                   ))}
                 </div>
@@ -1464,22 +1464,22 @@ export default function App() {
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.75)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }} onClick={() => setShowAddModal(false)}>
           <div className="card slide-in" style={{ width:"100%", maxWidth:520, maxHeight:"90vh", overflowY:"auto", padding:24 }} onClick={e => e.stopPropagation()}>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
-              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>ADD APPOINTMENT</div>
-              <button className="btn ghost" style={{ padding:"4px 10px", fontSize:12 }} onClick={() => setShowAddModal(false)}>✕</button>
+              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>ADD APPOINTMENT</div>
+              <button className="btn ghost" style={{ padding:"4px 10px", fontSize:14 }} onClick={() => setShowAddModal(false)}>✕</button>
             </div>
 
             <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
               <div>
-                <label htmlFor="admin-name" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FULL NAME *</label>
+                <label htmlFor="admin-name" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FULL NAME *</label>
                 <input id="admin-name" value={adminForm.name} onChange={e => setAdminForm({...adminForm, name:e.target.value})} placeholder="Client name" />
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                 <div>
-                  <label htmlFor="admin-phone" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE *</label>
+                  <label htmlFor="admin-phone" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE *</label>
                   <input id="admin-phone" type="tel" value={adminForm.phone} onChange={e => setAdminForm({...adminForm, phone:formatPhone(e.target.value)})} placeholder="(242) 555-0000" />
                 </div>
                 <div>
-                  <label htmlFor="admin-email" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL</label>
+                  <label htmlFor="admin-email" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL</label>
                   <input id="admin-email" type="email" value={adminForm.email} onChange={e => setAdminForm({...adminForm, email:e.target.value})} placeholder="email@example.com" />
                 </div>
               </div>
@@ -1487,9 +1487,9 @@ export default function App() {
               {/* Multi-service selector */}
               <div>
                 <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
-                  <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif" }}>SERVICES *</label>
+                  <label style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif" }}>SERVICES *</label>
                   {adminForm.services.length > 0 && (
-                    <span style={{ fontSize:10, color:"#c9a227", fontFamily:"'Orbitron',sans-serif" }}>{adminForm.services.length} selected</span>
+                    <span style={{ fontSize:12, color:"#c9a227", fontFamily:"'Orbitron',sans-serif" }}>{adminForm.services.length} selected</span>
                   )}
                 </div>
                 <div style={{ maxHeight:220, overflowY:"auto", paddingRight:2 }}>
@@ -1499,11 +1499,11 @@ export default function App() {
 
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                 <div>
-                  <label htmlFor="admin-date" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>DATE *</label>
+                  <label htmlFor="admin-date" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>DATE *</label>
                   <input id="admin-date" type="date" value={adminForm.date} onChange={e => { setAdminForm({...adminForm, date:e.target.value}); setAdminConfirmOverlap(false); }} style={{ colorScheme:"dark" }} />
                 </div>
                 <div>
-                  <label htmlFor="admin-time" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>TIME *</label>
+                  <label htmlFor="admin-time" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>TIME *</label>
                   <select id="admin-time" value={adminForm.time} onChange={e => { setAdminForm({...adminForm, time:e.target.value}); setAdminConfirmOverlap(false); }}>
                     <option value="">Select time…</option>
                     {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
@@ -1511,38 +1511,38 @@ export default function App() {
                 </div>
               </div>
               <div>
-                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:8 }}>SOURCE *</label>
+                <label style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:8 }}>SOURCE *</label>
                 <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
                   {SOURCES.map(src => (
-                    <button key={src.id} type="button" onClick={() => setAdminForm({...adminForm, source:src.id})} className="btn" style={{ padding:"7px 12px", fontSize:10, background: adminForm.source === src.id ? "rgba(201,162,39,.25)" : "transparent", border: adminForm.source === src.id ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.2)", color: adminForm.source === src.id ? "#f0c040" : "#7788aa" }}>{src.icon} {src.label}</button>
+                    <button key={src.id} type="button" onClick={() => setAdminForm({...adminForm, source:src.id})} className="btn" style={{ padding:"7px 12px", fontSize:12, background: adminForm.source === src.id ? "rgba(201,162,39,.25)" : "transparent", border: adminForm.source === src.id ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.2)", color: adminForm.source === src.id ? "#f0c040" : "#7788aa" }}>{src.icon} {src.label}</button>
                   ))}
                 </div>
               </div>
               <div>
-                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:8 }}>DURATION *</label>
+                <label style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:8 }}>DURATION *</label>
                 <div style={{ display:"flex", gap:5 }}>
                   {[1,2,3,4,5,6,7,8].map(h => (
-                    <button key={h} type="button" onClick={() => { setAdminForm({...adminForm, duration:h}); setAdminConfirmOverlap(false); }} className="btn" style={{ flex:1, padding:"7px 2px", fontSize:10, background: adminForm.duration === h ? "rgba(201,162,39,.25)" : "transparent", border: adminForm.duration === h ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.2)", color: adminForm.duration === h ? "#f0c040" : "#7788aa" }}>{h}h</button>
+                    <button key={h} type="button" onClick={() => { setAdminForm({...adminForm, duration:h}); setAdminConfirmOverlap(false); }} className="btn" style={{ flex:1, padding:"7px 2px", fontSize:12, background: adminForm.duration === h ? "rgba(201,162,39,.25)" : "transparent", border: adminForm.duration === h ? "1px solid #c9a227" : "1px solid rgba(201,162,39,.2)", color: adminForm.duration === h ? "#f0c040" : "#7788aa" }}>{h}h</button>
                   ))}
                 </div>
               </div>
               <div>
-                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:8 }}>INITIAL STATUS</label>
+                <label style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:8 }}>INITIAL STATUS</label>
                 <div style={{ display:"flex", gap:6 }}>
                   {[
                     { k:"pending",        l:"PENDING",  bg:"rgba(245,158,11,.2)",  border:"#f59e0b", c:"#fbbf24" },
                     { k:"approved",       l:"APPROVED", bg:"rgba(34,197,94,.2)",   border:"#22c55e", c:"#4ade80" },
                     { k:"scheduled_call", l:"CALL",     bg:"rgba(59,130,246,.2)",  border:"#3b82f6", c:"#60a5fa" },
                   ].map(({k,l,bg,border,c}) => (
-                    <button key={k} type="button" onClick={() => setAdminForm({...adminForm, status:k})} className="btn" style={{ padding:"7px 10px", fontSize:10, flex:1, background: adminForm.status === k ? bg : "transparent", border: adminForm.status === k ? `1px solid ${border}` : "1px solid rgba(201,162,39,.2)", color: adminForm.status === k ? c : "#7788aa" }}>{l}</button>
+                    <button key={k} type="button" onClick={() => setAdminForm({...adminForm, status:k})} className="btn" style={{ padding:"7px 10px", fontSize:12, flex:1, background: adminForm.status === k ? bg : "transparent", border: adminForm.status === k ? `1px solid ${border}` : "1px solid rgba(201,162,39,.2)", color: adminForm.status === k ? c : "#7788aa" }}>{l}</button>
                   ))}
                 </div>
               </div>
               <div style={{ display:"flex", flexDirection:"column", gap:8, padding:"12px", background:"rgba(201,162,39,.05)", border:"1px solid rgba(201,162,39,.15)", borderRadius:4 }}>
                 <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                  <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif" }}>RECURRING</label>
+                  <label style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif" }}>RECURRING</label>
                   <button type="button" onClick={() => setRecurringOn(r => !r)}
-                    style={{ padding:"5px 14px", fontSize:11, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, fontWeight:700, borderRadius:3, cursor:"pointer", transition:"all .15s",
+                    style={{ padding:"5px 14px", fontSize:13, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, fontWeight:700, borderRadius:3, cursor:"pointer", transition:"all .15s",
                       background: recurringOn ? "rgba(201,162,39,.2)" : "transparent",
                       border: `1px solid ${recurringOn ? "#c9a227" : "rgba(201,162,39,.3)"}`,
                       color: recurringOn ? "#f0c040" : "#556677" }}
@@ -1552,7 +1552,7 @@ export default function App() {
                   <div style={{ display:"flex", gap:6 }}>
                     {[{ l:"Weekly", v:7 },{ l:"2 Weeks", v:14 },{ l:"Monthly", v:30 }].map(({ l, v }) => (
                       <button key={v} type="button" onClick={() => setRecurInterval(v)} className="btn"
-                        style={{ flex:1, padding:"6px 4px", fontSize:10,
+                        style={{ flex:1, padding:"6px 4px", fontSize:12,
                           background: recurInterval === v ? "rgba(201,162,39,.2)" : "transparent",
                           border: `1px solid ${recurInterval === v ? "#c9a227" : "rgba(201,162,39,.2)"}`,
                           color: recurInterval === v ? "#f0c040" : "#7788aa" }}
@@ -1560,32 +1560,32 @@ export default function App() {
                     ))}
                   </div>
                 )}
-                {recurringOn && <div style={{ fontSize:10, color:"#556677" }}>A second pending booking will be auto-created {recurInterval} days after this one.</div>}
+                {recurringOn && <div style={{ fontSize:12, color:"#556677" }}>A second pending booking will be auto-created {recurInterval} days after this one.</div>}
               </div>
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif" }}>PAYMENT</label>
+                <label style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif" }}>PAYMENT</label>
                 <button type="button" onClick={() => setAdminForm({...adminForm, paid:!adminForm.paid})}
-                  style={{ padding:"5px 14px", fontSize:11, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, fontWeight:700, borderRadius:3, cursor:"pointer", transition:"all .15s",
+                  style={{ padding:"5px 14px", fontSize:13, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, fontWeight:700, borderRadius:3, cursor:"pointer", transition:"all .15s",
                     background: adminForm.paid ? "rgba(52,211,153,.15)" : "transparent",
                     border: `1px solid ${adminForm.paid ? "#34d399" : "rgba(201,162,39,.3)"}`,
                     color: adminForm.paid ? "#34d399" : "#556677" }}
                 >{adminForm.paid ? "✓ PAID" : "MARK AS PAID"}</button>
               </div>
               <div>
-                <label htmlFor="admin-notes" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>NOTES</label>
+                <label htmlFor="admin-notes" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>NOTES</label>
                 <textarea id="admin-notes" rows={2} value={adminForm.notes} onChange={e => setAdminForm({...adminForm, notes:e.target.value})} placeholder="Additional notes, location, or special requirements…" />
               </div>
             </div>
 
             {hasAdminConflict(adminForm.date, adminForm.time, adminForm.duration) && !adminConfirmOverlap && (
-              <div style={{ marginTop:12, padding:10, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:11, color:"#fca5a5" }}>
+              <div style={{ marginTop:12, padding:10, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:13, color:"#fca5a5" }}>
                 ⚠️ This time slot overlaps with an existing booking.
               </div>
             )}
 
             {adminConfirmOverlap ? (
               <div style={{ marginTop:16 }}>
-                <div style={{ padding:13, background:"rgba(239,68,68,.1)", border:"1px solid rgba(239,68,68,.35)", borderRadius:4, fontSize:12, color:"#fca5a5", marginBottom:12 }}>
+                <div style={{ padding:13, background:"rgba(239,68,68,.1)", border:"1px solid rgba(239,68,68,.35)", borderRadius:4, fontSize:14, color:"#fca5a5", marginBottom:12 }}>
                   ⚠️ This appointment overlaps with an existing booking. Are you sure?
                 </div>
                 <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
@@ -1614,24 +1614,24 @@ export default function App() {
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.8)", zIndex:2000, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }} onClick={() => setShowChangePwModal(false)}>
           <div className="card slide-in" style={{ width:"100%", maxWidth:400, padding:28 }} onClick={e => e.stopPropagation()}>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:22 }}>
-              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>🔑 CHANGE PASSWORD</div>
-              <button className="btn ghost" style={{ padding:"4px 10px", fontSize:12 }} onClick={() => setShowChangePwModal(false)}>✕</button>
+              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>🔑 CHANGE PASSWORD</div>
+              <button className="btn ghost" style={{ padding:"4px 10px", fontSize:14 }} onClick={() => setShowChangePwModal(false)}>✕</button>
             </div>
             <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
               <div>
-                <label htmlFor="cpw-old" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>CURRENT PASSWORD *</label>
+                <label htmlFor="cpw-old" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>CURRENT PASSWORD *</label>
                 <input id="cpw-old" type="password" value={changePwForm.old} onChange={e => { setChangePwForm(f => ({...f, old:e.target.value})); setChangePwError(""); }} placeholder="Enter current password" autoFocus />
               </div>
               <div>
-                <label htmlFor="cpw-new" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>NEW PASSWORD *</label>
+                <label htmlFor="cpw-new" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>NEW PASSWORD *</label>
                 <input id="cpw-new" type="password" value={changePwForm.newPw} onChange={e => { setChangePwForm(f => ({...f, newPw:e.target.value})); setChangePwError(""); }} placeholder="Min. 6 characters" />
               </div>
               <div>
-                <label htmlFor="cpw-confirm" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>CONFIRM NEW PASSWORD *</label>
+                <label htmlFor="cpw-confirm" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>CONFIRM NEW PASSWORD *</label>
                 <input id="cpw-confirm" type="password" value={changePwForm.confirm} onChange={e => { setChangePwForm(f => ({...f, confirm:e.target.value})); setChangePwError(""); }} placeholder="Re-enter new password" onKeyDown={e => e.key === "Enter" && submitChangePassword()} />
               </div>
               {changePwError && (
-                <div style={{ padding:"9px 12px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:11, color:"#fca5a5" }}>
+                <div style={{ padding:"9px 12px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:13, color:"#fca5a5" }}>
                   ⚠️ {changePwError}
                 </div>
               )}
@@ -1686,17 +1686,17 @@ export default function App() {
           {submitted ? (
             <div className="card" style={{ padding:30, textAlign:"center" }}>
               <div style={{ fontSize:60, marginBottom:14 }}>✅</div>
-              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:18, fontWeight:900, color:"#f0c040", marginBottom:10, letterSpacing:1.5 }}>BOOKING RECEIVED</div>
-              <div style={{ color:"#c8bfa8", marginBottom:8, fontSize:14 }}>Thank you, <span style={{ color:"#c9a227", fontWeight:700 }}>{form.firstName}</span>!</div>
-              <div style={{ color:"#7788aa", fontSize:13, marginBottom:18 }}>
+              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:20, fontWeight:900, color:"#f0c040", marginBottom:10, letterSpacing:1.5 }}>BOOKING RECEIVED</div>
+              <div style={{ color:"#c8bfa8", marginBottom:8, fontSize:16 }}>Thank you, <span style={{ color:"#c9a227", fontWeight:700 }}>{form.firstName}</span>!</div>
+              <div style={{ color:"#7788aa", fontSize:15, marginBottom:18 }}>
                 Your request for{" "}
                 <strong style={{ color:"#e8e0cc" }}>{form.services.map(id => svc(id).label).join(", ")}</strong>
                 {" "}on <strong style={{ color:"#e8e0cc" }}>{form.date}</strong> at <strong style={{ color:"#e8e0cc" }}>{form.time}</strong> has been submitted.
               </div>
-              <div style={{ padding:14, background:"rgba(201,162,39,.08)", border:"1px solid rgba(201,162,39,.2)", borderRadius:4, marginBottom:18, fontSize:12, color:"#c8bfa8" }}>
+              <div style={{ padding:14, background:"rgba(201,162,39,.08)", border:"1px solid rgba(201,162,39,.2)", borderRadius:4, marginBottom:18, fontSize:14, color:"#c8bfa8" }}>
                 Our team will review your request and contact you at <strong style={{ color:"#c9a227" }}>{form.phone}</strong> to <strong>approve</strong>, <strong>schedule a call</strong>, or <strong>follow up</strong>.
               </div>
-              <div style={{ fontSize:11, color:"#7788aa", marginBottom:18 }}>📞 {CONTACT.phone} · ✉️ {CONTACT.email}</div>
+              <div style={{ fontSize:13, color:"#7788aa", marginBottom:18 }}>📞 {CONTACT.phone} · ✉️ {CONTACT.email}</div>
               <button className="btn gold" onClick={resetClient}>BOOK ANOTHER SERVICE</button>
             </div>
           ) : (
@@ -1718,8 +1718,8 @@ export default function App() {
                 {[{n:1,label:"Info"},{n:2,label:"Service"},{n:3,label:"Date"},{n:4,label:"Confirm"}].map(({n,label}) => (
                   <div key={n} style={{ display:"flex", alignItems:"flex-start" }}>
                     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:5 }}>
-                      <div style={{ width:28, height:28, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Orbitron',sans-serif", fontSize:12, fontWeight:700, background: step >= n ? "#c9a227" : "transparent", color: step >= n ? "#050d1a" : "#556677", border: step >= n ? "none" : "1px solid #556677" }}>{n}</div>
-                      <div style={{ fontSize:9, color: step >= n ? "#c9a227" : "#556677", fontFamily:"'Orbitron',sans-serif", letterSpacing:0.5, whiteSpace:"nowrap" }}>{label}</div>
+                      <div style={{ width:28, height:28, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Orbitron',sans-serif", fontSize:14, fontWeight:700, background: step >= n ? "#c9a227" : "transparent", color: step >= n ? "#050d1a" : "#556677", border: step >= n ? "none" : "1px solid #556677" }}>{n}</div>
+                      <div style={{ fontSize:11, color: step >= n ? "#c9a227" : "#556677", fontFamily:"'Orbitron',sans-serif", letterSpacing:0.5, whiteSpace:"nowrap" }}>{label}</div>
                     </div>
                     {n < 4 && <div style={{ width:20, height:1, background: step > n ? "#c9a227" : "#556677", marginTop:14 }} />}
                   </div>
@@ -1731,28 +1731,28 @@ export default function App() {
                 {/* Step 1 — Contact Info */}
                 {step === 1 && (
                   <div className="slide-in">
-                    <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>YOUR INFORMATION</div>
-                    <div style={{ fontSize:12, color:"#7788aa", marginBottom:18 }}>Step 1 of 4 · Tell us about yourself</div>
+                    <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>YOUR INFORMATION</div>
+                    <div style={{ fontSize:14, color:"#7788aa", marginBottom:18 }}>Step 1 of 4 · Tell us about yourself</div>
                     <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
                       <div style={{ display:"flex", gap:10 }}>
                         <div style={{ flex:1 }}>
-                          <label htmlFor="cl-fname" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FIRST NAME *</label>
+                          <label htmlFor="cl-fname" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FIRST NAME *</label>
                           <input id="cl-fname" value={form.firstName} onChange={e => setForm({...form, firstName:e.target.value})} placeholder="John" />
                         </div>
                         <div style={{ flex:1 }}>
-                          <label htmlFor="cl-lname" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>LAST NAME *</label>
+                          <label htmlFor="cl-lname" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>LAST NAME *</label>
                           <input id="cl-lname" value={form.lastName} onChange={e => setForm({...form, lastName:e.target.value})} placeholder="Smith" />
                         </div>
                       </div>
                       <div>
-                        <label htmlFor="cl-email" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL *</label>
+                        <label htmlFor="cl-email" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL *</label>
                         <input id="cl-email" type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})} placeholder="you@email.com" />
-                        {form.email && !validEmail(form.email) && <div style={{ fontSize:11, color:"#f87171", marginTop:4 }}>Please enter a valid email address.</div>}
+                        {form.email && !validEmail(form.email) && <div style={{ fontSize:13, color:"#f87171", marginTop:4 }}>Please enter a valid email address.</div>}
                       </div>
                       <div>
-                        <label htmlFor="cl-phone" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE *</label>
+                        <label htmlFor="cl-phone" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE *</label>
                         <input id="cl-phone" type="tel" value={form.phone} onChange={e => setForm({...form, phone:formatPhone(e.target.value)})} placeholder="(242) 555-0000" />
-                        {form.phone && !validPhone(form.phone) && <div style={{ fontSize:11, color:"#f87171", marginTop:4 }}>Format: (242) 555-0000</div>}
+                        {form.phone && !validPhone(form.phone) && <div style={{ fontSize:13, color:"#f87171", marginTop:4 }}>Format: (242) 555-0000</div>}
                       </div>
                     </div>
                     <div style={{ display:"flex", justifyContent:"flex-end", marginTop:20 }}>
@@ -1764,8 +1764,8 @@ export default function App() {
                 {/* Step 2 — Service Multi-Select */}
                 {step === 2 && (
                   <div className="slide-in">
-                    <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>SELECT SERVICES</div>
-                    <div style={{ fontSize:12, color:"#7788aa", marginBottom:16 }}>Step 2 of 4 · Select one or more services</div>
+                    <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>SELECT SERVICES</div>
+                    <div style={{ fontSize:14, color:"#7788aa", marginBottom:16 }}>Step 2 of 4 · Select one or more services</div>
 
                     <div style={{ maxHeight:420, overflowY:"auto", paddingRight:2 }}>
                       {ServiceSelector({ selected: form.services, onChange: v => setForm({...form, services:v}) })}
@@ -1774,8 +1774,8 @@ export default function App() {
                     {/* Selected summary bar */}
                     {form.services.length > 0 && (
                       <div style={{ marginTop:12, padding:"9px 13px", background:"rgba(201,162,39,.08)", border:"1px solid rgba(201,162,39,.25)", borderRadius:4, display:"flex", alignItems:"center", gap:8 }}>
-                        <span style={{ fontSize:11, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", flexShrink:0 }}>{form.services.length} SELECTED</span>
-                        <div style={{ flex:1, fontSize:11, color:"#8899aa", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                        <span style={{ fontSize:13, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", flexShrink:0 }}>{form.services.length} SELECTED</span>
+                        <div style={{ flex:1, fontSize:13, color:"#8899aa", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                           {form.services.map(id => svc(id).label).join(" · ")}
                         </div>
                       </div>
@@ -1791,16 +1791,16 @@ export default function App() {
                 {/* Step 3 — Date & Time */}
                 {step === 3 && (
                   <div className="slide-in">
-                    <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>PICK A DATE & TIME</div>
-                    <div style={{ fontSize:12, color:"#7788aa", marginBottom:16 }}>Step 3 of 4 · Select a date, then pick an available time slot</div>
+                    <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>PICK A DATE & TIME</div>
+                    <div style={{ fontSize:14, color:"#7788aa", marginBottom:16 }}>Step 3 of 4 · Select a date, then pick an available time slot</div>
                     <div style={{ marginBottom:16 }}>
                       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
                         <button className="btn ghost" style={{ padding:"5px 10px" }} onClick={() => { if(calM===0){setCalM(11);setCalY(y=>y-1);}else setCalM(m=>m-1); }}>‹</button>
-                        <span style={{ fontFamily:"'Orbitron',sans-serif", fontSize:12, fontWeight:700, color:"#f0c040" }}>{MONTHS[calM]} {calY}</span>
+                        <span style={{ fontFamily:"'Orbitron',sans-serif", fontSize:14, fontWeight:700, color:"#f0c040" }}>{MONTHS[calM]} {calY}</span>
                         <button className="btn ghost" style={{ padding:"5px 10px" }} onClick={() => { if(calM===11){setCalM(0);setCalY(y=>y+1);}else setCalM(m=>m+1); }}>›</button>
                       </div>
                       <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:3, marginBottom:3 }}>
-                        {DAYNAMES.map(d => <div key={d} style={{ textAlign:"center", fontFamily:"'Orbitron',sans-serif", fontSize:9, letterSpacing:1, color:"#c9a227", padding:"4px 0" }}>{d}</div>)}
+                        {DAYNAMES.map(d => <div key={d} style={{ textAlign:"center", fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:1, color:"#c9a227", padding:"4px 0" }}>{d}</div>)}
                       </div>
                       <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:3 }}>
                         {Array(firstDay(calY, calM)).fill(null).map((_,i) => <div key={`e${i}`} />)}
@@ -1816,7 +1816,7 @@ export default function App() {
                           return <div key={d} className={cls} onClick={() => !isPast && setForm({...form, date:ds, time:""})}>{d}</div>;
                         })}
                       </div>
-                      <div style={{ display:"flex", gap:12, marginTop:10, justifyContent:"center", flexWrap:"wrap", fontSize:10, color:"#7788aa" }}>
+                      <div style={{ display:"flex", gap:12, marginTop:10, justifyContent:"center", flexWrap:"wrap", fontSize:12, color:"#7788aa" }}>
                         <div style={{ display:"flex", alignItems:"center", gap:5 }}><div style={{ width:9, height:9, background:"#4ade80", borderRadius:2 }} />Booked</div>
                         <div style={{ display:"flex", alignItems:"center", gap:5 }}><div style={{ width:9, height:9, background:"#fbbf24", borderRadius:2 }} />Pending</div>
                         <div style={{ display:"flex", alignItems:"center", gap:5 }}><div style={{ width:9, height:9, border:"1px solid #c9a227", borderRadius:2 }} />Today</div>
@@ -1824,8 +1824,8 @@ export default function App() {
                     </div>
                     {form.date && (
                       <div>
-                        <div style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:4 }}>AVAILABLE TIMES · {form.date}</div>
-                        <div style={{ fontSize:10, color:"#556677", marginBottom:8 }}>All times are Nassau time (EST, UTC−5)</div>
+                        <div style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:4 }}>AVAILABLE TIMES · {form.date}</div>
+                        <div style={{ fontSize:12, color:"#556677", marginBottom:8 }}>All times are Nassau time (EST, UTC−5)</div>
                         <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6 }}>
                           {CLIENT_TIMES.map(t => {
                             const taken = isClientBooked(form.date, t);
@@ -1844,8 +1844,8 @@ export default function App() {
                 {/* Step 4 — Review & Submit */}
                 {step === 4 && (
                   <div className="slide-in">
-                    <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>REVIEW & SUBMIT</div>
-                    <div style={{ fontSize:12, color:"#7788aa", marginBottom:16 }}>Step 4 of 4 · Confirm your booking</div>
+                    <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>REVIEW & SUBMIT</div>
+                    <div style={{ fontSize:14, color:"#7788aa", marginBottom:16 }}>Step 4 of 4 · Confirm your booking</div>
                     <div style={{ background:"rgba(201,162,39,.05)", border:"1px solid rgba(201,162,39,.2)", borderRadius:4, padding:16, marginBottom:14 }}>
                       {[
                         ["NAME",  `${form.firstName} ${form.lastName}`.trim()],
@@ -1855,20 +1855,20 @@ export default function App() {
                         ["TIME",  form.time],
                       ].map(([l,v]) => (
                         <div key={l} style={{ display:"flex", justifyContent:"space-between", padding:"7px 0", borderBottom:"1px solid rgba(201,162,39,.1)", gap:10 }}>
-                          <span style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif" }}>{l}</span>
-                          <span style={{ fontSize:13, color:"#e8e0cc", fontWeight:500, textAlign:"right" }}>{v}</span>
+                          <span style={{ fontSize:12, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif" }}>{l}</span>
+                          <span style={{ fontSize:15, color:"#e8e0cc", fontWeight:500, textAlign:"right" }}>{v}</span>
                         </div>
                       ))}
                       {/* Services block */}
                       <div style={{ padding:"7px 0" }}>
-                        <span style={{ fontSize:10, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:6 }}>SERVICES</span>
+                        <span style={{ fontSize:12, color:"#7788aa", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:6 }}>SERVICES</span>
                         <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
                           {form.services.map(id => {
                             const s = svc(id);
                             return (
                               <div key={id} style={{ display:"flex", alignItems:"center", gap:8 }}>
-                                <span style={{ fontSize:14 }}>{s.icon}</span>
-                                <span style={{ fontSize:13, color:"#e8e0cc", fontWeight:500 }}>{s.label}</span>
+                                <span style={{ fontSize:16 }}>{s.icon}</span>
+                                <span style={{ fontSize:15, color:"#e8e0cc", fontWeight:500 }}>{s.label}</span>
                               </div>
                             );
                           })}
@@ -1876,10 +1876,10 @@ export default function App() {
                       </div>
                     </div>
                     <div>
-                      <label htmlFor="cl-notes" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>ADDITIONAL NOTES (OPTIONAL)</label>
+                      <label htmlFor="cl-notes" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>ADDITIONAL NOTES (OPTIONAL)</label>
                       <textarea id="cl-notes" rows={3} value={form.notes} onChange={e => setForm({...form, notes:e.target.value})} placeholder="Tell us about your project, location, or any special requirements..." />
                     </div>
-                    <div style={{ marginTop:14, padding:11, background:"rgba(59,130,246,.08)", border:"1px solid rgba(59,130,246,.2)", borderRadius:4, fontSize:11, color:"#93bbf0" }}>
+                    <div style={{ marginTop:14, padding:11, background:"rgba(59,130,246,.08)", border:"1px solid rgba(59,130,246,.2)", borderRadius:4, fontSize:13, color:"#93bbf0" }}>
                       ℹ️ After submitting, our team will review your request and reach out to <strong>approve</strong>, <strong>schedule a call</strong>, or follow up.
                     </div>
                     <div style={{ display:"flex", justifyContent:"space-between", marginTop:18 }}>
@@ -1897,7 +1897,7 @@ export default function App() {
             {/* Divider */}
             <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:22 }}>
               <div style={{ flex:1, height:1, background:"rgba(201,162,39,.2)" }} />
-              <span style={{ fontFamily:"'Orbitron',sans-serif", fontSize:9, letterSpacing:2.5, color:"#556677", whiteSpace:"nowrap" }}>OR SEND US A MESSAGE</span>
+              <span style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:2.5, color:"#556677", whiteSpace:"nowrap" }}>OR SEND US A MESSAGE</span>
               <div style={{ flex:1, height:1, background:"rgba(201,162,39,.2)" }} />
             </div>
 
@@ -1905,43 +1905,43 @@ export default function App() {
               {contactSucceeded ? (
                 <div style={{ textAlign:"center", padding:"20px 0" }}>
                   <div style={{ fontSize:52, marginBottom:12 }}>✉️</div>
-                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:900, color:"#f0c040", letterSpacing:1.5, marginBottom:8 }}>MESSAGE SENT</div>
-                  <div style={{ fontSize:13, color:"#c8bfa8" }}>Thanks! We'll get back to you shortly.</div>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:900, color:"#f0c040", letterSpacing:1.5, marginBottom:8 }}>MESSAGE SENT</div>
+                  <div style={{ fontSize:15, color:"#c8bfa8" }}>Thanks! We'll get back to you shortly.</div>
                 </div>
               ) : (
                 <>
-                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>CONTACT US</div>
-                  <div style={{ fontSize:12, color:"#7788aa", marginBottom:18 }}>Have a question or need a quote? Drop us a message.</div>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>CONTACT US</div>
+                  <div style={{ fontSize:14, color:"#7788aa", marginBottom:18 }}>Have a question or need a quote? Drop us a message.</div>
 
                   <form onSubmit={handleContactSubmit} style={{ display:"flex", flexDirection:"column", gap:12 }}>
                     <div>
-                      <label htmlFor="cf-name" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FULL NAME *</label>
+                      <label htmlFor="cf-name" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FULL NAME *</label>
                       <input id="cf-name" type="text" value={contactForm.name} onChange={e => setContactForm({...contactForm, name:e.target.value})} placeholder="John Smith" required />
                     </div>
 
                     <div className="contact-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                       <div>
-                        <label htmlFor="cf-email" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL *</label>
+                        <label htmlFor="cf-email" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>EMAIL *</label>
                         <input id="cf-email" type="email" value={contactForm.email} onChange={e => setContactForm({...contactForm, email:e.target.value})} placeholder="you@email.com" required />
                       </div>
                       <div>
-                        <label htmlFor="cf-phone" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE</label>
+                        <label htmlFor="cf-phone" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>PHONE</label>
                         <input id="cf-phone" type="tel" value={contactForm.phone} onChange={e => setContactForm({...contactForm, phone:formatPhone(e.target.value)})} placeholder="(242) 555-0000" required />
                       </div>
                     </div>
 
                     <div>
-                      <label htmlFor="cf-message" style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>MESSAGE *</label>
+                      <label htmlFor="cf-message" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>MESSAGE *</label>
                       <textarea id="cf-message" value={contactForm.message} onChange={e => setContactForm({...contactForm, message:e.target.value})} rows={4} placeholder="Tell us how we can help…" required />
                     </div>
 
                     {contactError && (
-                      <div style={{ padding:"9px 12px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:11, color:"#fca5a5" }}>
+                      <div style={{ padding:"9px 12px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4, fontSize:13, color:"#fca5a5" }}>
                         ⚠️ Something went wrong. Please try again.
                       </div>
                     )}
 
-                    <button type="submit" className="btn gold" style={{ padding:"13px", fontSize:12, letterSpacing:2 }} disabled={contactSubmitting}>
+                    <button type="submit" className="btn gold" style={{ padding:"13px", fontSize:14, letterSpacing:2 }} disabled={contactSubmitting}>
                       {contactSubmitting ? "SENDING…" : "SEND MESSAGE →"}
                     </button>
                   </form>
@@ -1996,8 +1996,8 @@ export default function App() {
   if (loading && mode !== "subscriptions") return (
     <div style={{ minHeight:"100vh", background:"#050d1a", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:16 }} className="circuit">
       <style>{css}</style>
-      <div className="logo-circle" style={{ width:60, height:60, fontSize:22 }}>EZ</div>
-      <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:12, color:"#c9a227", letterSpacing:3 }} className="pulse">LOADING…</div>
+      <div className="logo-circle" style={{ width:60, height:60, fontSize:24 }}>EZ</div>
+      <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:14, color:"#c9a227", letterSpacing:3 }} className="pulse">LOADING…</div>
     </div>
   );
 
@@ -2005,7 +2005,7 @@ export default function App() {
     <div style={{ minHeight:"100vh", background:"#050d1a", color:"#e8e0cc", overflowX:"hidden", maxWidth:"100vw" }} className="circuit">
       <style>{css}</style>
       {toast && (
-        <div className="slide-in" style={{ position:"fixed", top:20, right:20, zIndex:9999, padding:"12px 20px", background:"linear-gradient(135deg,#c9a227,#f0c040)", color:"#050d1a", borderRadius:4, fontFamily:"'Orbitron',sans-serif", fontSize:12, fontWeight:700, letterSpacing:1, boxShadow:"0 8px 24px rgba(0,0,0,.4)" }}>
+        <div className="slide-in" style={{ position:"fixed", top:20, right:20, zIndex:9999, padding:"12px 20px", background:"linear-gradient(135deg,#c9a227,#f0c040)", color:"#050d1a", borderRadius:4, fontFamily:"'Orbitron',sans-serif", fontSize:14, fontWeight:700, letterSpacing:1, boxShadow:"0 8px 24px rgba(0,0,0,.4)" }}>
           {toast}
         </div>
       )}

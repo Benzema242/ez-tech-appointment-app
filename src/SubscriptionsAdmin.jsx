@@ -422,7 +422,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const movieSubs  = subs.filter(s => s.plan === "Movies & TV" && s.status === "active" && daysUntil(s.expiration) > 0).length;
 
   const lbl = (text) => (
-    <label style={{ fontSize:11, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>{text}</label>
+    <label style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>{text}</label>
   );
 
   // ── Auth gate ─────────────────────────────────────────────────────────────
@@ -431,11 +431,11 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", padding:16 }} className="circuit">
         <div className="card slide-in" style={{ width:"100%", maxWidth:380, padding:"36px 32px" }}>
           <div style={{ textAlign:"center", marginBottom:28 }}>
-            <div className="logo-circle" style={{ width:56, height:56, fontSize:20, margin:"0 auto 14px" }}>EZ</div>
-            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:900, color:"#fff", letterSpacing:2 }}>
+            <div className="logo-circle" style={{ width:56, height:56, fontSize:22, margin:"0 auto 14px" }}>EZ</div>
+            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:900, color:"#fff", letterSpacing:2 }}>
               EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span>
             </div>
-            <div style={{ fontSize:11, color:"#7788aa", letterSpacing:2, marginTop:6, fontFamily:"'Orbitron',sans-serif" }}>SUBSCRIPTION MANAGER</div>
+            <div style={{ fontSize:13, color:"#7788aa", letterSpacing:2, marginTop:6, fontFamily:"'Orbitron',sans-serif" }}>SUBSCRIPTION MANAGER</div>
           </div>
           <div style={{ marginBottom:14 }}>
             {lbl("PASSWORD")}
@@ -447,13 +447,13 @@ export default function SubscriptionsAdmin({ onGoClient }) {
               className={pwErr ? "shake" : ""}
               style={pwErr ? { borderColor:"#ef4444", boxShadow:"0 0 0 2px rgba(239,68,68,.2)" } : {}}
             />
-            {pwErr && <div style={{ fontSize:11, color:"#f87171", marginTop:6 }}>Incorrect password.</div>}
+            {pwErr && <div style={{ fontSize:13, color:"#f87171", marginTop:6 }}>Incorrect password.</div>}
           </div>
-          <button className="btn gold" style={{ width:"100%", padding:"13px", fontSize:12, letterSpacing:2 }} onClick={tryLogin} disabled={pwLoading}>
+          <button className="btn gold" style={{ width:"100%", padding:"13px", fontSize:14, letterSpacing:2 }} onClick={tryLogin} disabled={pwLoading}>
             {pwLoading ? "VERIFYING…" : "UNLOCK DASHBOARD"}
           </button>
           <div style={{ textAlign:"center", marginTop:16 }}>
-            <button onClick={onGoClient} style={{ background:"none", border:"none", color:"#556677", fontSize:11, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>
+            <button onClick={onGoClient} style={{ background:"none", border:"none", color:"#556677", fontSize:13, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>
               ← Back to booking page
             </button>
           </div>
@@ -467,7 +467,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
     <div style={{ display:"flex", flexDirection:"column", height:"100vh", overflowX:"hidden", width:"100%" }}>
 
       {toast && (
-        <div className="slide-in" style={{ position:"fixed", top:20, right:20, zIndex:9999, padding:"12px 20px", background:"linear-gradient(135deg,#c9a227,#f0c040)", color:"#050d1a", borderRadius:4, fontFamily:"'Orbitron',sans-serif", fontSize:12, fontWeight:700, letterSpacing:1, boxShadow:"0 8px 24px rgba(0,0,0,.4)" }}>
+        <div className="slide-in" style={{ position:"fixed", top:20, right:20, zIndex:9999, padding:"12px 20px", background:"linear-gradient(135deg,#c9a227,#f0c040)", color:"#050d1a", borderRadius:4, fontFamily:"'Orbitron',sans-serif", fontSize:14, fontWeight:700, letterSpacing:1, boxShadow:"0 8px 24px rgba(0,0,0,.4)" }}>
           {toast}
         </div>
       )}
@@ -476,13 +476,13 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       <div className="admin-hdr" style={{ padding:"16px 24px", borderBottom:"1px solid rgba(201,162,39,.2)", background:"linear-gradient(180deg,rgba(10,22,40,.95),rgba(10,22,40,.85))", display:"flex", alignItems:"center", gap:14, flexWrap:"wrap" }}>
         <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO2.png`} alt="EZ Tech" style={{ height:56, width:"auto", flexShrink:0 }} />
         <div style={{ flex:1 }}>
-          <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:14, fontWeight:900, color:"#fff", letterSpacing:2 }}>EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span></div>
-          <div style={{ fontSize:10, color:"#7788aa", letterSpacing:1, marginTop:1 }}>SUBSCRIPTION MANAGER</div>
+          <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:16, fontWeight:900, color:"#fff", letterSpacing:2 }}>EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span></div>
+          <div style={{ fontSize:12, color:"#7788aa", letterSpacing:1, marginTop:1 }}>SUBSCRIPTION MANAGER</div>
         </div>
         <div className="admin-hdr-btns" style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-          <button className="btn ghost" style={{ padding:"8px 12px", fontSize:10 }} onClick={() => { window.location.hash = "#/admin"; }}>📋 BOOKINGS</button>
+          <button className="btn ghost" style={{ padding:"8px 12px", fontSize:12 }} onClick={() => { window.location.hash = "#/admin"; }}>📋 BOOKINGS</button>
           <button className="btn ghost" onClick={onGoClient}>👤 CLIENT VIEW</button>
-          <button className="btn danger" style={{ padding:"10px 14px", fontSize:10 }} onClick={doLogout}>LOGOUT</button>
+          <button className="btn danger" style={{ padding:"10px 14px", fontSize:12 }} onClick={doLogout}>LOGOUT</button>
         </div>
       </div>
 
@@ -497,10 +497,10 @@ export default function SubscriptionsAdmin({ onGoClient }) {
           { l:"MOVIES",   v:`$${movieRev}`, c:"#a78bfa" },
         ].map(s => (
           <div key={s.l} className="card stat-card" style={{ padding:"12px 18px", flex:"1 1 100px" }}>
-            <div style={{ fontSize:9, letterSpacing:2, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:4 }}>{s.l}</div>
-            <div className="stat-val" style={{ fontFamily:"'Orbitron',sans-serif", fontSize:22, fontWeight:900, color:s.c }}>
+            <div style={{ fontSize:11, letterSpacing:2, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:4 }}>{s.l}</div>
+            <div className="stat-val" style={{ fontFamily:"'Orbitron',sans-serif", fontSize:24, fontWeight:900, color:s.c }}>
               {s.v}
-              {s.pulse && <span className="pulse" style={{ marginLeft:6, fontSize:14 }}>●</span>}
+              {s.pulse && <span className="pulse" style={{ marginLeft:6, fontSize:16 }}>●</span>}
             </div>
           </div>
         ))}
@@ -509,7 +509,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       {/* Tabs */}
       <div className="admin-tabs" style={{ padding:"0 24px", display:"flex", borderBottom:"1px solid rgba(201,162,39,.15)", overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
         {[["list","📋 SUBSCRIPTIONS"],["stats","📊 STATS"]].map(([k, l]) => (
-          <button key={k} onClick={() => setTab(k)} style={{ padding:"14px 20px", background:"transparent", border:"none", borderBottom:tab===k?"2px solid #c9a227":"2px solid transparent", color:tab===k?"#c9a227":"#7788aa", fontFamily:"'Orbitron',sans-serif", fontSize:11, fontWeight:700, letterSpacing:1.5, cursor:"pointer", transition:"all .2s", flexShrink:0, whiteSpace:"nowrap" }}>{l}</button>
+          <button key={k} onClick={() => setTab(k)} style={{ padding:"14px 20px", background:"transparent", border:"none", borderBottom:tab===k?"2px solid #c9a227":"2px solid transparent", color:tab===k?"#c9a227":"#7788aa", fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, letterSpacing:1.5, cursor:"pointer", transition:"all .2s", flexShrink:0, whiteSpace:"nowrap" }}>{l}</button>
         ))}
       </div>
 
@@ -528,16 +528,16 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                 <input
                   placeholder="Search name / phone / email…"
                   value={search} onChange={e => setSearch(e.target.value)}
-                  style={{ flex:1, fontSize:13, padding:"9px 12px" }}
+                  style={{ flex:1, fontSize:15, padding:"9px 12px" }}
                 />
-                <button className="btn gold" style={{ padding:"9px 14px", fontSize:10, whiteSpace:"nowrap" }} onClick={openAdd}>＋ ADD</button>
+                <button className="btn gold" style={{ padding:"9px 14px", fontSize:12, whiteSpace:"nowrap" }} onClick={openAdd}>＋ ADD</button>
               </div>
 
               {/* Plan filter */}
               <div className="filter-row" style={{ display:"flex", gap:6, marginBottom:8, flexWrap:"wrap" }}>
                 {["all","IPTV","Movies & TV"].map(f => (
                   <button key={f} className="btn filter-btn" onClick={() => setPlanFilter(f)}
-                    style={{ padding:"6px 12px", fontSize:10, letterSpacing:.5,
+                    style={{ padding:"6px 12px", fontSize:12, letterSpacing:.5,
                       background:planFilter===f?"rgba(201,162,39,.15)":"transparent",
                       border:`1px solid ${planFilter===f?"#c9a227":"rgba(201,162,39,.2)"}`,
                       color:planFilter===f?"#f0c040":"#556677" }}>
@@ -550,7 +550,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
               <div className="filter-row" style={{ display:"flex", gap:6, marginBottom:14, flexWrap:"wrap" }}>
                 {[["all","ALL"],["active","ACTIVE"],["expiring","EXPIRING"],["expired","EXPIRED"],["cancelled","CANCELLED"]].map(([f, l]) => (
                   <button key={f} className="btn filter-btn" onClick={() => setStatusFilter(f)}
-                    style={{ padding:"6px 12px", fontSize:10, letterSpacing:.5,
+                    style={{ padding:"6px 12px", fontSize:12, letterSpacing:.5,
                       background:statusFilter===f?"rgba(201,162,39,.15)":"transparent",
                       border:`1px solid ${statusFilter===f?"#c9a227":"rgba(201,162,39,.2)"}`,
                       color:statusFilter===f?"#f0c040":"#556677" }}>
@@ -560,9 +560,9 @@ export default function SubscriptionsAdmin({ onGoClient }) {
               </div>
 
               {loading ? (
-                <div style={{ textAlign:"center", padding:30, color:"#556677", fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:2 }} className="pulse">LOADING…</div>
+                <div style={{ textAlign:"center", padding:30, color:"#556677", fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:2 }} className="pulse">LOADING…</div>
               ) : filtered.length === 0 ? (
-                <div style={{ textAlign:"center", padding:30, color:"#556677", fontSize:13 }}>No subscriptions found</div>
+                <div style={{ textAlign:"center", padding:30, color:"#556677", fontSize:15 }}>No subscriptions found</div>
               ) : filtered.map(sub => {
                 const ei = expiryInfo(sub);
                 return (
@@ -571,27 +571,27 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     style={{ ...rowColor(sub), borderRadius:4, cursor:"pointer", padding:"12px 14px", marginBottom:8, transition:"all .15s", outline:selected?.id===sub.id?"2px solid rgba(201,162,39,.5)":"none" }}>
                     <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8 }}>
                       <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:15, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{sub.name}</div>
-                        <div style={{ fontSize:12, color:"#7788aa", marginTop:3 }}>
-                          <span style={{ padding:"2px 7px", borderRadius:2, fontSize:10, marginRight:6,
+                        <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:17, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{sub.name}</div>
+                        <div style={{ fontSize:14, color:"#7788aa", marginTop:3 }}>
+                          <span style={{ padding:"2px 7px", borderRadius:2, fontSize:12, marginRight:6,
                             background:sub.plan==="IPTV"?"rgba(59,130,246,.15)":"rgba(167,139,250,.15)",
                             border:`1px solid ${sub.plan==="IPTV"?"rgba(59,130,246,.3)":"rgba(167,139,250,.3)"}`,
                             color:sub.plan==="IPTV"?"#60a5fa":"#c4b5fd" }}>{sub.plan}</span>
                           {sub.duration_months}mo · ${sub.price}
                         </div>
-                        <div style={{ fontSize:12, marginTop:4, color:ei.color }}>{ei.text}</div>
+                        <div style={{ fontSize:14, marginTop:4, color:ei.color }}>{ei.text}</div>
                         {(sub.reminded_7d || sub.reminded_2d || sub.reminded_expired) && (
                           <div style={{ display:"flex", gap:4, marginTop:5, flexWrap:"wrap" }}>
-                            {sub.reminded_7d      && <span style={{ fontSize:9, padding:"2px 5px", borderRadius:2, background:"rgba(201,162,39,.15)", border:"1px solid rgba(201,162,39,.3)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>7D ✓</span>}
-                            {sub.reminded_2d      && <span style={{ fontSize:9, padding:"2px 5px", borderRadius:2, background:"rgba(245,158,11,.15)", border:"1px solid rgba(245,158,11,.3)", color:"#f59e0b", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>2D ✓</span>}
-                            {sub.reminded_expired && <span style={{ fontSize:9, padding:"2px 5px", borderRadius:2, background:"rgba(239,68,68,.15)", border:"1px solid rgba(239,68,68,.3)",  color:"#ef4444", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>EXP ✓</span>}
+                            {sub.reminded_7d      && <span style={{ fontSize:11, padding:"2px 5px", borderRadius:2, background:"rgba(201,162,39,.15)", border:"1px solid rgba(201,162,39,.3)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>7D ✓</span>}
+                            {sub.reminded_2d      && <span style={{ fontSize:11, padding:"2px 5px", borderRadius:2, background:"rgba(245,158,11,.15)", border:"1px solid rgba(245,158,11,.3)", color:"#f59e0b", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>2D ✓</span>}
+                            {sub.reminded_expired && <span style={{ fontSize:11, padding:"2px 5px", borderRadius:2, background:"rgba(239,68,68,.15)", border:"1px solid rgba(239,68,68,.3)",  color:"#ef4444", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>EXP ✓</span>}
                           </div>
                         )}
                       </div>
                       {sub.phone && (
                         <a href={`https://wa.me/${waPhone(sub.phone)}?text=${waRenewalMsg(sub)}`} target="_blank" rel="noopener noreferrer"
                           onClick={e => e.stopPropagation()}
-                          style={{ flexShrink:0, padding:"5px 9px", borderRadius:3, background:"rgba(37,211,102,.12)", border:"1px solid rgba(37,211,102,.25)", color:"#25d366", fontSize:13, textDecoration:"none" }}>
+                          style={{ flexShrink:0, padding:"5px 9px", borderRadius:3, background:"rgba(37,211,102,.12)", border:"1px solid rgba(37,211,102,.25)", color:"#25d366", fontSize:15, textDecoration:"none" }}>
                           💬
                         </a>
                       )}
@@ -606,7 +606,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
               {!selected ? (
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", color:"rgba(201,162,39,.3)", padding:40, height:"100%" }}>
                   <div style={{ fontSize:56, marginBottom:14 }}>📱</div>
-                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, letterSpacing:2, textAlign:"center" }}>SELECT A SUBSCRIPTION</div>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, letterSpacing:2, textAlign:"center" }}>SELECT A SUBSCRIPTION</div>
                 </div>
               ) : (() => {
                 const ei   = expiryInfo(selected);
@@ -617,7 +617,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     {/* Mobile back */}
                     <div className="mobile-back" style={{ marginBottom:14 }}>
                       <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditNotes(false); }}
-                        style={{ background:"none", border:"none", color:"#c9a227", fontSize:12, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
+                        style={{ background:"none", border:"none", color:"#c9a227", fontSize:14, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
                         ← Back to list
                       </button>
                     </div>
@@ -625,34 +625,34 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     {/* Header */}
                     <div style={{ display:"flex", alignItems:"flex-start", gap:12, marginBottom:20 }}>
                       <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:16, fontWeight:700, color:"#f0c040" }}>{selected.name}</div>
+                        <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:18, fontWeight:700, color:"#f0c040" }}>{selected.name}</div>
                         <div style={{ display:"flex", gap:6, marginTop:8, flexWrap:"wrap", alignItems:"center" }}>
-                          <span style={{ padding:"3px 10px", borderRadius:3, fontSize:11, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:.5,
+                          <span style={{ padding:"3px 10px", borderRadius:3, fontSize:13, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:.5,
                             background:selected.plan==="IPTV"?"rgba(59,130,246,.15)":"rgba(167,139,250,.15)",
                             border:`1px solid ${selected.plan==="IPTV"?"rgba(59,130,246,.4)":"rgba(167,139,250,.4)"}`,
                             color:selected.plan==="IPTV"?"#60a5fa":"#c4b5fd" }}>{selected.plan}</span>
-                          <span style={{ padding:"3px 10px", borderRadius:3, fontSize:11, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:.5,
+                          <span style={{ padding:"3px 10px", borderRadius:3, fontSize:13, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:.5,
                             color:selected.status==="active"?"#22c55e":selected.status==="cancelled"?"#7788aa":"#ef4444",
                             background:selected.status==="active"?"rgba(34,197,94,.1)":selected.status==="cancelled"?"rgba(119,136,170,.1)":"rgba(239,68,68,.1)",
                             border:`1px solid ${selected.status==="active"?"rgba(34,197,94,.3)":selected.status==="cancelled"?"rgba(119,136,170,.3)":"rgba(239,68,68,.3)"}`}}>
                             {(selected.status || "active").toUpperCase()}
                           </span>
-                          <span style={{ fontSize:13, color:ei.color, fontWeight:600 }}>{ei.text}</span>
+                          <span style={{ fontSize:15, color:ei.color, fontWeight:600 }}>{ei.text}</span>
                         </div>
                       </div>
-                      <button className="btn ghost" style={{ padding:"7px 12px", fontSize:10, flexShrink:0 }} onClick={() => openEdit(selected)}>✏️ EDIT</button>
+                      <button className="btn ghost" style={{ padding:"7px 12px", fontSize:12, flexShrink:0 }} onClick={() => openEdit(selected)}>✏️ EDIT</button>
                     </div>
 
                     {/* Contact */}
                     <div style={{ marginBottom:12, padding:12, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
-                      <div style={{ fontSize:10, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:8 }}>CONTACT</div>
+                      <div style={{ fontSize:12, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:8 }}>CONTACT</div>
                       {selected.phone && (
                         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"7px 0", borderBottom:"1px solid rgba(201,162,39,.08)" }}>
-                          <span style={{ fontSize:14, color:"#7788aa" }}>📞 Phone</span>
+                          <span style={{ fontSize:16, color:"#7788aa" }}>📞 Phone</span>
                           <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                            <span style={{ fontSize:14, color:"#e8e0cc" }}>{selected.phone}</span>
+                            <span style={{ fontSize:16, color:"#e8e0cc" }}>{selected.phone}</span>
                             <a href={`https://wa.me/${waPhone(selected.phone)}?text=${waRenewalMsg(selected)}`} target="_blank" rel="noopener noreferrer"
-                              style={{ padding:"4px 10px", borderRadius:3, background:"rgba(37,211,102,.12)", border:"1px solid rgba(37,211,102,.25)", color:"#25d366", fontSize:11, textDecoration:"none", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
+                              style={{ padding:"4px 10px", borderRadius:3, background:"rgba(37,211,102,.12)", border:"1px solid rgba(37,211,102,.25)", color:"#25d366", fontSize:13, textDecoration:"none", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
                               💬 WA
                             </a>
                           </div>
@@ -660,15 +660,15 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                       )}
                       {selected.email && (
                         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"7px 0" }}>
-                          <span style={{ fontSize:14, color:"#7788aa" }}>✉️ Email</span>
-                          <span style={{ fontSize:13, color:"#e8e0cc", textAlign:"right", maxWidth:"65%", wordBreak:"break-all" }}>{selected.email}</span>
+                          <span style={{ fontSize:16, color:"#7788aa" }}>✉️ Email</span>
+                          <span style={{ fontSize:15, color:"#e8e0cc", textAlign:"right", maxWidth:"65%", wordBreak:"break-all" }}>{selected.email}</span>
                         </div>
                       )}
                     </div>
 
                     {/* Subscription details */}
                     <div style={{ marginBottom:12, padding:12, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
-                      <div style={{ fontSize:10, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:8 }}>SUBSCRIPTION DETAILS</div>
+                      <div style={{ fontSize:12, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:8 }}>SUBSCRIPTION DETAILS</div>
                       {[
                         ["Duration",  `${selected.duration_months} month${selected.duration_months !== 1 ? "s" : ""}`],
                         ["Price",     `$${selected.price}`],
@@ -677,8 +677,8 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                         ["Expires",   fmtDate(selected.expiration)],
                       ].map(([l, v]) => (
                         <div key={l} style={{ display:"flex", justifyContent:"space-between", padding:"6px 0", borderBottom:"1px solid rgba(201,162,39,.08)" }}>
-                          <span style={{ fontSize:14, color:"#7788aa" }}>{l}</span>
-                          <span style={{ fontSize:14, color:"#e8e0cc", fontWeight:500 }}>{v}</span>
+                          <span style={{ fontSize:16, color:"#7788aa" }}>{l}</span>
+                          <span style={{ fontSize:16, color:"#e8e0cc", fontWeight:500 }}>{v}</span>
                         </div>
                       ))}
                     </div>
@@ -687,18 +687,18 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     {(selected.username || selected.password) && (
                       <div style={{ marginBottom:12, padding:12, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
                         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-                          <div style={{ fontSize:10, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>CREDENTIALS</div>
-                          <button onClick={() => setShowPw(p => !p)} style={{ background:"none", border:"none", color:"#556677", fontSize:11, cursor:"pointer" }}>
+                          <div style={{ fontSize:12, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>CREDENTIALS</div>
+                          <button onClick={() => setShowPw(p => !p)} style={{ background:"none", border:"none", color:"#556677", fontSize:13, cursor:"pointer" }}>
                             {showPw ? "🙈 Hide" : "👁 Show"}
                           </button>
                         </div>
                         {selected.username && (
                           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0", borderBottom:"1px solid rgba(201,162,39,.08)" }}>
-                            <span style={{ fontSize:14, color:"#7788aa" }}>Username</span>
+                            <span style={{ fontSize:16, color:"#7788aa" }}>Username</span>
                             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                              <span style={{ fontSize:13, color:"#e8e0cc", fontFamily:"monospace" }}>{selected.username}</span>
+                              <span style={{ fontSize:15, color:"#e8e0cc", fontFamily:"monospace" }}>{selected.username}</span>
                               <button onClick={() => { navigator.clipboard.writeText(selected.username); fire("📋 Username copied"); }}
-                                style={{ background:"none", border:"1px solid rgba(201,162,39,.25)", borderRadius:3, color:"#c9a227", fontSize:10, padding:"2px 7px", cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
+                                style={{ background:"none", border:"1px solid rgba(201,162,39,.25)", borderRadius:3, color:"#c9a227", fontSize:12, padding:"2px 7px", cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
                                 COPY
                               </button>
                             </div>
@@ -706,11 +706,11 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                         )}
                         {selected.password && (
                           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0" }}>
-                            <span style={{ fontSize:14, color:"#7788aa" }}>Password</span>
+                            <span style={{ fontSize:16, color:"#7788aa" }}>Password</span>
                             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                              <span style={{ fontSize:13, color:"#e8e0cc", fontFamily:"monospace" }}>{showPw ? selected.password : "••••••••"}</span>
+                              <span style={{ fontSize:15, color:"#e8e0cc", fontFamily:"monospace" }}>{showPw ? selected.password : "••••••••"}</span>
                               <button onClick={() => { navigator.clipboard.writeText(selected.password); fire("📋 Password copied"); }}
-                                style={{ background:"none", border:"1px solid rgba(201,162,39,.25)", borderRadius:3, color:"#c9a227", fontSize:10, padding:"2px 7px", cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
+                                style={{ background:"none", border:"1px solid rgba(201,162,39,.25)", borderRadius:3, color:"#c9a227", fontSize:12, padding:"2px 7px", cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
                                 COPY
                               </button>
                             </div>
@@ -722,26 +722,26 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     {/* Notes */}
                     <div style={{ marginBottom:16, padding:12, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
                       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:editNotes ? 8 : 4 }}>
-                        <div style={{ fontSize:10, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>NOTES</div>
-                        {!editNotes && <button onClick={() => { setNotesInput(selected.notes || ""); setEditNotes(true); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:11, cursor:"pointer" }}>✏️ Edit</button>}
+                        <div style={{ fontSize:12, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>NOTES</div>
+                        {!editNotes && <button onClick={() => { setNotesInput(selected.notes || ""); setEditNotes(true); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:13, cursor:"pointer" }}>✏️ Edit</button>}
                       </div>
                       {editNotes ? (
                         <>
-                          <textarea value={notesInput} onChange={e => setNotesInput(e.target.value)} rows={3} style={{ fontSize:13, resize:"vertical" }} />
+                          <textarea value={notesInput} onChange={e => setNotesInput(e.target.value)} rows={3} style={{ fontSize:15, resize:"vertical" }} />
                           <div style={{ display:"flex", gap:8, marginTop:8 }}>
-                            <button className="btn gold" style={{ padding:"6px 14px", fontSize:10 }} onClick={saveNotes}>SAVE</button>
-                            <button className="btn ghost" style={{ padding:"6px 14px", fontSize:10 }} onClick={() => setEditNotes(false)}>CANCEL</button>
+                            <button className="btn gold" style={{ padding:"6px 14px", fontSize:12 }} onClick={saveNotes}>SAVE</button>
+                            <button className="btn ghost" style={{ padding:"6px 14px", fontSize:12 }} onClick={() => setEditNotes(false)}>CANCEL</button>
                           </div>
                         </>
                       ) : (
-                        <div style={{ fontSize:13, color:selected.notes ? "#c8bfa8" : "#445566", fontStyle:selected.notes ? "normal" : "italic" }}>
+                        <div style={{ fontSize:15, color:selected.notes ? "#c8bfa8" : "#445566", fontStyle:selected.notes ? "normal" : "italic" }}>
                           {selected.notes || "No notes"}
                         </div>
                       )}
                     </div>
 
                     {/* Renew */}
-                    <button className="btn ok" style={{ width:"100%", padding:"11px", fontSize:11, marginBottom:10, letterSpacing:1 }}
+                    <button className="btn ok" style={{ width:"100%", padding:"11px", fontSize:13, marginBottom:10, letterSpacing:1 }}
                       onClick={() => openRenew(selected)}>
                       🔄 RENEW SUBSCRIPTION
                     </button>
@@ -749,18 +749,18 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     {/* Send Reminder */}
                     <div style={{ marginBottom:10 }}>
                       {!reminderConfirm ? (
-                        <button className="btn blue" style={{ width:"100%", padding:"10px", fontSize:10 }}
+                        <button className="btn blue" style={{ width:"100%", padding:"10px", fontSize:12 }}
                           onClick={() => setReminderConfirm(true)} disabled={!selected.email}>
                           📧 SEND REMINDER EMAIL
                         </button>
                       ) : (
                         <div style={{ padding:12, background:"rgba(59,130,246,.08)", border:"1px solid rgba(59,130,246,.25)", borderRadius:4 }}>
-                          <div style={{ fontSize:11, color:"#93c5fd", marginBottom:8 }}>Send reminder to {selected.email}?</div>
+                          <div style={{ fontSize:13, color:"#93c5fd", marginBottom:8 }}>Send reminder to {selected.email}?</div>
                           <div style={{ display:"flex", gap:8 }}>
-                            <button className="btn blue" style={{ flex:1, padding:"8px", fontSize:10 }} onClick={sendReminder} disabled={sendingReminder}>
+                            <button className="btn blue" style={{ flex:1, padding:"8px", fontSize:12 }} onClick={sendReminder} disabled={sendingReminder}>
                               {sendingReminder ? "SENDING…" : "SEND"}
                             </button>
-                            <button className="btn ghost" style={{ flex:1, padding:"8px", fontSize:10 }} onClick={() => setReminderConfirm(false)}>CANCEL</button>
+                            <button className="btn ghost" style={{ flex:1, padding:"8px", fontSize:12 }} onClick={() => setReminderConfirm(false)}>CANCEL</button>
                           </div>
                         </div>
                       )}
@@ -768,15 +768,15 @@ export default function SubscriptionsAdmin({ onGoClient }) {
 
                     {/* Delete */}
                     {!deleteConfirm ? (
-                      <button className="btn danger" style={{ width:"100%", padding:"10px", fontSize:10 }} onClick={() => setDeleteConfirm(true)}>
+                      <button className="btn danger" style={{ width:"100%", padding:"10px", fontSize:12 }} onClick={() => setDeleteConfirm(true)}>
                         🗑 DELETE SUBSCRIPTION
                       </button>
                     ) : (
                       <div style={{ padding:12, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:4 }}>
-                        <div style={{ fontSize:12, color:"#fca5a5", marginBottom:10 }}>⚠️ Permanently delete {selected.name}?</div>
+                        <div style={{ fontSize:14, color:"#fca5a5", marginBottom:10 }}>⚠️ Permanently delete {selected.name}?</div>
                         <div style={{ display:"flex", gap:8 }}>
-                          <button className="btn danger" style={{ flex:1, padding:"8px", fontSize:10 }} onClick={deleteSub}>YES, DELETE</button>
-                          <button className="btn ghost"  style={{ flex:1, padding:"8px", fontSize:10 }} onClick={() => setDeleteConfirm(false)}>CANCEL</button>
+                          <button className="btn danger" style={{ flex:1, padding:"8px", fontSize:12 }} onClick={deleteSub}>YES, DELETE</button>
+                          <button className="btn ghost"  style={{ flex:1, padding:"8px", fontSize:12 }} onClick={() => setDeleteConfirm(false)}>CANCEL</button>
                         </div>
                       </div>
                     )}
@@ -790,8 +790,8 @@ export default function SubscriptionsAdmin({ onGoClient }) {
 
           // ── Stats tab ─────────────────────────────────────────────────────
           <div style={{ flex:1, padding:24, overflowY:"auto" }}>
-            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>SUBSCRIPTION REVENUE — LAST 12 MONTHS</div>
-            <div style={{ fontSize:13, color:"#7788aa", marginBottom:20 }}>Blue = IPTV · Purple = Movies & TV</div>
+            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>SUBSCRIPTION REVENUE — LAST 12 MONTHS</div>
+            <div style={{ fontSize:15, color:"#7788aa", marginBottom:20 }}>Blue = IPTV · Purple = Movies & TV</div>
 
             {/* Bar chart */}
             <div className="card" style={{ padding:"20px 16px 10px", marginBottom:20, overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
@@ -800,7 +800,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                   <div key={m.key} style={{ flex:1, minWidth:44, display:"flex", flexDirection:"column", alignItems:"center", gap:3, height:"100%" }}>
                     <div style={{ flex:1, width:"100%", display:"flex", flexDirection:"column", justifyContent:"flex-end" }}>
                       {m.rev > 0 && (
-                        <div style={{ fontSize:11, color:"#e8e0cc", textAlign:"center", marginBottom:4, fontFamily:"'Orbitron',sans-serif" }}>
+                        <div style={{ fontSize:13, color:"#e8e0cc", textAlign:"center", marginBottom:4, fontFamily:"'Orbitron',sans-serif" }}>
                           ${m.rev >= 1000 ? `${(m.rev/1000).toFixed(1)}k` : m.rev}
                         </div>
                       )}
@@ -814,8 +814,8 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                         {m.rev === 0 && <div style={{ width:"100%", height:4, background:"rgba(201,162,39,.1)" }} />}
                       </div>
                     </div>
-                    <div style={{ fontSize:11, color:"#ffffff", fontFamily:"'Orbitron',sans-serif", textAlign:"center", letterSpacing:.3, marginTop:2 }}>{m.label}</div>
-                    {m.total > 0 && <div style={{ fontSize:11, color:"#c9a227", textAlign:"center", fontWeight:700 }}>{m.total}</div>}
+                    <div style={{ fontSize:13, color:"#ffffff", fontFamily:"'Orbitron',sans-serif", textAlign:"center", letterSpacing:.3, marginTop:2 }}>{m.label}</div>
+                    {m.total > 0 && <div style={{ fontSize:13, color:"#c9a227", textAlign:"center", fontWeight:700 }}>{m.total}</div>}
                   </div>
                 ))}
               </div>
@@ -834,8 +834,8 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                 { l:"TOTAL ACTIVE",      v:activeCount,                           c:"#34d399" },
               ].map(s => (
                 <div key={s.l} className="card" style={{ padding:"16px 18px" }}>
-                  <div style={{ fontSize:11, letterSpacing:1.5, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>{s.l}</div>
-                  <div style={{ fontSize:22, fontWeight:900, color:s.c, fontFamily:"'Orbitron',sans-serif" }}>{s.v}</div>
+                  <div style={{ fontSize:13, letterSpacing:1.5, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>{s.l}</div>
+                  <div style={{ fontSize:24, fontWeight:900, color:s.c, fontFamily:"'Orbitron',sans-serif" }}>{s.v}</div>
                 </div>
               ))}
             </div>
@@ -850,10 +850,10 @@ export default function SubscriptionsAdmin({ onGoClient }) {
           <div className="card slide-in" style={{ width:"100%", maxWidth:520, padding:28, marginTop:20, marginBottom:20 }}
             onClick={e => e.stopPropagation()}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:22 }}>
-              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>
+              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>
                 {editId ? "✏️ EDIT SUBSCRIPTION" : "＋ NEW SUBSCRIPTION"}
               </div>
-              <button className="btn ghost" style={{ padding:"4px 10px", fontSize:12 }} onClick={() => setShowModal(false)}>✕</button>
+              <button className="btn ghost" style={{ padding:"4px 10px", fontSize:14 }} onClick={() => setShowModal(false)}>✕</button>
             </div>
 
             <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
@@ -899,7 +899,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     const pp = presetPrice(form.plan, form.duration_months, form.devices);
                     return pp != null && String(pp) !== form.price ? (
                       <button onClick={() => setForm(f => ({ ...f, price:String(presetPrice(f.plan, f.duration_months, f.devices)) }))}
-                        style={{ background:"none", border:"none", color:"#c9a227", fontSize:10, cursor:"pointer", marginTop:3, padding:0, fontFamily:"'Exo 2',sans-serif" }}>
+                        style={{ background:"none", border:"none", color:"#c9a227", fontSize:12, cursor:"pointer", marginTop:3, padding:0, fontFamily:"'Exo 2',sans-serif" }}>
                         ↺ Use preset: ${pp}
                       </button>
                     ) : null;
@@ -935,7 +935,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                 <div>
                   {lbl("EXPIRATION *")}
                   <input type="date" value={form.expiration} onChange={e => setForm(f => ({ ...f, expiration:e.target.value }))} />
-                  <span style={{ fontSize:10, color:"#7788aa", marginTop:3, display:"block" }}>Auto-set from start + months</span>
+                  <span style={{ fontSize:12, color:"#7788aa", marginTop:3, display:"block" }}>Auto-set from start + months</span>
                 </div>
               </div>
 
@@ -955,7 +955,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                 <div style={{ display:"flex", gap:8 }}>
                   {PAYMENT_METHODS.map(m => (
                     <button key={m} type="button" onClick={() => setForm(f => ({ ...f, payment_method:m }))}
-                      style={{ flex:1, padding:"10px", fontSize:12, borderRadius:3, cursor:"pointer", transition:"all .15s",
+                      style={{ flex:1, padding:"10px", fontSize:14, borderRadius:3, cursor:"pointer", transition:"all .15s",
                         background: form.payment_method === m ? "rgba(201,162,39,.2)" : "transparent",
                         border: `1px solid ${form.payment_method === m ? "#c9a227" : "rgba(201,162,39,.2)"}`,
                         color: form.payment_method === m ? "#f0c040" : "#556677",
@@ -990,13 +990,13 @@ export default function SubscriptionsAdmin({ onGoClient }) {
           onClick={() => setShowRenewModal(false)}>
           <div className="card slide-in" style={{ width:"100%", maxWidth:420, padding:28 }} onClick={e => e.stopPropagation()}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
-              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>🔄 RENEW SUBSCRIPTION</div>
-              <button className="btn ghost" style={{ padding:"4px 10px", fontSize:12 }} onClick={() => setShowRenewModal(false)}>✕</button>
+              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>🔄 RENEW SUBSCRIPTION</div>
+              <button className="btn ghost" style={{ padding:"4px 10px", fontSize:14 }} onClick={() => setShowRenewModal(false)}>✕</button>
             </div>
 
             <div style={{ padding:"10px 14px", background:"rgba(201,162,39,.06)", border:"1px solid rgba(201,162,39,.15)", borderRadius:4, marginBottom:18 }}>
-              <div style={{ fontWeight:700, color:"#f0c040", fontSize:14 }}>{selected.name}</div>
-              <div style={{ fontSize:12, color:"#7788aa", marginTop:3 }}>
+              <div style={{ fontWeight:700, color:"#f0c040", fontSize:16 }}>{selected.name}</div>
+              <div style={{ fontSize:14, color:"#7788aa", marginTop:3 }}>
                 <span style={{ color: selected.plan==="IPTV"?"#60a5fa":"#c4b5fd" }}>{selected.plan}</span>
                 {" · "}Current expiry: <span style={{ color:"#c9a227" }}>{(() => { const d = daysUntil(selected.expiration); return d > 0 ? `${d}d remaining` : "Expired"; })()}</span>
               </div>
@@ -1023,7 +1023,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     const pp = presetPrice(selected.plan, renewForm.duration_months, renewForm.devices);
                     return pp != null && String(pp) !== renewForm.price ? (
                       <button onClick={() => setRenewForm(f => ({ ...f, price:String(presetPrice(selected.plan, f.duration_months, f.devices)) }))}
-                        style={{ background:"none", border:"none", color:"#c9a227", fontSize:10, cursor:"pointer", marginTop:3, padding:0 }}>
+                        style={{ background:"none", border:"none", color:"#c9a227", fontSize:12, cursor:"pointer", marginTop:3, padding:0 }}>
                         ↺ Preset: ${pp}
                       </button>
                     ) : null;
@@ -1033,8 +1033,8 @@ export default function SubscriptionsAdmin({ onGoClient }) {
 
               {/* New expiry preview */}
               <div style={{ padding:"10px 14px", background:"rgba(34,197,94,.06)", border:"1px solid rgba(34,197,94,.2)", borderRadius:4, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <span style={{ fontSize:12, color:"#7788aa" }}>New expiration</span>
-                <span style={{ fontSize:13, fontWeight:700, color:"#34d399" }}>
+                <span style={{ fontSize:14, color:"#7788aa" }}>New expiration</span>
+                <span style={{ fontSize:15, fontWeight:700, color:"#34d399" }}>
                   {(() => {
                     const base = daysUntil(selected.expiration) > 0
                       ? new Date(selected.expiration).toISOString().slice(0, 10)
@@ -1050,7 +1050,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                 <div style={{ display:"flex", gap:8 }}>
                   {PAYMENT_METHODS.map(m => (
                     <button key={m} type="button" onClick={() => setRenewForm(f => ({ ...f, payment_method:m }))}
-                      style={{ flex:1, padding:"10px", fontSize:12, borderRadius:3, cursor:"pointer", transition:"all .15s",
+                      style={{ flex:1, padding:"10px", fontSize:14, borderRadius:3, cursor:"pointer", transition:"all .15s",
                         background: renewForm.payment_method === m ? "rgba(201,162,39,.2)" : "transparent",
                         border: `1px solid ${renewForm.payment_method === m ? "#c9a227" : "rgba(201,162,39,.2)"}`,
                         color: renewForm.payment_method === m ? "#f0c040" : "#556677",

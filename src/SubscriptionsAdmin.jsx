@@ -1,9 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "./supabase";
 
-const SESSION_KEY = "ez_admin_authed";
-const pad = n => String(n).padStart(2, "0");
+const SESSION_KEY  = "ez_admin_authed";
+const pad          = n => String(n).padStart(2, "0");
 const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS_FULL  = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAYNAMES     = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const daysInMonth  = (y, m) => new Date(y, m + 1, 0).getDate();
+const firstDay     = (y, m) => new Date(y, m, 1).getDay();
+const calDateStr   = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
 
 const waPhone = phone => {
   const d = (phone || "").replace(/\D/g, "");
@@ -112,6 +117,9 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const [showRenewModal, setShowRenewModal] = useState(false);
   const [renewForm, setRenewForm]           = useState({ duration_months:1, price:"", payment_method:"Bank Transfer", devices:2 });
   const [renewing, setRenewing]             = useState(false);
+  const [calM, setCalM] = useState(new Date().getMonth());
+  const [calY, setCalY] = useState(new Date().getFullYear());
+  const [calDay, setCalDay] = useState(null);
 
   useEffect(() => {
     if (!authed) return;
@@ -537,7 +545,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
 
       {/* Tabs */}
       <div className="admin-tabs" style={{ padding:"0 24px", display:"flex", borderBottom:"1px solid rgba(201,162,39,.15)", overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
-        {[["list","📋 SUBSCRIPTIONS"],["stats","📊 STATS"]].map(([k, l]) => (
+        {[["list","📋 SUBSCRIPTIONS"],["calendar","📅 CALENDAR"],["stats","📊 STATS"]].map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)} style={{ padding:"14px 20px", background:"transparent", border:"none", borderBottom:tab===k?"2px solid #c9a227":"2px solid transparent", color:tab===k?"#c9a227":"#7788aa", fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, letterSpacing:1.5, cursor:"pointer", transition:"all .2s", flexShrink:0, whiteSpace:"nowrap" }}>{l}</button>
         ))}
       </div>
@@ -826,6 +834,156 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                   </div>
                 );
               })()}
+            </div>
+          </div>
+
+        ) : tab === "calendar" ? (
+
+          // ── Calendar tab ───────────────────────────────────────────────────
+          <div style={{ flex:1, padding:24, overflowY:"auto" }}>
+            <div style={{ display:"flex", flexWrap:"wrap", gap:20 }}>
+
+              {/* Month grid */}
+              <div style={{ flex:"1 1 460px", minWidth:0 }}>
+
+                {/* Nav */}
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
+                  <button className="btn ghost" style={{ padding:"8px 16px", fontSize:20, lineHeight:1 }}
+                    onClick={() => { const d = new Date(calY, calM-1, 1); setCalM(d.getMonth()); setCalY(d.getFullYear()); }}>
+                    ‹
+                  </button>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:700, color:"#f0c040", letterSpacing:2 }}>
+                    {MONTHS_FULL[calM]} {calY}
+                  </div>
+                  <button className="btn ghost" style={{ padding:"8px 16px", fontSize:20, lineHeight:1 }}
+                    onClick={() => { const d = new Date(calY, calM+1, 1); setCalM(d.getMonth()); setCalY(d.getFullYear()); }}>
+                    ›
+                  </button>
+                </div>
+
+                {/* Day names */}
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:4, marginBottom:4 }}>
+                  {DAYNAMES.map(dn => (
+                    <div key={dn} style={{ textAlign:"center", fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, padding:"5px 0" }}>{dn}</div>
+                  ))}
+                </div>
+
+                {/* Grid cells */}
+                {(() => {
+                  const todayDt  = new Date();
+                  const todayY   = todayDt.getFullYear();
+                  const todayM   = todayDt.getMonth();
+                  const todayD   = todayDt.getDate();
+                  const total    = daysInMonth(calY, calM);
+                  const start    = firstDay(calY, calM);
+                  const cells    = [...Array(start).fill(null), ...Array.from({ length: total }, (_, i) => i + 1)];
+                  while (cells.length % 7) cells.push(null);
+                  return (
+                    <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:4 }}>
+                      {cells.map((d, i) => {
+                        if (!d) return <div key={i} style={{ minHeight:56 }} />;
+                        const ds       = calDateStr(calY, calM, d);
+                        const isToday  = calY === todayY && calM === todayM && d === todayD;
+                        const isSel    = calDay === ds;
+                        const expiring = subs.filter(s => {
+                          if (!s.expiration) return false;
+                          const dt = new Date(s.expiration);
+                          return dt.getFullYear() === calY && dt.getMonth() === calM && dt.getDate() === d;
+                        });
+                        return (
+                          <div key={i} onClick={() => setCalDay(isSel ? null : ds)}
+                            style={{
+                              minHeight:56, padding:"6px 4px 5px", borderRadius:4, cursor:"pointer",
+                              display:"flex", flexDirection:"column", alignItems:"center", gap:4,
+                              background: isSel ? "rgba(201,162,39,.18)" : isToday ? "rgba(201,162,39,.07)" : "rgba(10,22,40,.4)",
+                              border:     isSel ? "1px solid rgba(201,162,39,.6)" : isToday ? "1px solid rgba(201,162,39,.3)" : "1px solid rgba(201,162,39,.08)",
+                              transition:"all .15s",
+                            }}>
+                            <span style={{ fontSize:14, color:isToday?"#f0c040":"#c8bfa8", fontWeight:isToday?700:400 }}>{d}</span>
+                            {expiring.length > 0 && (
+                              <div style={{ display:"flex", gap:2, flexWrap:"wrap", justifyContent:"center", maxWidth:46 }}>
+                                {expiring.slice(0, 5).map((s, j) => {
+                                  const days2 = daysUntil(s.expiration);
+                                  const dc = s.status === "cancelled" ? "#7788aa" : days2 <= 0 ? "#ef4444" : days2 <= 7 ? "#f59e0b" : "#22c55e";
+                                  return <div key={j} style={{ width:7, height:7, borderRadius:"50%", background:dc, flexShrink:0 }} />;
+                                })}
+                                {expiring.length > 5 && <span style={{ fontSize:9, color:"#7788aa", lineHeight:"7px" }}>+{expiring.length - 5}</span>}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+
+                {/* Legend */}
+                <div style={{ display:"flex", gap:14, flexWrap:"wrap", marginTop:14, paddingTop:12, borderTop:"1px solid rgba(201,162,39,.1)" }}>
+                  {[["#ef4444","Expired"],["#f59e0b","Expiring ≤7d"],["#22c55e","Active"],["#7788aa","Cancelled"]].map(([c, l]) => (
+                    <div key={l} style={{ display:"flex", alignItems:"center", gap:6 }}>
+                      <div style={{ width:9, height:9, borderRadius:"50%", background:c, flexShrink:0 }} />
+                      <span style={{ fontSize:13, color:"#7788aa" }}>{l}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Day detail panel */}
+              <div style={{ flex:"0 0 280px", minWidth:240 }}>
+                {calDay ? (() => {
+                  const [dy, dm, dd2] = calDay.split("-").map(Number);
+                  const daySubs = subs.filter(s => {
+                    if (!s.expiration) return false;
+                    const dt = new Date(s.expiration);
+                    return dt.getFullYear() === dy && dt.getMonth() === dm - 1 && dt.getDate() === dd2;
+                  });
+                  return (
+                    <div>
+                      <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:14, color:"#f0c040", letterSpacing:1, marginBottom:14 }}>
+                        {MONTHS_FULL[dm - 1]} {dd2}, {dy}
+                        <span style={{ fontSize:12, color:"#7788aa", marginLeft:8, fontWeight:400 }}>
+                          {daySubs.length} sub{daySubs.length !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                      {daySubs.length === 0 ? (
+                        <div style={{ color:"#556677", fontSize:14, padding:"20px 0", textAlign:"center" }}>No subscriptions on this day.</div>
+                      ) : daySubs.map(sub => {
+                        const ei = expiryInfo(sub);
+                        return (
+                          <div key={sub.id} className="card" style={{ padding:"12px 14px", marginBottom:8, cursor:"pointer" }}
+                            onClick={() => { setTab("list"); setSelected(sub); }}>
+                            <div style={{ fontWeight:700, color:"#e8e0cc", fontSize:15, marginBottom:4 }}>{sub.name}</div>
+                            <div style={{ display:"flex", gap:6, alignItems:"center", marginBottom:4, flexWrap:"wrap" }}>
+                              <span style={{ padding:"1px 6px", borderRadius:2, fontSize:11,
+                                background:sub.plan==="IPTV"?"rgba(59,130,246,.15)":"rgba(167,139,250,.15)",
+                                border:`1px solid ${sub.plan==="IPTV"?"rgba(59,130,246,.3)":"rgba(167,139,250,.3)"}`,
+                                color:sub.plan==="IPTV"?"#60a5fa":"#c4b5fd" }}>{sub.plan}</span>
+                              <span style={{ fontSize:13, color:"#7788aa" }}>${sub.price} · {sub.duration_months}mo</span>
+                            </div>
+                            <div style={{ fontSize:13, color:ei.color, marginBottom:sub.phone?6:0 }}>{ei.text}</div>
+                            {sub.phone && (
+                              <a href={`https://wa.me/${waPhone(sub.phone)}?text=${waRenewalMsg(sub)}`}
+                                target="_blank" rel="noopener noreferrer"
+                                onClick={e => e.stopPropagation()}
+                                style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"4px 10px",
+                                  borderRadius:3, background:"rgba(37,211,102,.12)", border:"1px solid rgba(37,211,102,.25)",
+                                  color:"#25d366", fontSize:12, textDecoration:"none" }}>
+                                💬 WhatsApp
+                              </a>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })() : (
+                  <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", color:"rgba(201,162,39,.3)", padding:"40px 16px" }}>
+                    <div style={{ fontSize:48, marginBottom:12 }}>📅</div>
+                    <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:12, letterSpacing:2, textAlign:"center", marginBottom:8 }}>SELECT A DAY</div>
+                    <div style={{ fontSize:13, color:"#445566", textAlign:"center" }}>Click any date to view expiring subscriptions</div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

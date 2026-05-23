@@ -473,8 +473,8 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       )}
 
       {/* Header */}
-      <div className="admin-hdr" style={{ padding:"0px 24px", borderBottom:"1px solid rgba(201,162,39,.2)", background:"linear-gradient(180deg,rgba(10,22,40,.95),rgba(10,22,40,.85))", display:"flex", alignItems:"center", justifyContent:"space-between", gap:14, flexWrap:"wrap" }}>
-        <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO-wide.png`} alt="EZ Tech" style={{ height:220, width:"auto", flexShrink:0 }} />
+      <div className="admin-hdr" style={{ padding:"12px 24px", borderBottom:"1px solid rgba(201,162,39,.2)", background:"linear-gradient(180deg,rgba(10,22,40,.95),rgba(10,22,40,.85))", display:"flex", alignItems:"center", justifyContent:"space-between", gap:14, flexWrap:"wrap" }}>
+        <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO-wide.png`} alt="EZ Tech" style={{ height:80, width:"auto", flexShrink:0 }} />
         <div className="admin-hdr-btns" style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
           <button className="btn ghost" style={{ padding:"8px 12px", fontSize:12 }} onClick={() => { window.location.hash = "#/admin"; }}>📋 BOOKINGS</button>
           <button className="btn ghost" onClick={onGoClient}>👤 CLIENT VIEW</button>

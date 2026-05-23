@@ -967,18 +967,26 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                         <div style={{ fontSize:13, color:"#556677", textAlign:"center", padding:"8px 0" }} className="pulse">Loading…</div>
                       ) : payments.length === 0 ? (
                         <div style={{ fontSize:14, color:"#445566", fontStyle:"italic" }}>No payment records yet</div>
-                      ) : payments.map(pay => (
-                        <div key={pay.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", padding:"7px 0", borderBottom:"1px solid rgba(201,162,39,.07)" }}>
-                          <div>
-                            <div style={{ fontSize:14, color:"#e8e0cc" }}>
-                              {PAYMENT_EMOJI[pay.payment_method] || "💳"} {pay.payment_method}
-                              {pay.note ? <span style={{ fontSize:12, color:"#7788aa", marginLeft:6 }}>· {pay.note}</span> : null}
+                      ) : (
+                        <>
+                          {payments.map(pay => (
+                            <div key={pay.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", padding:"7px 0", borderBottom:"1px solid rgba(201,162,39,.07)" }}>
+                              <div>
+                                <div style={{ fontSize:14, color:"#e8e0cc" }}>
+                                  {PAYMENT_EMOJI[pay.payment_method] || "💳"} {pay.payment_method}
+                                  {pay.note ? <span style={{ fontSize:12, color:"#7788aa", marginLeft:6 }}>· {pay.note}</span> : null}
+                                </div>
+                                <div style={{ fontSize:12, color:"#556677", marginTop:2 }}>{fmtDate(pay.paid_at)}</div>
+                              </div>
+                              <div style={{ fontSize:16, fontWeight:700, color:"#22c55e", flexShrink:0 }}>${pay.amount}</div>
                             </div>
-                            <div style={{ fontSize:12, color:"#556677", marginTop:2 }}>{fmtDate(pay.paid_at)}</div>
+                          ))}
+                          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", paddingTop:8, marginTop:4, borderTop:"1px solid rgba(201,162,39,.2)" }}>
+                            <span style={{ fontSize:12, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1 }}>LIFETIME VALUE</span>
+                            <span style={{ fontSize:16, fontWeight:700, color:"#c9a227" }}>${payments.reduce((s, p) => s + (p.amount || 0), 0)}</span>
                           </div>
-                          <div style={{ fontSize:16, fontWeight:700, color:"#22c55e", flexShrink:0 }}>${pay.amount}</div>
-                        </div>
-                      ))}
+                        </>
+                      )}
                     </div>
 
                     {/* Renew */}

@@ -1665,7 +1665,7 @@ export default function App() {
           padding:"2px clamp(8px,1.5vw,16px)",
           display:"flex", alignItems:"center", justifyContent:"center", gap:"clamp(10px,2vw,20px)"
         }}>
-          <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO2.png`} alt="EZ Tech Solutions" style={{ width:220, height:220, flexShrink:0 }} />
+          <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO-wide.png`} alt="EZ Tech Solutions" style={{ height:80, width:"auto", flexShrink:0 }} />
           <div style={{ fontSize:"clamp(15px,3vw,24px)", fontWeight:900, color:"#c9a227", letterSpacing:"clamp(1px,0.4vw,3px)", fontStyle:"italic" }}>
             Providing Fast and Quality Services
           </div>
@@ -1950,7 +1950,7 @@ export default function App() {
           </div>
 
           <div style={{ textAlign:"center", marginTop:28, paddingBottom:8 }}>
-            <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO BLACK.jpg`} alt="EZ Tech Solutions" style={{ height:"clamp(120px, 32vw, 200px)", width:"auto", objectFit:"contain", mixBlendMode:"screen", opacity:0.85 }} />
+            <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO-wide.png`} alt="EZ Tech Solutions" style={{ height:"clamp(60px, 14vw, 100px)", width:"auto" }} />
           </div>
           </div>{/* end center column */}
 

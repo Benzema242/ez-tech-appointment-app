@@ -772,7 +772,7 @@ export default function App() {
 
       {/* Admin Header */}
       <div className="admin-hdr" style={{ padding:"16px 24px", borderBottom:"1px solid rgba(201,162,39,.2)", background:"linear-gradient(180deg,rgba(10,22,40,.95),rgba(10,22,40,.85))", display:"flex", alignItems:"center", gap:14, flexWrap:"wrap" }}>
-        <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO2.png`} alt="EZ Tech" style={{ height:56, width:"auto", flexShrink:0 }} />
+        <img src={`${import.meta.env.BASE_URL}assets/EZTECHLOGO2.png`} alt="EZ Tech" style={{ height:220, width:"auto", flexShrink:0 }} />
         <div style={{ flex:1 }}>
           <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:16, fontWeight:900, color:"#fff", letterSpacing:2 }}>EZ TECH <span style={{ color:"#c9a227" }}>SOLUTIONS</span></div>
           <div style={{ fontSize:12, color:"#7788aa", letterSpacing:1, marginTop:1 }}>ADMIN DASHBOARD · BENZ</div>

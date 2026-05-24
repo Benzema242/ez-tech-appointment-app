@@ -222,6 +222,11 @@ export default function App() {
     return () => supabase.removeChannel(channel);
   }, []);
 
+  useEffect(() => {
+    if (!authed) { document.title = "EZ Tech Solutions"; return; }
+    document.title = pendingCount > 0 ? `(${pendingCount}) EZ Tech Admin` : "EZ Tech Admin";
+  }, [authed, pendingCount]);
+
   // ── Toast ──────────────────────────────────────────────────────────────
   const fire = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
@@ -600,7 +605,13 @@ export default function App() {
   };
   const filtered = bookings
     .filter(b => filter === "all" || b.status === filter)
-    .filter(b => !search.trim() || b.client.toLowerCase().includes(search.toLowerCase()))
+    .filter(b => {
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return b.client.toLowerCase().includes(q) ||
+             (b.phone || "").includes(search) ||
+             (b.email || "").toLowerCase().includes(q);
+    })
     .filter(b => !dateFrom || b.date >= dateFrom)
     .filter(b => !dateTo   || b.date <= dateTo)
     .sort((a, b) => a.date.localeCompare(b.date));
@@ -858,7 +869,7 @@ export default function App() {
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Search by client name…"
+                placeholder="Search by name, phone or email…"
                 style={{ marginBottom:10, fontSize:16, padding:"11px 14px" }}
               />
               <div style={{ display:"flex", gap:6, marginBottom:8, flexWrap:"wrap", alignItems:"center" }}>

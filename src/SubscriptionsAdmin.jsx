@@ -101,6 +101,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const [search, setSearch]     = useState("");
   const [planFilter, setPlanFilter]     = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [subsSort, setSubsSort] = useState("expiry");
   const [selected, setSelected] = useState(null);
   const [toast, setToast]       = useState(null);
   const [showPw, setShowPw]     = useState(false);
@@ -547,6 +548,11 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       return (s.name  || "").toLowerCase().includes(q) ||
              (s.phone || "").includes(search) ||
              (s.email || "").toLowerCase().includes(q);
+    })
+    .sort((a, b) => {
+      if (subsSort === "name")  return (a.name || "").localeCompare(b.name || "");
+      if (subsSort === "price") return (b.price || 0) - (a.price || 0);
+      return new Date(a.expiration) - new Date(b.expiration);
     });
 
   const rowColor = sub => {
@@ -584,6 +590,9 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const bestMonth  = monthStats.reduce((a, b) => b.rev > a.rev ? b : a, monthStats[0]);
   const iptvSubs   = subs.filter(s => s.plan === "IPTV"        && s.status === "active" && daysUntil(s.expiration) > 0).length;
   const movieSubs  = subs.filter(s => s.plan === "Movies & TV" && s.status === "active" && daysUntil(s.expiration) > 0).length;
+  const curMonthRev  = monthStats[11]?.rev ?? 0;
+  const prevMonthRev = monthStats[10]?.rev ?? 0;
+  const momPct = prevMonthRev > 0 ? Math.round(((curMonthRev - prevMonthRev) / prevMonthRev) * 100) : null;
 
   const projWindow = n => subs.filter(s => { const d = daysUntil(s.expiration); return s.status === "active" && d > 0 && d <= n; });
   const proj30subs = projWindow(30);
@@ -757,6 +766,20 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                       background:statusFilter===f?"rgba(201,162,39,.15)":"transparent",
                       border:`1px solid ${statusFilter===f?"#c9a227":"rgba(201,162,39,.2)"}`,
                       color:statusFilter===f?"#f0c040":"#556677" }}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+
+              {/* Sort */}
+              <div style={{ display:"flex", gap:5, marginBottom:10, alignItems:"center" }}>
+                <span style={{ fontSize:11, color:"#556677", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, flexShrink:0 }}>SORT</span>
+                {[["expiry","EXPIRY"],["name","NAME"],["price","PRICE"]].map(([k,l]) => (
+                  <button key={k} onClick={() => setSubsSort(k)}
+                    style={{ padding:"4px 10px", fontSize:11, borderRadius:3, cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, fontWeight:700, transition:"all .15s",
+                      background: subsSort===k ? "rgba(201,162,39,.2)" : "transparent",
+                      border: `1px solid ${subsSort===k ? "#c9a227" : "rgba(201,162,39,.2)"}`,
+                      color: subsSort===k ? "#f0c040" : "#556677" }}>
                     {l}
                   </button>
                 ))}
@@ -1259,6 +1282,11 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     </div>
                     <div style={{ fontSize:13, color:"#ffffff", fontFamily:"'Orbitron',sans-serif", textAlign:"center", letterSpacing:.3, marginTop:2 }}>{m.label}</div>
                     {m.total > 0 && <div style={{ fontSize:13, color:"#c9a227", textAlign:"center", fontWeight:700 }}>{m.total}</div>}
+                    {m.key === monthStats[11]?.key && momPct !== null && (
+                      <div style={{ fontSize:11, textAlign:"center", color: momPct >= 0 ? "#22c55e" : "#ef4444", fontWeight:700 }}>
+                        {momPct >= 0 ? "▲" : "▼"}{Math.abs(momPct)}%
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1267,8 +1295,9 @@ export default function SubscriptionsAdmin({ onGoClient }) {
             {/* Summary cards */}
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))", gap:12, marginBottom:32 }}>
               {[
-                { l:"12-MONTH REVENUE",  v:`$${totalRev12}`,                      c:"#c9a227" },
-                { l:"MONTHLY AVG",       v:`$${avgRev}`,                          c:"#a78bfa" },
+                { l:"12-MONTH REVENUE",  v:`$${totalRev12}`,                       c:"#c9a227" },
+                { l:"MONTHLY AVG",       v:`$${avgRev}`,                           c:"#a78bfa" },
+                { l:"VS LAST MONTH",     v: momPct !== null ? `${momPct >= 0 ? "+" : ""}${momPct}%` : "—", c: momPct === null ? "#7788aa" : momPct > 0 ? "#22c55e" : momPct < 0 ? "#ef4444" : "#7788aa" },
                 { l:"BEST MONTH",        v:`${bestMonth.label} $${bestMonth.rev}`, c:"#f0c040" },
                 { l:"IPTV REVENUE",      v:`$${iptvRev}`,                         c:"#3b82f6" },
                 { l:"MOVIES REVENUE",    v:`$${movieRev}`,                        c:"#a78bfa" },

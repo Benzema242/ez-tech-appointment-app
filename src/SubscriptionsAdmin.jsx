@@ -137,8 +137,18 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       .from("subscriptions")
       .select("*")
       .order("expiration", { ascending: true })
-      .then(({ data, error }) => {
-        if (!error && data) setSubs(data);
+      .then(async ({ data, error }) => {
+        if (!error && data) {
+          const now = new Date();
+          const toExpire = data.filter(s => s.status === "active" && new Date(s.expiration) < now);
+          if (toExpire.length > 0) {
+            const ids = toExpire.map(s => s.id);
+            await supabase.from("subscriptions").update({ status:"expired" }).in("id", ids);
+            setSubs(data.map(s => ids.includes(s.id) ? { ...s, status:"expired" } : s));
+          } else {
+            setSubs(data);
+          }
+        }
         setLoading(false);
       });
   }, [authed]);

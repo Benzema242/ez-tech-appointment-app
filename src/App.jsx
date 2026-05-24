@@ -522,6 +522,13 @@ export default function App() {
     });
   };
 
+  const statusCycle  = { pending:"approved", approved:"denied", denied:"pending", scheduled_call:"pending" };
+  const waNum        = phone => { const d = (phone||"").replace(/\D/g,""); if(d.length===7) return `1242${d}`; if(d.length===10) return `1${d}`; return d; };
+  const waBookingMsg = b => {
+    const svcs = Array.isArray(b.service) ? b.service.join(", ") : (b.service || "Service");
+    return encodeURIComponent(`Hi ${b.client}, this is EZ Tech Solutions. Your appointment for ${svcs} is confirmed for ${b.date} at ${b.time}. Contact us if you need to reschedule. 📞 (242) 805-0777`);
+  };
+
   const submitChangePassword = async () => {
     if (!changePwForm.old) { setChangePwError("Enter your current password"); return; }
     if (changePwForm.newPw.length < 6) { setChangePwError("New password must be at least 6 characters"); return; }
@@ -936,7 +943,21 @@ export default function App() {
                         </div>
                         <div style={{ fontSize:15, color:"#c9a227", marginTop:3, fontFamily:"'Orbitron',sans-serif" }}>{relativeDate(b.date)} · {b.time}</div>
                       </div>
-                      <span style={{ padding:"3px 8px", borderRadius:3, fontSize:11, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:st.color, background:st.bg, border:`1px solid ${st.border}`, whiteSpace:"nowrap" }}>{st.label}</span>
+                      <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:5, flexShrink:0 }}>
+                        <button
+                          onClick={e => { e.stopPropagation(); if (!editMode) updateStatus(b.id, statusCycle[b.status] ?? "pending"); }}
+                          title={editMode ? "" : `Tap to → ${statusCycle[b.status] ?? "pending"}`}
+                          style={{ padding:"3px 8px", borderRadius:3, fontSize:11, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:st.color, background:st.bg, border:`1px solid ${st.border}`, whiteSpace:"nowrap", cursor: editMode ? "default" : "pointer" }}>
+                          {st.label}
+                        </button>
+                        {!editMode && b.phone && (
+                          <a href={`https://wa.me/${waNum(b.phone)}?text=${waBookingMsg(b)}`} target="_blank" rel="noopener noreferrer"
+                            onClick={e => e.stopPropagation()}
+                            style={{ padding:"4px 8px", borderRadius:3, background:"rgba(37,211,102,.12)", border:"1px solid rgba(37,211,102,.25)", color:"#25d366", fontSize:14, textDecoration:"none" }}>
+                            💬
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

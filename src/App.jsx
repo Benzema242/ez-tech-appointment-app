@@ -223,9 +223,9 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!authed) { document.title = "EZ Tech Solutions"; return; }
+    if (!adminAuthed) { document.title = "EZ Tech Solutions"; return; }
     document.title = pendingCount > 0 ? `(${pendingCount}) EZ Tech Admin` : "EZ Tech Admin";
-  }, [authed, pendingCount]);
+  }, [adminAuthed, pendingCount]);
 
   // ── Toast ──────────────────────────────────────────────────────────────
   const fire = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2500); };

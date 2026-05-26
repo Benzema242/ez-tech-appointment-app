@@ -762,7 +762,7 @@ export default function App() {
             <div style={{ flex:1, minWidth:0 }}>
               <div style={{ fontWeight:600, color: on ? "#f0c040" : "#e8e0cc", fontSize: compact ? 12 : 13 }}>{s.label}</div>
               {s.note && !compact && <div style={{ fontSize:13, color:"#c9a227", marginTop:2 }}>{s.note}</div>}
-              {s.id === "starlink" && !compact && <div style={{ fontSize:11, color:"#e8d9a0", marginTop:3, opacity:0.85 }}>50% non-refundable deposit required to book</div>}
+              {(s.id === "starlink" || s.id === "cctv_install") && !compact && <div style={{ fontSize:11, color:"#e8d9a0", marginTop:3, opacity:0.85 }}>50% non-refundable deposit required to book</div>}
             </div>
             <div style={{
               width:18, height:18, borderRadius:"50%", flexShrink:0,
@@ -2014,6 +2014,12 @@ export default function App() {
                       <div style={{ marginTop:14, padding:14, background:"rgba(201,162,39,.07)", border:"1px solid rgba(201,162,39,.35)", borderRadius:4, fontSize:13, color:"#e8d9a0", lineHeight:1.6 }}>
                         <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, fontWeight:700, letterSpacing:1.5, color:"#c9a227", marginBottom:6 }}>DEPOSIT REQUIRED — STARLINK INSTALLATION</div>
                         A <strong>50% non-refundable deposit</strong> is required to secure your Starlink system and confirm your installation appointment. This deposit is applied toward the total cost of your service and guarantees equipment allocation and scheduling on your behalf. Our team will provide payment instructions upon approval of your booking.
+                      </div>
+                    )}
+                    {form.services.includes("cctv_install") && (
+                      <div style={{ marginTop:14, padding:14, background:"rgba(201,162,39,.07)", border:"1px solid rgba(201,162,39,.35)", borderRadius:4, fontSize:13, color:"#e8d9a0", lineHeight:1.6 }}>
+                        <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:11, fontWeight:700, letterSpacing:1.5, color:"#c9a227", marginBottom:6 }}>DEPOSIT REQUIRED — SECURITY CAMERA INSTALLATION</div>
+                        A <strong>50% non-refundable deposit</strong> is required to confirm your custom security system order and secure your installation appointment. Your system is tailored to your property to ensure full coverage, and this deposit guarantees equipment procurement and scheduling on your behalf. Our team will provide payment instructions upon approval of your booking.
                       </div>
                     )}
                     <div style={{ marginTop:14, padding:11, background:"rgba(59,130,246,.08)", border:"1px solid rgba(59,130,246,.2)", borderRadius:4, fontSize:13, color:"#93bbf0" }}>

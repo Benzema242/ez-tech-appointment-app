@@ -1888,9 +1888,12 @@ export default function App() {
                     {form.date && (
                       <div>
                         <div style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", marginBottom:4 }}>AVAILABLE TIMES · {form.date}</div>
-                        <div style={{ fontSize:12, color:"#556677", marginBottom:8 }}>All times are Nassau time (EST, UTC−5)</div>
+                        <div style={{ fontSize:12, color:"#556677", marginBottom:8 }}>All times are Nassau time (EST, UTC−5){form.services.some(id => ["starlink","cctv_install"].includes(id)) ? " · Installation bookings: 10:00 AM – 3:00 PM only" : ""}</div>
                         <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6 }}>
-                          {CLIENT_TIMES.map(t => {
+                          {(form.services.some(id => ["starlink","cctv_install"].includes(id))
+                            ? CLIENT_TIMES.filter(t => { const h = timeToHour(t); return h >= 10 && h <= 15; })
+                            : CLIENT_TIMES
+                          ).map(t => {
                             const taken = isClientBooked(form.date, t);
                             return <div key={t} className={"timeslot " + (form.time === t ? "sel" : "") + (taken ? " taken" : "")} onClick={() => !taken && setForm({...form, time:t})}>{t}</div>;
                           })}

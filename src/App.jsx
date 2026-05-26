@@ -10,6 +10,7 @@ const SERVICES = [
   { id: "cctv_install", label: "Security Camera / CCTV Installation", price: 300, icon: "📷" },
   { id: "network", label: "WiFi Network Setup", price: 200, icon: "📡" },
   { id: "ap", label: "AP Installation", price: 175, icon: "🔗" },
+  { id: "starlink_assess", label: "Starlink Assessment", price: 0, icon: "🛰️", note: "FREE Assessment" },
   { id: "starlink", label: "Starlink Installation", price: 250, icon: "🛰️" },
   { id: "lighting", label: "Smart Lighting (EZ Tech Lighting)", price: 0, icon: "💡", note: "FREE Consultation" },
   { id: "av", label: "Audio Visual Production", price: 200, icon: "🎚️" },

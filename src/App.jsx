@@ -187,6 +187,8 @@ export default function App() {
   const [priceInput, setPriceInput] = useState("");
   const [editingDetails, setEditingDetails] = useState(false);
   const [detailsForm, setDetailsForm] = useState({ client:"", phone:"", email:"", service:[] });
+  const [adminNoteInput, setAdminNoteInput] = useState("");
+  const [adminNoteSaving, setAdminNoteSaving] = useState(false);
   const [contactAction, setContactAction] = useState("confirmation");
   const [editMode, setEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -939,7 +941,7 @@ export default function App() {
                   <div
                     key={b.id}
                     className={"row " + (!editMode && selected?.id === b.id ? "active" : "") + (editMode && selectedIds.has(b.id) ? " active" : "")}
-                    onClick={() => editMode ? toggleSelectId(b.id) : (() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); })()}
+                    onClick={() => editMode ? toggleSelectId(b.id) : (() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setAdminNoteInput(""); })()}
                   >
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                       {editMode ? (
@@ -1018,7 +1020,7 @@ export default function App() {
 
                     {/* Mobile back button */}
                     <div className="mobile-back" style={{ marginBottom:14, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:14, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
+                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setAdminNoteInput(""); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:14, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
                         ← Back to list
                       </button>
                       <button onClick={() => {
@@ -1202,6 +1204,48 @@ export default function App() {
                           {selected.notes || "No notes — click Edit to add"}
                         </div>
                       )}
+                    </div>
+
+                    {/* Admin-only note */}
+                    <div style={{ marginTop:14, padding:14, background:"rgba(239,68,68,.05)", border:"1px solid rgba(239,68,68,.25)", borderRadius:8 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+                        <div style={{ fontSize:12, color:"#f87171", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>🔒 ADMIN NOTE</div>
+                        <div style={{ fontSize:11, color:"#556677", fontStyle:"italic" }}>internal only — not visible to client</div>
+                      </div>
+                      <textarea
+                        rows={3}
+                        value={adminNoteInput}
+                        onChange={e => setAdminNoteInput(e.target.value)}
+                        placeholder="Add an internal note about this booking…"
+                        style={{ fontSize:15, resize:"vertical", padding:"10px 12px", borderRadius:6, width:"100%", borderColor:"rgba(239,68,68,.3)" }}
+                      />
+                      <button
+                        className="btn"
+                        disabled={!adminNoteInput.trim() || adminNoteSaving}
+                        style={{ marginTop:10, padding:"10px 18px", fontSize:13, borderRadius:6, background: adminNoteInput.trim() ? "rgba(239,68,68,.15)" : "transparent", border:"1px solid rgba(239,68,68,.35)", color: adminNoteInput.trim() ? "#f87171" : "#556677", cursor: adminNoteInput.trim() ? "pointer" : "not-allowed" }}
+                        onClick={async () => {
+                          if (!adminNoteInput.trim() || adminNoteSaving) return;
+                          setAdminNoteSaving(true);
+                          const svcs = svcList(selected.service);
+                          await fetch("/api/send-admin-note-email", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              client: selected.client,
+                              phone: selected.phone,
+                              email: selected.email,
+                              services: svcs.map(s => s.label),
+                              date: selected.date,
+                              time: selected.time,
+                              duration: selected.duration || 1,
+                              status: selected.status,
+                              note: adminNoteInput.trim(),
+                            }),
+                          });
+                          setAdminNoteSaving(false);
+                          fire("📧 Admin note sent to your inbox");
+                        }}
+                      >{adminNoteSaving ? "SENDING…" : "SAVE & SEND NOTE"}</button>
                     </div>
 
                     {/* Reschedule */}

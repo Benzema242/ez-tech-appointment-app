@@ -403,7 +403,7 @@ export default function App() {
       /* ── Body ── */
       .body{flex:1;padding:28px 36px;}
       table{width:100%;border-collapse:collapse;margin-top:4px;}
-      th{text-align:left;padding:11px 14px;background:#050b1f;color:#c9a227;font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+      th{text-align:left;padding:11px 14px;background:linear-gradient(90deg,#1e40af,#3b82f6);color:#fff;font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
       td{padding:12px 14px;font-size:16px;border-bottom:1px solid #eee;vertical-align:top;color:#1a1a2e;}
       td:first-child{font-weight:600;color:#444;width:36%;background:#fafaf8;}
       tr:last-child td{border-bottom:none;}

@@ -190,6 +190,8 @@ export default function App() {
   const [editingAdminNote, setEditingAdminNote] = useState(false);
   const [adminNoteInput, setAdminNoteInput] = useState("");
   const [adminNoteSending, setAdminNoteSending] = useState(false);
+  const [editingDeposit, setEditingDeposit] = useState(false);
+  const [depositForm, setDepositForm] = useState({ amount:"", date:"", method:"Cash", note:"" });
   const [contactAction, setContactAction] = useState("confirmation");
   const [editMode, setEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -956,7 +958,7 @@ export default function App() {
                   <div
                     key={b.id}
                     className={"row " + (!editMode && selected?.id === b.id ? "active" : "") + (editMode && selectedIds.has(b.id) ? " active" : "")}
-                    onClick={() => editMode ? toggleSelectId(b.id) : (() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); })()}
+                    onClick={() => editMode ? toggleSelectId(b.id) : (() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); })()}
                   >
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                       {editMode ? (
@@ -1035,7 +1037,7 @@ export default function App() {
 
                     {/* Mobile back button */}
                     <div className="mobile-back" style={{ marginBottom:14, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:14, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
+                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:14, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
                         ← Back to list
                       </button>
                       <button onClick={() => {
@@ -1183,6 +1185,76 @@ export default function App() {
                           color: selected.paid ? "#34d399" : "#556677" }}
                       >{selected.paid ? "✓ PAID" : "MARK AS PAID"}</button>
                     </div>
+
+                    {/* Deposit */}
+                    {(() => {
+                      const totalPrice = (() => { const svcs = svcList(selected.service); return selected.price != null ? selected.price : svcs.reduce((s,sv) => s+(sv.price||0),0); })();
+                      const requiredDeposit = totalPrice > 0 ? Math.round(totalPrice * 0.5) : null;
+                      const depositReceived = selected.deposit_paid;
+                      return (
+                        <div style={{ marginTop:14, padding:14, background:"rgba(52,211,153,.04)", border:"1px solid rgba(52,211,153,.2)", borderRadius:8 }}>
+                          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
+                            <div style={{ fontSize:12, color:"#34d399", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>💰 DEPOSIT</div>
+                            {!editingDeposit && (
+                              <button onClick={() => { setDepositForm({ amount: selected.deposit_amount ?? (requiredDeposit ?? ""), date: selected.deposit_date || "", method: selected.deposit_method || "Cash", note: selected.deposit_note || "" }); setEditingDeposit(true); }} style={{ background:"none", border:"none", color:"#34d399", fontSize:13, cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>✏️ Edit</button>
+                            )}
+                          </div>
+
+                          {editingDeposit ? (
+                            <>
+                              <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                                  <div>
+                                    <div style={{ fontSize:11, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>AMOUNT ($)</div>
+                                    <input type="number" min="0" value={depositForm.amount} onChange={e => setDepositForm(p => ({...p, amount:e.target.value}))} placeholder={requiredDeposit ? `${requiredDeposit}` : "0"} style={{ fontSize:14, padding:"8px", width:"100%", borderRadius:6, borderColor:"rgba(52,211,153,.3)" }} />
+                                  </div>
+                                  <div>
+                                    <div style={{ fontSize:11, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>DATE RECEIVED</div>
+                                    <input type="date" value={depositForm.date} onChange={e => setDepositForm(p => ({...p, date:e.target.value}))} style={{ fontSize:14, padding:"8px", width:"100%", borderRadius:6, colorScheme:"dark", borderColor:"rgba(52,211,153,.3)" }} />
+                                  </div>
+                                </div>
+                                <div>
+                                  <div style={{ fontSize:11, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>PAYMENT METHOD</div>
+                                  <select value={depositForm.method} onChange={e => setDepositForm(p => ({...p, method:e.target.value}))} style={{ fontSize:14, padding:"8px", width:"100%", borderRadius:6, borderColor:"rgba(52,211,153,.3)" }}>
+                                    {["Cash","Bank Transfer","Card","Cheque","Zelle","PayPal","Other"].map(m => <option key={m}>{m}</option>)}
+                                  </select>
+                                </div>
+                                <div>
+                                  <div style={{ fontSize:11, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>NOTE (OPTIONAL)</div>
+                                  <input type="text" value={depositForm.note} onChange={e => setDepositForm(p => ({...p, note:e.target.value}))} placeholder="e.g. Reference number, receipt…" style={{ fontSize:14, padding:"8px", width:"100%", borderRadius:6 }} />
+                                </div>
+                              </div>
+                              <div style={{ display:"flex", gap:8, marginTop:12 }}>
+                                <button className="btn" style={{ padding:"9px 16px", fontSize:13, borderRadius:6, background:"rgba(52,211,153,.15)", border:"1px solid rgba(52,211,153,.4)", color:"#34d399" }}
+                                  onClick={() => { updateBooking(selected.id, { deposit_paid: true, deposit_amount: depositForm.amount !== "" ? Number(depositForm.amount) : null, deposit_date: depositForm.date || null, deposit_method: depositForm.method, deposit_note: depositForm.note || null }); setEditingDeposit(false); }}>
+                                  SAVE
+                                </button>
+                                <button className="btn ghost" style={{ padding:"9px 16px", fontSize:13, borderRadius:6 }} onClick={() => setEditingDeposit(false)}>CANCEL</button>
+                                {depositReceived && <button className="btn" style={{ padding:"9px 16px", fontSize:13, borderRadius:6, background:"transparent", border:"1px solid rgba(239,68,68,.3)", color:"#f87171", marginLeft:"auto" }} onClick={() => { updateBooking(selected.id, { deposit_paid: false, deposit_amount: null, deposit_date: null, deposit_method: null, deposit_note: null }); setEditingDeposit(false); }}>CLEAR</button>}
+                              </div>
+                            </>
+                          ) : depositReceived ? (
+                            <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
+                              <div style={{ display:"flex", justifyContent:"space-between", fontSize:15 }}>
+                                <span style={{ color:"#7788aa" }}>Amount</span>
+                                <span style={{ color:"#34d399", fontWeight:600 }}>{selected.deposit_amount != null ? `$${selected.deposit_amount}` : "—"}{requiredDeposit ? <span style={{ fontSize:12, color:"#556677", marginLeft:6 }}>of ${requiredDeposit} required</span> : null}</span>
+                              </div>
+                              {selected.deposit_date && <div style={{ display:"flex", justifyContent:"space-between", fontSize:14 }}><span style={{ color:"#7788aa" }}>Date</span><span style={{ color:"#e8e0cc" }}>{selected.deposit_date}</span></div>}
+                              {selected.deposit_method && <div style={{ display:"flex", justifyContent:"space-between", fontSize:14 }}><span style={{ color:"#7788aa" }}>Method</span><span style={{ color:"#e8e0cc" }}>{selected.deposit_method}</span></div>}
+                              {selected.deposit_note && <div style={{ display:"flex", justifyContent:"space-between", fontSize:14, gap:10 }}><span style={{ color:"#7788aa", flexShrink:0 }}>Note</span><span style={{ color:"#e8e0cc", textAlign:"right" }}>{selected.deposit_note}</span></div>}
+                              <div style={{ marginTop:4, padding:"5px 10px", background:"rgba(52,211,153,.12)", border:"1px solid rgba(52,211,153,.3)", borderRadius:4, fontSize:12, color:"#34d399", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, display:"inline-block", alignSelf:"flex-start" }}>✓ DEPOSIT RECEIVED</div>
+                            </div>
+                          ) : (
+                            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                              <div style={{ fontSize:14, color:"#445566", fontStyle:"italic" }}>
+                                {requiredDeposit ? `50% deposit required: $${requiredDeposit}` : "No deposit recorded"}
+                              </div>
+                              <span style={{ fontSize:12, color:"#ef4444", fontFamily:"'Orbitron',sans-serif", letterSpacing:1 }}>PENDING</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     {/* Client history */}
                     {(() => {

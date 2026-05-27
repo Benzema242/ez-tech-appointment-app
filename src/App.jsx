@@ -1435,16 +1435,20 @@ export default function App() {
                 {Array(firstDay(calY, calM)).fill(null).map((_,i) => <div key={`e${i}`} />)}
                 {Array(daysInMonth(calY, calM)).fill(null).map((_,i) => {
                   const d = i+1; const ds = fmtDate(calY, calM, d); const mark = dayMark(ds);
+                  const blackout = blackoutDates.find(b => b.date === ds);
                   let cls = "cell";
                   if (ds === todayStr)         cls += " today";
                   if (mark === "approved")     cls += " has-app";
                   else if (mark === "pending") cls += " has-pen";
+                  if (blackout)               cls += " blacked-out";
                   if (selDay === ds)           cls += " sel-day";
-                  return <div key={d} className={cls} onClick={() => setSelDay(ds === selDay ? null : ds)}>{d}</div>;
+                  return (
+                    <div key={d} className={cls} onClick={() => setSelDay(ds === selDay ? null : ds)} title={blackout ? `⛔ Blocked${blackout.reason ? `: ${blackout.reason}` : ""}` : undefined}>{d}</div>
+                  );
                 })}
               </div>
               <div style={{ display:"flex", gap:18, marginTop:18, justifyContent:"center", flexWrap:"wrap" }}>
-                {[["#4ade80","Approved"],["#fbbf24","Pending"]].map(([c,l]) => (
+                {[["#4ade80","Approved"],["#fbbf24","Pending"],["rgba(239,68,68,.4)","Blocked"]].map(([c,l]) => (
                   <div key={l} style={{ display:"flex", alignItems:"center", gap:7, fontSize:15, color:"#7788aa" }}>
                     <div style={{ width:13, height:13, borderRadius:3, background:c }} />{l}
                   </div>
@@ -1457,6 +1461,7 @@ export default function App() {
                 {selDay ? `📅 ${selDay}` : "SELECT A DAY"}
               </div>
               {selDay ? (() => {
+                const blackoutForDay = blackoutDates.find(b => b.date === selDay);
                 const coveredSlots = {};
                 bookings
                   .filter(b => b.date === selDay && (b.status === "approved" || b.status === "pending" || b.status === "scheduled_call"))
@@ -1466,6 +1471,12 @@ export default function App() {
                   });
                 return (
                   <div>
+                    {blackoutForDay && (
+                      <div style={{ marginBottom:14, padding:"10px 14px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.3)", borderRadius:6 }}>
+                        <div style={{ fontSize:11, color:"#f87171", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:4 }}>⛔ BLOCKED DATE</div>
+                        <div style={{ fontSize:14, color:"#e8c8c8" }}>{blackoutForDay.reason || "No reason specified"}</div>
+                      </div>
+                    )}
                     {TIMES.map((t, idx) => {
                       const b = coveredSlots[t];
                       const isStart = b && timeToHour(b.time) === timeToHour(t);

@@ -1042,6 +1042,9 @@ export default function App() {
                       </button>
                       <button onClick={() => {
                         const services = Array.isArray(selected.service) ? selected.service.join(', ') : (selected.service || '—');
+                        const svcs = svcList(selected.service);
+                        const totalPrice = selected.price != null ? selected.price : svcs.reduce((s,sv) => s+(sv.price||0),0);
+                        const requiredDeposit = totalPrice > 0 ? Math.round(totalPrice * 0.5) : null;
                         printDoc(`Booking — ${selected.client}`, `
                           <table>
                             <tr><th>Field</th><th>Details</th></tr>
@@ -1053,9 +1056,21 @@ export default function App() {
                             <tr><td>Time</td><td>${selected.time} (Nassau time)</td></tr>
                             <tr><td>Duration</td><td>${selected.duration || 1} hour${(selected.duration||1)!==1?'s':''}</td></tr>
                             <tr><td>Status</td><td>${selected.status}</td></tr>
-                            <tr><td>Price</td><td>${selected.price != null ? '$'+selected.price : '—'}</td></tr>
-                            <tr><td>Paid</td><td>${selected.paid ? 'Yes' : 'No'}</td></tr>
+                            <tr><td>Price</td><td>${totalPrice ? '$'+totalPrice : '—'}</td></tr>
+                            <tr><td>Paid in Full</td><td>${selected.paid ? 'Yes' : 'No'}</td></tr>
                             <tr><td>Notes</td><td>${selected.notes || '—'}</td></tr>
+                          </table>
+                          <h3 style="margin-top:24px;">Deposit</h3>
+                          <table>
+                            <tr><th>Field</th><th>Details</th></tr>
+                            <tr><td>Required (50%)</td><td>${requiredDeposit ? '$'+requiredDeposit : '—'}</td></tr>
+                            <tr><td>Status</td><td>${selected.deposit_paid ? '✓ Received' : 'Pending'}</td></tr>
+                            ${selected.deposit_paid ? `
+                            <tr><td>Amount Received</td><td>${selected.deposit_amount != null ? '$'+selected.deposit_amount : '—'}</td></tr>
+                            <tr><td>Date Received</td><td>${selected.deposit_date || '—'}</td></tr>
+                            <tr><td>Payment Method</td><td>${selected.deposit_method || '—'}</td></tr>
+                            ${selected.deposit_note ? `<tr><td>Note</td><td>${selected.deposit_note}</td></tr>` : ''}
+                            ` : ''}
                           </table>`);
                       }} style={{ background:"none", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontSize:13, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", padding:"5px 10px", borderRadius:4 }}>🖨 Print</button>
                     </div>

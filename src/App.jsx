@@ -382,7 +382,7 @@ export default function App() {
     const dateStr = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
     let logoSrc = '';
     try {
-      const res = await fetch('/assets/EZTECHLOGO2.png');
+      const res = await fetch('/assets/EZ Tech Logo 1200px X 495px.png');
       const blob = await res.blob();
       logoSrc = await new Promise(r => { const fr = new FileReader(); fr.onloadend = () => r(fr.result); fr.readAsDataURL(blob); });
     } catch(e) {}
@@ -391,7 +391,7 @@ export default function App() {
       *{box-sizing:border-box;margin:0;padding:0;}
       body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:16px;min-height:100vh;display:flex;flex-direction:column;}
       /* ── Header ── */
-      .hdr{background:#fff;padding:16px 36px 0;display:flex;align-items:flex-end;justify-content:space-between;}
+      .hdr{background:#fff;padding:24px 36px 0;display:flex;align-items:center;justify-content:space-between;}
       .hdr-contact{text-align:right;font-size:14px;color:#444;line-height:2;}
       .hdr-contact span{color:#c9a227;font-weight:700;}
       /* ── Rules ── */
@@ -428,7 +428,7 @@ export default function App() {
       @media print{@page{margin:0;size:letter}body{height:11in;min-height:unset;}button{display:none;}}
     </style></head><body>
       <div class="hdr">
-        ${logoSrc ? `<img src="${logoSrc}" style="width:220px;height:220px;object-fit:contain;object-position:bottom left;" />` : ''}
+        ${logoSrc ? `<img src="${logoSrc}" style="width:280px;height:auto;object-fit:contain;" />` : '<div style="font-size:22px;font-weight:900;color:#050b1f;letter-spacing:1px;">EZ TECH <span style=\'color:#c9a227;\'>SOLUTIONS</span></div>'}
         <div class="hdr-contact">
           <span>(242) 805-0777</span><br/>
           info@ez-techgroup.com<br/>

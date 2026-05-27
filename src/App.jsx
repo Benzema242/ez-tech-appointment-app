@@ -394,7 +394,7 @@ export default function App() {
       .hdr-contact span{color:#c9a227;font-weight:700;}
       /* ── Rules ── */
       .gold-rule{height:4px;background:linear-gradient(90deg,#c9a227,#f0c040,#c9a227);}
-      .blue-rule{height:4px;background:linear-gradient(90deg,#1e40af,#3b82f6,#1e40af);}
+      .blue-rule{height:4px;background:#3b82f6;}
       /* ── Doc info bar ── */
       .doc-bar{background:#f7f5ef;border-bottom:1px solid #e0d9c8;padding:13px 36px;display:flex;align-items:center;justify-content:space-between;}
       .doc-title{font-size:20px;font-weight:800;color:#050b1f;letter-spacing:.5px;}
@@ -403,7 +403,7 @@ export default function App() {
       /* ── Body ── */
       .body{flex:1;padding:28px 36px;}
       table{width:100%;border-collapse:collapse;margin-top:4px;}
-      th{text-align:left;padding:11px 14px;background:linear-gradient(90deg,#1e40af,#3b82f6);color:#fff;font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+      th{text-align:left;padding:11px 14px;background:#3b82f6;color:#fff;font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
       td{padding:12px 14px;font-size:16px;border-bottom:1px solid #eee;vertical-align:top;color:#1a1a2e;}
       td:first-child{font-weight:600;color:#444;width:36%;background:#fafaf8;}
       tr:last-child td{border-bottom:none;}
@@ -419,7 +419,7 @@ export default function App() {
       /* ── Footer ── */
       .ftr-rules{margin-top:auto;}
       .ftr-gold{height:4px;background:linear-gradient(90deg,#c9a227,#f0c040,#c9a227);}
-      .ftr-blue{height:4px;background:linear-gradient(90deg,#1e40af,#3b82f6,#1e40af);}
+      .ftr-blue{height:4px;background:#3b82f6;}
       .ftr{background:#fff;padding:16px 36px;}
       .ftr-disclaimer{font-size:12px;color:#111;line-height:1.6;}
       .ftr-disclaimer strong{color:#111;}
@@ -1057,20 +1057,16 @@ export default function App() {
                             <tr><td>Duration</td><td>${selected.duration || 1} hour${(selected.duration||1)!==1?'s':''}</td></tr>
                             <tr><td>Status</td><td>${selected.status}</td></tr>
                             <tr><td>Price</td><td>${totalPrice ? '$'+totalPrice : '—'}</td></tr>
+                            <tr><td>Deposit Required (50%)</td><td>${requiredDeposit ? '$'+requiredDeposit : '—'}</td></tr>
+                            <tr><td>Deposit Status</td><td>${selected.deposit_paid ? '✓ Received' : 'Pending'}</td></tr>
+                            ${selected.deposit_paid ? `
+                            <tr><td>Deposit Amount</td><td>${selected.deposit_amount != null ? '$'+selected.deposit_amount : '—'}</td></tr>
+                            <tr><td>Deposit Date</td><td>${selected.deposit_date || '—'}</td></tr>
+                            <tr><td>Payment Method</td><td>${selected.deposit_method || '—'}</td></tr>
+                            ${selected.deposit_note ? `<tr><td>Deposit Note</td><td>${selected.deposit_note}</td></tr>` : ''}
+                            ` : ''}
                             <tr><td>Paid in Full</td><td>${selected.paid ? 'Yes' : 'No'}</td></tr>
                             <tr><td>Notes</td><td>${selected.notes || '—'}</td></tr>
-                          </table>
-                          <h3 style="margin-top:24px;">Deposit</h3>
-                          <table>
-                            <tr><th>Field</th><th>Details</th></tr>
-                            <tr><td>Required (50%)</td><td>${requiredDeposit ? '$'+requiredDeposit : '—'}</td></tr>
-                            <tr><td>Status</td><td>${selected.deposit_paid ? '✓ Received' : 'Pending'}</td></tr>
-                            ${selected.deposit_paid ? `
-                            <tr><td>Amount Received</td><td>${selected.deposit_amount != null ? '$'+selected.deposit_amount : '—'}</td></tr>
-                            <tr><td>Date Received</td><td>${selected.deposit_date || '—'}</td></tr>
-                            <tr><td>Payment Method</td><td>${selected.deposit_method || '—'}</td></tr>
-                            ${selected.deposit_note ? `<tr><td>Note</td><td>${selected.deposit_note}</td></tr>` : ''}
-                            ` : ''}
                           </table>`);
                       }} style={{ background:"none", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontSize:13, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", padding:"5px 10px", borderRadius:4 }}>🖨 Print</button>
                     </div>

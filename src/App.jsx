@@ -195,6 +195,10 @@ export default function App() {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [blackoutDates, setBlackoutDates] = useState([]);
+  const [blackoutInput, setBlackoutInput] = useState("");
+  const [blackoutReason, setBlackoutReason] = useState("");
+  const [blackoutSaving, setBlackoutSaving] = useState(false);
 
   // ── Load bookings from Supabase ────────────────────────────────────────
   useEffect(() => {
@@ -224,6 +228,15 @@ export default function App() {
       })
       .subscribe();
     return () => supabase.removeChannel(channel);
+  }, []);
+
+  useEffect(() => {
+    supabase.from("blackout_dates").select("*").order("date", { ascending: true }).then(({ data }) => { if (data) setBlackoutDates(data); });
+    const ch = supabase.channel("blackout-realtime")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "blackout_dates" }, ({ new: row }) => setBlackoutDates(p => [...p, row].sort((a,b) => a.date.localeCompare(b.date))))
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "blackout_dates" }, ({ old: row }) => setBlackoutDates(p => p.filter(b => b.id !== row.id)))
+      .subscribe();
+    return () => supabase.removeChannel(ch);
   }, []);
 
   useEffect(() => {
@@ -662,6 +675,7 @@ export default function App() {
     .cell.has-pen{background:rgba(245,158,11,.18);color:#fbbf24;}
     .cell.sel-day{background:#c9a227!important;color:#050d1a!important;font-weight:700;}
     .cell.disabled-past{opacity:.25;cursor:not-allowed;}
+    .cell.blacked-out{background:rgba(239,68,68,.12);color:#f87171;border-color:rgba(239,68,68,.3);cursor:not-allowed;text-decoration:line-through;opacity:.6;}
     .row{padding:13px 14px;border-radius:4px;cursor:pointer;border:1px solid rgba(201,162,39,.1);background:rgba(201,162,39,.03);transition:all .15s;margin-bottom:8px;}
     .row:hover{background:rgba(201,162,39,.08);border-color:rgba(201,162,39,.3);}
     .row.active{background:rgba(201,162,39,.12);border-color:rgba(201,162,39,.5);}
@@ -859,7 +873,7 @@ export default function App() {
 
       {/* Tab Navigation */}
       <div className="admin-tabs" style={{ padding:"0 24px", display:"flex", borderBottom:"1px solid rgba(201,162,39,.15)", overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
-        {[["bookings","📋 BOOKINGS"],["upcoming","🗓 UPCOMING"],["calendar","📅 CALENDAR"],["stats","📊 STATS"]].map(([k,l]) => (
+        {[["bookings","📋 BOOKINGS"],["upcoming","🗓 UPCOMING"],["calendar","📅 CALENDAR"],["stats","📊 STATS"],["blackout","⛔ BLOCK DATES"]].map(([k,l]) => (
           <button key={k} onClick={() => setAdminTab(k)} style={{ padding:"14px 20px", background:"transparent", border:"none", borderBottom: adminTab===k ? "2px solid #c9a227" : "2px solid transparent", color: adminTab===k ? "#c9a227" : "#7788aa", fontFamily:"'Orbitron',sans-serif", fontSize:13, fontWeight:700, letterSpacing:1.5, cursor:"pointer", transition:"all .2s", flexShrink:0, whiteSpace:"nowrap" }}>{l}</button>
         ))}
       </div>
@@ -1500,6 +1514,60 @@ export default function App() {
             </div>
           </div>
 
+        ) : adminTab === "blackout" ? (
+
+          // ── Block Dates Tab ──────────────────────────────────────────
+          <div style={{ padding:24, maxWidth:520 }}>
+            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>⛔ BLOCK DATES</div>
+            <div style={{ fontSize:14, color:"#7788aa", marginBottom:20 }}>Blocked dates are completely unavailable to clients — no time slots will be shown.</div>
+
+            {/* Add form */}
+            <div style={{ padding:16, background:"rgba(239,68,68,.05)", border:"1px solid rgba(239,68,68,.2)", borderRadius:8, marginBottom:20 }}>
+              <div style={{ fontSize:12, color:"#f87171", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:12 }}>ADD BLOCKED DATE</div>
+              <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                <div>
+                  <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>DATE *</div>
+                  <input type="date" value={blackoutInput} onChange={e => setBlackoutInput(e.target.value)} style={{ fontSize:15, padding:"10px", colorScheme:"dark", width:"100%", borderRadius:6, borderColor:"rgba(239,68,68,.3)" }} />
+                </div>
+                <div>
+                  <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>REASON (OPTIONAL)</div>
+                  <input type="text" value={blackoutReason} onChange={e => setBlackoutReason(e.target.value)} placeholder="e.g. Travel, Public holiday, Team event…" style={{ fontSize:15, padding:"10px", width:"100%", borderRadius:6 }} />
+                </div>
+                <button
+                  className="btn"
+                  disabled={!blackoutInput || blackoutSaving || blackoutDates.some(b => b.date === blackoutInput)}
+                  style={{ padding:"11px", fontSize:13, borderRadius:6, background: blackoutInput ? "rgba(239,68,68,.15)" : "transparent", border:"1px solid rgba(239,68,68,.35)", color: blackoutInput ? "#f87171" : "#556677" }}
+                  onClick={async () => {
+                    setBlackoutSaving(true);
+                    const { error } = await supabase.from("blackout_dates").insert({ date: blackoutInput, reason: blackoutReason.trim() || null });
+                    if (error) { fire("❌ Error blocking date"); } else { setBlackoutInput(""); setBlackoutReason(""); fire("⛔ Date blocked"); }
+                    setBlackoutSaving(false);
+                  }}
+                >{blackoutSaving ? "SAVING…" : blackoutDates.some(b => b.date === blackoutInput) && blackoutInput ? "ALREADY BLOCKED" : "⛔ BLOCK DATE"}</button>
+              </div>
+            </div>
+
+            {/* List */}
+            {blackoutDates.length === 0 ? (
+              <div style={{ textAlign:"center", color:"#445566", fontSize:14, padding:"20px 0", fontStyle:"italic" }}>No dates blocked — clients can book any available day.</div>
+            ) : (
+              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                {blackoutDates.map(b => (
+                  <div key={b.id} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"12px 14px", background:"rgba(239,68,68,.05)", border:"1px solid rgba(239,68,68,.18)", borderRadius:6, gap:10 }}>
+                    <div>
+                      <div style={{ fontWeight:600, color:"#f0c040", fontSize:15 }}>{b.date}</div>
+                      {b.reason && <div style={{ fontSize:13, color:"#7788aa", marginTop:2 }}>{b.reason}</div>}
+                    </div>
+                    <button
+                      onClick={async () => { await supabase.from("blackout_dates").delete().eq("id", b.id); fire("✅ Date unblocked"); }}
+                      style={{ background:"none", border:"1px solid rgba(239,68,68,.3)", color:"#f87171", fontSize:12, padding:"5px 10px", borderRadius:4, cursor:"pointer", flexShrink:0 }}
+                    >REMOVE</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
         ) : (
 
           // ── Stats Tab ────────────────────────────────────────────────
@@ -1935,19 +2003,22 @@ export default function App() {
                         {Array(daysInMonth(calY, calM)).fill(null).map((_,i) => {
                           const d = i+1; const ds = fmtDate(calY, calM, d); const mark = dayMark(ds);
                           const isPast = ds < todayStr;
+                          const isBlackedOut = blackoutDates.some(b => b.date === ds);
                           let cls = "cell";
                           if (ds === todayStr)         cls += " today";
                           if (mark === "approved")     cls += " has-app";
                           else if (mark === "pending") cls += " has-pen";
                           if (isPast)                  cls += " disabled-past";
+                          if (isBlackedOut)            cls += " blacked-out";
                           if (form.date === ds)        cls += " sel-day";
-                          return <div key={d} className={cls} onClick={() => !isPast && setForm({...form, date:ds, time:""})}>{d}</div>;
+                          return <div key={d} className={cls} onClick={() => !isPast && !isBlackedOut && setForm({...form, date:ds, time:""})}>{d}</div>;
                         })}
                       </div>
                       <div style={{ display:"flex", gap:12, marginTop:10, justifyContent:"center", flexWrap:"wrap", fontSize:12, color:"#7788aa" }}>
                         <div style={{ display:"flex", alignItems:"center", gap:5 }}><div style={{ width:9, height:9, background:"#4ade80", borderRadius:2 }} />Booked</div>
                         <div style={{ display:"flex", alignItems:"center", gap:5 }}><div style={{ width:9, height:9, background:"#fbbf24", borderRadius:2 }} />Pending</div>
                         <div style={{ display:"flex", alignItems:"center", gap:5 }}><div style={{ width:9, height:9, border:"1px solid #c9a227", borderRadius:2 }} />Today</div>
+                        <div style={{ display:"flex", alignItems:"center", gap:5 }}><div style={{ width:9, height:9, background:"rgba(239,68,68,.3)", borderRadius:2 }} />Unavailable</div>
                       </div>
                     </div>
                     {form.date && (

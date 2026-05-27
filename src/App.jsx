@@ -204,12 +204,14 @@ export default function App() {
 
   // ── Load bookings from Supabase ────────────────────────────────────────
   useEffect(() => {
+    const timeout = setTimeout(() => setLoading(false), 8000);
     supabase
       .from("bookings")
       .select("*")
       .order("date", { ascending: true })
       .then(({ data, error }) => {
         if (!error && data) setBookings(data);
+        clearTimeout(timeout);
         setLoading(false);
       });
   }, []);
@@ -233,7 +235,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    supabase.from("blackout_dates").select("*").order("date", { ascending: true }).then(({ data }) => { if (data) setBlackoutDates(data); });
+    supabase.from("blackout_dates").select("*").order("date", { ascending: true }).then(({ data, error }) => { if (!error && data) setBlackoutDates(data); });
     const ch = supabase.channel("blackout-realtime")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "blackout_dates" }, ({ new: row }) => setBlackoutDates(p => [...p, row].sort((a,b) => a.date.localeCompare(b.date))))
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "blackout_dates" }, ({ old: row }) => setBlackoutDates(p => p.filter(b => b.id !== row.id)))

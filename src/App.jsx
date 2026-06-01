@@ -1548,7 +1548,8 @@ export default function App() {
                 {selDay ? `📅 ${selDay}` : "SELECT A DAY"}
               </div>
               {selDay ? (() => {
-                const blackoutForDay = blackoutDates.find(b => b.date === selDay);
+                const blackoutsForDay = blackoutDates.filter(b => b.date === selDay);
+                const allDayBlackout = blackoutsForDay.find(b => !b.start_time);
                 const coveredSlots = {};
                 bookings
                   .filter(b => b.date === selDay && (b.status === "approved" || b.status === "pending" || b.status === "scheduled_call"))
@@ -1556,28 +1557,34 @@ export default function App() {
                     const startH = timeToHour(b.time); const dur = b.duration || 1;
                     TIMES.forEach(t => { const h = timeToHour(t); if (h >= startH && h < startH + dur) coveredSlots[t] = b; });
                   });
+                const coveredBlackoutSlots = {};
+                blackoutsForDay.filter(b => b.start_time).forEach(b => {
+                  const startH = timeToHour(b.start_time); const endH = timeToHour(b.end_time);
+                  TIMES.forEach(t => { const h = timeToHour(t); if (h >= startH && h < endH) coveredBlackoutSlots[t] = b; });
+                });
                 return (
                   <div>
-                    {blackoutForDay && (
+                    {allDayBlackout && (
                       <div style={{ marginBottom:14, padding:"10px 14px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.3)", borderRadius:6 }}>
-                        <div style={{ fontSize:11, color:"#f87171", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:4 }}>⛔ BLOCKED{blackoutForDay.start_time ? " TIME RANGE" : " DATE"}</div>
-                        {blackoutForDay.start_time && <div style={{ fontSize:14, color:"#f87171", marginBottom:4 }}>{blackoutForDay.start_time} – {blackoutForDay.end_time}</div>}
-                        <div style={{ fontSize:14, color:"#e8c8c8" }}>{blackoutForDay.reason || "No reason specified"}</div>
+                        <div style={{ fontSize:11, color:"#f87171", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:4 }}>⛔ ALL DAY BLOCKED</div>
+                        <div style={{ fontSize:14, color:"#e8c8c8" }}>{allDayBlackout.reason || "No reason specified"}</div>
                       </div>
                     )}
                     {TIMES.map((t, idx) => {
                       const b = coveredSlots[t];
+                      const bk = coveredBlackoutSlots[t];
                       const isStart = b && timeToHour(b.time) === timeToHour(t);
                       const nextT = TIMES[idx + 1];
                       const isEnd = b && (!nextT || coveredSlots[nextT]?.id !== b.id);
+                      const isBkStart = bk && (!TIMES[idx - 1] || coveredBlackoutSlots[TIMES[idx - 1]]?.id !== bk.id);
+                      const isBkEnd = bk && (!nextT || coveredBlackoutSlots[nextT]?.id !== bk.id);
                       const st = b ? safeStatus(b.status) : null;
+                      const showLabel = b ? isStart : bk ? isBkStart : true;
                       return (
                         <div key={t} style={{ display:"flex", gap:8, minHeight:52 }}>
-                          <div style={{ width:70, paddingTop:16, fontSize:13, color: !b || isStart ? "#556677" : "transparent", textAlign:"right", flexShrink:0, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{t}</div>
+                          <div style={{ width:70, paddingTop:16, fontSize:13, color: showLabel ? "#556677" : "transparent", textAlign:"right", flexShrink:0, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{t}</div>
                           <div style={{ flex:1 }}>
-                            {!b ? (
-                              <div style={{ height:46, borderTop:"1px solid rgba(201,162,39,.07)" }} />
-                            ) : (
+                            {b ? (
                               <div style={{
                                 height:"100%", minHeight:46,
                                 background: st.bg, borderLeft: `2px solid ${st.border}`, borderRight: `1px solid ${st.border}`,
@@ -1602,6 +1609,27 @@ export default function App() {
                                   );
                                 })()}
                               </div>
+                            ) : bk ? (
+                              <div style={{
+                                height:"100%", minHeight:46,
+                                background: "rgba(239,68,68,.1)",
+                                borderLeft: "2px solid rgba(239,68,68,.55)",
+                                borderRight: "1px solid rgba(239,68,68,.3)",
+                                borderTop: isBkStart ? "1px solid rgba(239,68,68,.35)" : "none",
+                                borderBottom: isBkEnd ? "1px solid rgba(239,68,68,.35)" : "none",
+                                borderTopLeftRadius: isBkStart ? 4 : 0, borderTopRightRadius: isBkStart ? 4 : 0,
+                                borderBottomLeftRadius: isBkEnd ? 4 : 0, borderBottomRightRadius: isBkEnd ? 4 : 0,
+                                padding: isBkStart ? "8px 10px 4px" : "0 10px",
+                              }}>
+                                {isBkStart && (
+                                  <>
+                                    <div style={{ fontWeight:700, color:"#f87171", fontSize:14 }}>⛔ {bk.start_time} – {bk.end_time}</div>
+                                    {bk.reason && <div style={{ fontSize:13, color:"#e8c8c8", marginTop:2 }}>{bk.reason}</div>}
+                                  </>
+                                )}
+                              </div>
+                            ) : (
+                              <div style={{ height:46, borderTop:"1px solid rgba(201,162,39,.07)" }} />
                             )}
                           </div>
                         </div>

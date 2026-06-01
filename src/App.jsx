@@ -200,6 +200,8 @@ export default function App() {
   const [blackoutDates, setBlackoutDates] = useState([]);
   const [blackoutInput, setBlackoutInput] = useState("");
   const [blackoutReason, setBlackoutReason] = useState("");
+  const [blackoutStartTime, setBlackoutStartTime] = useState("");
+  const [blackoutEndTime, setBlackoutEndTime] = useState("");
   const [blackoutSaving, setBlackoutSaving] = useState(false);
 
   // ── Load bookings from Supabase ────────────────────────────────────────
@@ -1528,7 +1530,7 @@ export default function App() {
                   if (blackout)               cls += " blacked-out";
                   if (selDay === ds)           cls += " sel-day";
                   return (
-                    <div key={d} className={cls} onClick={() => setSelDay(ds === selDay ? null : ds)} title={blackout ? `⛔ Blocked${blackout.reason ? `: ${blackout.reason}` : ""}` : undefined}>{d}</div>
+                    <div key={d} className={cls} onClick={() => setSelDay(ds === selDay ? null : ds)} title={blackout ? `⛔ Blocked${blackout.start_time ? ` ${blackout.start_time}–${blackout.end_time}` : ""}${blackout.reason ? `: ${blackout.reason}` : ""}` : undefined}>{d}</div>
                   );
                 })}
               </div>
@@ -1558,7 +1560,8 @@ export default function App() {
                   <div>
                     {blackoutForDay && (
                       <div style={{ marginBottom:14, padding:"10px 14px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.3)", borderRadius:6 }}>
-                        <div style={{ fontSize:11, color:"#f87171", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:4 }}>⛔ BLOCKED DATE</div>
+                        <div style={{ fontSize:11, color:"#f87171", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:4 }}>⛔ BLOCKED{blackoutForDay.start_time ? " TIME RANGE" : " DATE"}</div>
+                        {blackoutForDay.start_time && <div style={{ fontSize:14, color:"#f87171", marginBottom:4 }}>{blackoutForDay.start_time} – {blackoutForDay.end_time}</div>}
                         <div style={{ fontSize:14, color:"#e8c8c8" }}>{blackoutForDay.reason || "No reason specified"}</div>
                       </div>
                     )}
@@ -1625,21 +1628,55 @@ export default function App() {
                   <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>DATE *</div>
                   <input type="date" value={blackoutInput} onChange={e => setBlackoutInput(e.target.value)} style={{ fontSize:15, padding:"10px", colorScheme:"dark", width:"100%", borderRadius:6, borderColor:"rgba(239,68,68,.3)" }} />
                 </div>
+                <div style={{ display:"flex", gap:10 }}>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>START TIME</div>
+                    <select value={blackoutStartTime} onChange={e => { setBlackoutStartTime(e.target.value); if (!e.target.value) setBlackoutEndTime(""); }} style={{ fontSize:14, padding:"10px", width:"100%", borderRadius:6, background:"#0d1f33", color: blackoutStartTime ? "#e8e0cc" : "#7788aa", border:"1px solid rgba(239,68,68,.3)" }}>
+                      <option value="">All day</option>
+                      {CLIENT_TIMES.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>END TIME</div>
+                    <select value={blackoutEndTime} onChange={e => setBlackoutEndTime(e.target.value)} disabled={!blackoutStartTime} style={{ fontSize:14, padding:"10px", width:"100%", borderRadius:6, background:"#0d1f33", color: blackoutEndTime ? "#e8e0cc" : "#7788aa", border:"1px solid rgba(239,68,68,.3)", opacity: blackoutStartTime ? 1 : 0.4 }}>
+                      <option value="">Select end</option>
+                      {CLIENT_TIMES.filter(t => timeToHour(t) > timeToHour(blackoutStartTime || "9:00 AM")).map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                </div>
+                {blackoutStartTime && !blackoutEndTime && (
+                  <div style={{ fontSize:12, color:"#f87171", opacity:0.8 }}>Select an end time to block a time range, or clear start time to block the whole day.</div>
+                )}
                 <div>
                   <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>REASON (OPTIONAL)</div>
                   <input type="text" value={blackoutReason} onChange={e => setBlackoutReason(e.target.value)} placeholder="e.g. Travel, Public holiday, Team event…" style={{ fontSize:15, padding:"10px", width:"100%", borderRadius:6 }} />
                 </div>
-                <button
-                  className="btn"
-                  disabled={!blackoutInput || blackoutSaving || blackoutDates.some(b => b.date === blackoutInput)}
-                  style={{ padding:"11px", fontSize:13, borderRadius:6, background: blackoutInput ? "rgba(239,68,68,.15)" : "transparent", border:"1px solid rgba(239,68,68,.35)", color: blackoutInput ? "#f87171" : "#556677" }}
-                  onClick={async () => {
-                    setBlackoutSaving(true);
-                    const { error } = await supabase.from("blackout_dates").insert({ date: blackoutInput, reason: blackoutReason.trim() || null });
-                    if (error) { fire("❌ Error blocking date"); } else { setBlackoutInput(""); setBlackoutReason(""); fire("⛔ Date blocked"); }
-                    setBlackoutSaving(false);
-                  }}
-                >{blackoutSaving ? "SAVING…" : blackoutDates.some(b => b.date === blackoutInput) && blackoutInput ? "ALREADY BLOCKED" : "⛔ BLOCK DATE"}</button>
+                {(() => {
+                  const alreadyBlocked = blackoutInput && blackoutDates.some(b =>
+                    b.date === blackoutInput &&
+                    (b.start_time || null) === (blackoutStartTime || null) &&
+                    (b.end_time || null) === (blackoutEndTime || null)
+                  );
+                  const isValid = blackoutInput && (!blackoutStartTime || blackoutEndTime);
+                  return (
+                    <button
+                      className="btn"
+                      disabled={!isValid || blackoutSaving || alreadyBlocked}
+                      style={{ padding:"11px", fontSize:13, borderRadius:6, background: isValid ? "rgba(239,68,68,.15)" : "transparent", border:"1px solid rgba(239,68,68,.35)", color: isValid ? "#f87171" : "#556677" }}
+                      onClick={async () => {
+                        setBlackoutSaving(true);
+                        const { error } = await supabase.from("blackout_dates").insert({
+                          date: blackoutInput,
+                          reason: blackoutReason.trim() || null,
+                          start_time: blackoutStartTime || null,
+                          end_time: blackoutEndTime || null,
+                        });
+                        if (error) { fire("❌ Error blocking date"); } else { setBlackoutInput(""); setBlackoutReason(""); setBlackoutStartTime(""); setBlackoutEndTime(""); fire("⛔ Date blocked"); }
+                        setBlackoutSaving(false);
+                      }}
+                    >{blackoutSaving ? "SAVING…" : alreadyBlocked ? "ALREADY BLOCKED" : "⛔ BLOCK DATE"}</button>
+                  );
+                })()}
               </div>
             </div>
 
@@ -1652,6 +1689,7 @@ export default function App() {
                   <div key={b.id} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"12px 14px", background:"rgba(239,68,68,.05)", border:"1px solid rgba(239,68,68,.18)", borderRadius:6, gap:10 }}>
                     <div>
                       <div style={{ fontWeight:600, color:"#f0c040", fontSize:15 }}>{b.date}</div>
+                      <div style={{ fontSize:13, color:"#c9a227", marginTop:2 }}>{b.start_time ? `${b.start_time} – ${b.end_time}` : "All day"}</div>
                       {b.reason && <div style={{ fontSize:13, color:"#7788aa", marginTop:2 }}>{b.reason}</div>}
                     </div>
                     <button
@@ -2099,15 +2137,16 @@ export default function App() {
                         {Array(daysInMonth(calY, calM)).fill(null).map((_,i) => {
                           const d = i+1; const ds = fmtDate(calY, calM, d); const mark = dayMark(ds);
                           const isPast = ds < todayStr;
-                          const isBlackedOut = blackoutDates.some(b => b.date === ds);
+                          const isAllDayBlackedOut = blackoutDates.some(b => b.date === ds && !b.start_time);
+                          const hasAnyBlackout = blackoutDates.some(b => b.date === ds);
                           let cls = "cell";
                           if (ds === todayStr)         cls += " today";
                           if (mark === "approved")     cls += " has-app";
                           else if (mark === "pending") cls += " has-pen";
                           if (isPast)                  cls += " disabled-past";
-                          if (isBlackedOut)            cls += " blacked-out";
+                          if (isAllDayBlackedOut)      cls += " blacked-out";
                           if (form.date === ds)        cls += " sel-day";
-                          return <div key={d} className={cls} onClick={() => !isPast && !isBlackedOut && setForm({...form, date:ds, time:""})}>{d}</div>;
+                          return <div key={d} className={cls} onClick={() => !isPast && !isAllDayBlackedOut && setForm({...form, date:ds, time:""})}>{d}</div>;
                         })}
                       </div>
                       <div style={{ display:"flex", gap:12, marginTop:10, justifyContent:"center", flexWrap:"wrap", fontSize:12, color:"#7788aa" }}>
@@ -2126,7 +2165,13 @@ export default function App() {
                             ? CLIENT_TIMES.filter(t => { const h = timeToHour(t); return h >= 10 && h <= 15; })
                             : CLIENT_TIMES
                           ).map(t => {
-                            const taken = isClientBooked(form.date, t);
+                            const booked = isClientBooked(form.date, t);
+                            const blockedByTime = blackoutDates.some(b => {
+                              if (b.date !== form.date || !b.start_time) return false;
+                              const h = timeToHour(t);
+                              return h >= timeToHour(b.start_time) && h <= timeToHour(b.end_time);
+                            });
+                            const taken = booked || blockedByTime;
                             return <div key={t} className={"timeslot " + (form.time === t ? "sel" : "") + (taken ? " taken" : "")} onClick={() => !taken && setForm({...form, time:t})}>{t}</div>;
                           })}
                         </div>

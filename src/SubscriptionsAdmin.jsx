@@ -127,6 +127,9 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const [showLogPayment, setShowLogPayment]   = useState(false);
   const [logPayForm, setLogPayForm]           = useState({ amount:"", payment_method:"Cash", note:"", paid_at:todayStr(), sendReceipt:true });
   const [loggingPay, setLoggingPay]           = useState(false);
+  const [editingPayment, setEditingPayment]   = useState(null);
+  const [deletePayId, setDeletePayId]         = useState(null);
+  const [showNameSuggestions, setShowNameSuggestions] = useState(false);
 
   const [bulkSel, setBulkSel]               = useState(new Set());
   const [bulkDelConfirm, setBulkDelConfirm] = useState(false);
@@ -497,33 +500,97 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const logPayment = async () => {
     if (!selected || loggingPay) return;
     setLoggingPay(true);
-    const { data, error } = await supabase.from("payments").insert({
-      subscription_id: selected.id,
-      amount:          parseInt(logPayForm.amount) || 0,
-      payment_method:  logPayForm.payment_method,
-      note:            logPayForm.note.trim(),
-      paid_at:         new Date(logPayForm.paid_at + "T12:00:00").toISOString(),
-    }).select().single();
-    if (error) { fire("❌ Failed to log payment"); setLoggingPay(false); return; }
-    setPayments(p => [data, ...p]);
-    if (logPayForm.sendReceipt && selected.email) {
-      fetch("/api/send-payment-receipt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name:           selected.name,
-          email:          selected.email,
-          plan:           selected.plan,
-          amount:         parseInt(logPayForm.amount) || 0,
-          payment_method: logPayForm.payment_method,
-          note:           logPayForm.note.trim(),
-          paid_at:        new Date(logPayForm.paid_at + "T12:00:00").toISOString(),
-        }),
-      }).catch(() => {});
+    const payload = {
+      amount:         parseInt(logPayForm.amount) || 0,
+      payment_method: logPayForm.payment_method,
+      note:           logPayForm.note.trim(),
+      paid_at:        new Date(logPayForm.paid_at + "T12:00:00").toISOString(),
+    };
+    if (editingPayment) {
+      const { error } = await supabase.from("payments").update(payload).eq("id", editingPayment.id);
+      if (error) { fire("❌ Failed to update payment"); setLoggingPay(false); return; }
+      setPayments(p => p.map(pay => pay.id === editingPayment.id ? { ...pay, ...payload } : pay));
+      setShowLogPayment(false);
+      setEditingPayment(null);
+      fire("✅ Payment updated");
+    } else {
+      const { data, error } = await supabase.from("payments").insert({
+        subscription_id: selected.id, ...payload,
+      }).select().single();
+      if (error) { fire("❌ Failed to log payment"); setLoggingPay(false); return; }
+      setPayments(p => [data, ...p]);
+      if (logPayForm.sendReceipt && selected.email) {
+        fetch("/api/send-payment-receipt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: selected.name, email: selected.email, plan: selected.plan, ...payload,
+          }),
+        }).catch(() => {});
+      }
+      setShowLogPayment(false);
+      fire("✅ Payment logged" + (logPayForm.sendReceipt && selected.email ? " · Receipt sent" : ""));
     }
-    setShowLogPayment(false);
-    fire("✅ Payment logged" + (logPayForm.sendReceipt && selected.email ? " · Receipt sent" : ""));
     setLoggingPay(false);
+  };
+
+  const deletePayment = async (id) => {
+    const { error } = await supabase.from("payments").delete().eq("id", id);
+    if (error) { fire("❌ Failed to delete payment"); return; }
+    setPayments(p => p.filter(pay => pay.id !== id));
+    setDeletePayId(null);
+    fire("🗑 Payment deleted");
+  };
+
+  const exportPaymentsCSV = () => {
+    if (!selected || payments.length === 0) return;
+    const headers = ["Date","Amount","Method","Note"];
+    const rows = payments.map(p => [
+      p.paid_at?.slice(0,10) || "",
+      p.amount || 0,
+      p.payment_method || "",
+      p.note || "",
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`));
+    const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const a = Object.assign(document.createElement("a"), {
+      href: URL.createObjectURL(new Blob([csv], { type:"text/csv" })),
+      download: `payments-${selected.name.replace(/\s+/g,"-")}-${new Date().toISOString().slice(0,10)}.csv`,
+    });
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  const printPaymentsPDF = () => {
+    if (!selected || payments.length === 0) return;
+    const total = payments.reduce((s, p) => s + (p.amount || 0), 0);
+    const rows = payments.map(p => `
+      <tr>
+        <td>${fmtDate(p.paid_at)}</td>
+        <td>${p.payment_method || "—"}</td>
+        <td>${p.note || "—"}</td>
+        <td style="text-align:right;font-weight:700;color:#16a34a">$${p.amount || 0}</td>
+      </tr>`).join("");
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Payment History – ${selected.name}</title>
+    <style>
+      body{font-family:Arial,sans-serif;padding:32px;color:#111;max-width:700px;margin:0 auto}
+      h2{margin:0 0 4px;font-size:20px}
+      .sub{font-size:13px;color:#555;margin-bottom:24px}
+      table{width:100%;border-collapse:collapse;margin-bottom:16px}
+      th{background:#1e3a5f;color:#fff;padding:9px 12px;text-align:left;font-size:13px}
+      td{padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:13px}
+      tr:last-child td{border-bottom:none}
+      .total{display:flex;justify-content:space-between;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:4px;font-weight:700;font-size:15px}
+      @media print{body{padding:0}}
+    </style></head><body>
+    <h2>Payment History</h2>
+    <div class="sub">${selected.name} · ${selected.plan} · Generated ${fmtDate(new Date().toISOString())}</div>
+    <table><thead><tr><th>Date</th><th>Method</th><th>Note</th><th style="text-align:right">Amount</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <div class="total"><span>Lifetime Total</span><span>$${total}</span></div>
+    <script>setTimeout(()=>window.print(),300);</script></body></html>`;
+    const w = window.open("", "_blank");
+    w.document.write(html);
+    w.document.close();
   };
 
   // ── Computed ──────────────────────────────────────────────────────────────
@@ -1024,11 +1091,17 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     <div style={{ marginBottom:16, padding:12, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
                       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
                         <div style={{ fontSize:12, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5 }}>PAYMENT HISTORY</div>
-                        <button
-                          onClick={() => { setLogPayForm({ amount:String(selected.price||""), payment_method:selected.payment_method||"Cash", note:"", paid_at:todayStr(), sendReceipt:!!selected.email }); setShowLogPayment(true); }}
-                          style={{ background:"none", border:"1px solid rgba(201,162,39,.3)", borderRadius:3, color:"#c9a227", fontSize:12, padding:"3px 9px", cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
-                          ＋ LOG
-                        </button>
+                        <div style={{ display:"flex", gap:6 }}>
+                          {payments.length > 0 && <>
+                            <button onClick={exportPaymentsCSV} style={{ background:"none", border:"1px solid rgba(119,136,170,.3)", borderRadius:3, color:"#7788aa", fontSize:12, padding:"3px 8px", cursor:"pointer" }} title="Export CSV">CSV</button>
+                            <button onClick={printPaymentsPDF} style={{ background:"none", border:"1px solid rgba(119,136,170,.3)", borderRadius:3, color:"#7788aa", fontSize:12, padding:"3px 8px", cursor:"pointer" }} title="Print PDF">PDF</button>
+                          </>}
+                          <button
+                            onClick={() => { setEditingPayment(null); setLogPayForm({ amount:String(selected.price||""), payment_method:selected.payment_method||"Cash", note:"", paid_at:todayStr(), sendReceipt:!!selected.email }); setShowLogPayment(true); }}
+                            style={{ background:"none", border:"1px solid rgba(201,162,39,.3)", borderRadius:3, color:"#c9a227", fontSize:12, padding:"3px 9px", cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
+                            ＋ LOG
+                          </button>
+                        </div>
                       </div>
                       {paymentsLoading ? (
                         <div style={{ fontSize:13, color:"#556677", textAlign:"center", padding:"8px 0" }} className="pulse">Loading…</div>
@@ -1037,15 +1110,29 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                       ) : (
                         <>
                           {payments.map(pay => (
-                            <div key={pay.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", padding:"7px 0", borderBottom:"1px solid rgba(201,162,39,.07)" }}>
-                              <div>
-                                <div style={{ fontSize:14, color:"#e8e0cc" }}>
-                                  {PAYMENT_EMOJI[pay.payment_method] || "💳"} {pay.payment_method}
-                                  {pay.note ? <span style={{ fontSize:12, color:"#7788aa", marginLeft:6 }}>· {pay.note}</span> : null}
+                            <div key={pay.id} style={{ padding:"7px 0", borderBottom:"1px solid rgba(201,162,39,.07)" }}>
+                              {deletePayId === pay.id ? (
+                                <div style={{ display:"flex", alignItems:"center", gap:8, padding:"4px 0" }}>
+                                  <span style={{ fontSize:12, color:"#f87171", flex:1 }}>Delete this entry?</span>
+                                  <button onClick={() => deletePayment(pay.id)} style={{ background:"rgba(239,68,68,.15)", border:"1px solid rgba(239,68,68,.4)", color:"#f87171", borderRadius:3, padding:"3px 10px", fontSize:12, cursor:"pointer" }}>YES</button>
+                                  <button onClick={() => setDeletePayId(null)} style={{ background:"none", border:"1px solid rgba(119,136,170,.3)", color:"#7788aa", borderRadius:3, padding:"3px 10px", fontSize:12, cursor:"pointer" }}>NO</button>
                                 </div>
-                                <div style={{ fontSize:12, color:"#556677", marginTop:2 }}>{fmtDate(pay.paid_at)}</div>
-                              </div>
-                              <div style={{ fontSize:16, fontWeight:700, color:"#22c55e", flexShrink:0 }}>${pay.amount}</div>
+                              ) : (
+                                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+                                  <div>
+                                    <div style={{ fontSize:14, color:"#e8e0cc" }}>
+                                      {PAYMENT_EMOJI[pay.payment_method] || "💳"} {pay.payment_method}
+                                      {pay.note ? <span style={{ fontSize:12, color:"#7788aa", marginLeft:6 }}>· {pay.note}</span> : null}
+                                    </div>
+                                    <div style={{ fontSize:12, color:"#556677", marginTop:2 }}>{fmtDate(pay.paid_at)}</div>
+                                  </div>
+                                  <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+                                    <div style={{ fontSize:16, fontWeight:700, color:"#22c55e" }}>${pay.amount}</div>
+                                    <button onClick={() => { setEditingPayment(pay); setLogPayForm({ amount:String(pay.amount||""), payment_method:pay.payment_method||"Cash", note:pay.note||"", paid_at:pay.paid_at?.slice(0,10)||todayStr(), sendReceipt:false }); setShowLogPayment(true); }} style={{ background:"none", border:"none", color:"#7788aa", fontSize:13, cursor:"pointer", padding:"2px 4px" }} title="Edit">✏️</button>
+                                    <button onClick={() => setDeletePayId(pay.id)} style={{ background:"none", border:"none", color:"#7788aa", fontSize:13, cursor:"pointer", padding:"2px 4px" }} title="Delete">🗑</button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           ))}
                           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", paddingTop:8, marginTop:4, borderTop:"1px solid rgba(201,162,39,.2)" }}>
@@ -1380,10 +1467,45 @@ export default function SubscriptionsAdmin({ onGoClient }) {
             </div>
 
             <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-              {/* Name */}
-              <div>
+              {/* Name with client history autocomplete */}
+              <div style={{ position:"relative" }}>
                 {lbl("NAME *")}
-                <input value={form.name} onChange={e => setForm(f => ({ ...f, name:e.target.value }))} placeholder="Full name" />
+                <input
+                  value={form.name}
+                  onChange={e => { setForm(f => ({ ...f, name:e.target.value })); setShowNameSuggestions(true); }}
+                  onFocus={() => setShowNameSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowNameSuggestions(false), 150)}
+                  placeholder="Full name"
+                  autoComplete="off"
+                />
+                {showNameSuggestions && form.name.trim().length > 0 && (() => {
+                  const q = form.name.trim().toLowerCase();
+                  const seen = new Set();
+                  const matches = subs.filter(s => {
+                    if (!s.name?.toLowerCase().includes(q)) return false;
+                    const key = s.name.trim().toLowerCase();
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                  });
+                  if (matches.length === 0) return null;
+                  return (
+                    <div style={{ position:"absolute", top:"100%", left:0, right:0, zIndex:9999, background:"#0d1f35", border:"1px solid rgba(201,162,39,.35)", borderRadius:4, boxShadow:"0 8px 24px rgba(0,0,0,.5)", maxHeight:220, overflowY:"auto", marginTop:2 }}>
+                      {matches.map(s => (
+                        <div key={s.id}
+                          onMouseDown={() => { setForm(f => ({ ...f, name:s.name, phone:s.phone||"", email:s.email||"" })); setShowNameSuggestions(false); }}
+                          style={{ padding:"9px 12px", cursor:"pointer", borderBottom:"1px solid rgba(201,162,39,.08)" }}
+                          onMouseEnter={e => e.currentTarget.style.background="rgba(201,162,39,.08)"}
+                          onMouseLeave={e => e.currentTarget.style.background="transparent"}>
+                          <div style={{ fontSize:14, color:"#e8e0cc", fontWeight:600 }}>{s.name}</div>
+                          <div style={{ fontSize:12, color:"#7788aa", marginTop:2 }}>
+                            {[s.phone, s.email].filter(Boolean).join(" · ") || "No contact info"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Phone + Email */}
@@ -1594,14 +1716,14 @@ export default function SubscriptionsAdmin({ onGoClient }) {
           </div>
         </div>
       )}
-      {/* Log Payment Modal */}
+      {/* Log / Edit Payment Modal */}
       {showLogPayment && selected && (
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.8)", zIndex:2000, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}
-          onClick={() => setShowLogPayment(false)}>
+          onClick={() => { setShowLogPayment(false); setEditingPayment(null); }}>
           <div className="card slide-in" style={{ width:"100%", maxWidth:400, padding:28 }} onClick={e => e.stopPropagation()}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
-              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>💵 LOG PAYMENT</div>
-              <button className="btn ghost" style={{ padding:"4px 10px", fontSize:14 }} onClick={() => setShowLogPayment(false)}>✕</button>
+              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>{editingPayment ? "✏️ EDIT PAYMENT" : "💵 LOG PAYMENT"}</div>
+              <button className="btn ghost" style={{ padding:"4px 10px", fontSize:14 }} onClick={() => { setShowLogPayment(false); setEditingPayment(null); }}>✕</button>
             </div>
 
             <div style={{ padding:"8px 12px", background:"rgba(201,162,39,.06)", border:"1px solid rgba(201,162,39,.15)", borderRadius:4, marginBottom:18, fontSize:14, color:"#c9a227", fontWeight:600 }}>
@@ -1655,9 +1777,9 @@ export default function SubscriptionsAdmin({ onGoClient }) {
             </div>
 
             <div style={{ display:"flex", gap:10, marginTop:22, justifyContent:"flex-end" }}>
-              <button className="btn ghost" onClick={() => setShowLogPayment(false)}>CANCEL</button>
+              <button className="btn ghost" onClick={() => { setShowLogPayment(false); setEditingPayment(null); }}>CANCEL</button>
               <button className="btn gold" disabled={!logPayForm.amount || loggingPay} onClick={logPayment}>
-                {loggingPay ? "SAVING…" : "💾 SAVE PAYMENT"}
+                {loggingPay ? "SAVING…" : editingPayment ? "💾 UPDATE" : "💾 SAVE PAYMENT"}
               </button>
             </div>
           </div>

@@ -95,10 +95,7 @@ export default function App() {
   const getHash = () => window.location.hash;
   const isAdminRoute = () => getHash() === "#/admin";
   const isSubsRoute  = () => getHash() === "#/subscriptions";
-  const [mode, setMode] = useState(() => {
-    if (new URLSearchParams(window.location.search).get('reschedule')) return 'reschedule';
-    return isAdminRoute() ? "admin" : isSubsRoute() ? "subscriptions" : "client";
-  });
+  const [mode, setMode] = useState(() => isAdminRoute() ? "admin" : isSubsRoute() ? "subscriptions" : "client");
   const [adminAuthed, setAdminAuthed] = useState(() => sessionStorage.getItem(SESSION_KEY) === "1");
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState(false);
@@ -130,16 +127,6 @@ export default function App() {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
-  useEffect(() => {
-    if (mode !== 'reschedule' || !rescheduleId) return;
-    supabase.from('bookings').select('*').eq('id', rescheduleId).single()
-      .then(({ data, error }) => {
-        if (error || !data) { setRescheduleStatus('not-found'); return; }
-        if (data.status === 'cancelled' || data.status === 'denied') { setRescheduleStatus('error'); return; }
-        setRescheduleBooking(data);
-        setRescheduleStatus('form');
-      });
-  }, [mode, rescheduleId]);
 
   const goAdmin = () => { window.location.hash = "#/admin"; };
   const goClient = () => { window.location.hash = ""; resetClient(); };
@@ -197,11 +184,6 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [editingNotes, setEditingNotes] = useState(false);
 
-  // ── Reschedule flow ────────────────────────────────────────────────────
-  const [rescheduleId]                      = useState(() => new URLSearchParams(window.location.search).get('reschedule'));
-  const [rescheduleBooking, setRescheduleBooking] = useState(null);
-  const [rescheduleStatus, setRescheduleStatus]   = useState('loading'); // loading | form | submitting | success | not-found | error
-  const [rescheduleForm, setRescheduleForm]       = useState({ date:'', time:'10:00 AM' });
   const [notesInput, setNotesInput] = useState("");
   const [editingPrice, setEditingPrice] = useState(false);
   const [priceInput, setPriceInput] = useState("");
@@ -817,114 +799,6 @@ export default function App() {
       })}
     </div>
   );
-
-  // ── Reschedule View ────────────────────────────────────────────────────
-  const RescheduleView = () => {
-    const todayStr = new Date().toISOString().slice(0, 10);
-
-    const submitReschedule = async () => {
-      if (!rescheduleForm.date || !rescheduleForm.time) return;
-      setRescheduleStatus('submitting');
-      try {
-        const res = await fetch('/api/reschedule-booking', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: rescheduleId, date: rescheduleForm.date, time: rescheduleForm.time }),
-        });
-        if (res.ok) { setRescheduleStatus('success'); }
-        else { setRescheduleStatus('form'); }
-      } catch { setRescheduleStatus('form'); }
-    };
-
-    const svcList = rescheduleBooking
-      ? (Array.isArray(rescheduleBooking.service) ? rescheduleBooking.service.join(', ') : rescheduleBooking.service)
-      : '';
-
-    return (
-      <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:16 }} className="circuit">
-        <div className="card slide-in" style={{ width:'100%', maxWidth:440, padding:'36px 32px' }}>
-          <div style={{ textAlign:'center', marginBottom:28 }}>
-            <div className="logo-circle" style={{ width:56, height:56, fontSize:22, margin:'0 auto 14px' }}>EZ</div>
-            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:900, color:'#fff', letterSpacing:2 }}>
-              EZ TECH <span style={{ color:'#c9a227' }}>SOLUTIONS</span>
-            </div>
-          </div>
-
-          {rescheduleStatus === 'loading' && (
-            <div style={{ textAlign:'center', color:'#7788aa', fontSize:14 }} className="pulse">Loading your booking…</div>
-          )}
-
-          {rescheduleStatus === 'not-found' && (
-            <div style={{ textAlign:'center' }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>❌</div>
-              <div style={{ color:'#f87171', fontSize:15, fontWeight:600, marginBottom:8 }}>Booking not found</div>
-              <div style={{ color:'#7788aa', fontSize:13 }}>This reschedule link may be invalid or expired.</div>
-              <p style={{ margin:'16px 0 0', fontSize:13, color:'#c9a227' }}>📞 (242) 805-0777</p>
-            </div>
-          )}
-
-          {rescheduleStatus === 'error' && (
-            <div style={{ textAlign:'center' }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>⚠️</div>
-              <div style={{ color:'#f87171', fontSize:15, fontWeight:600, marginBottom:8 }}>Can't reschedule</div>
-              <div style={{ color:'#7788aa', fontSize:13 }}>This booking has been cancelled or denied. Please contact us to book a new appointment.</div>
-              <a href="https://booking.eztechbahamas.com" style={{ display:'inline-block', marginTop:20, padding:'10px 24px', background:'#c9a227', color:'#050d1a', borderRadius:4, textDecoration:'none', fontWeight:700, fontSize:13 }}>Book New Appointment</a>
-            </div>
-          )}
-
-          {(rescheduleStatus === 'form' || rescheduleStatus === 'submitting') && rescheduleBooking && (
-            <>
-              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:14, fontWeight:700, color:'#f0c040', letterSpacing:1, marginBottom:16, textAlign:'center' }}>🔄 RESCHEDULE APPOINTMENT</div>
-
-              <div style={{ padding:'12px 16px', background:'rgba(201,162,39,.06)', border:'1px solid rgba(201,162,39,.15)', borderRadius:4, marginBottom:20, fontSize:13 }}>
-                <div style={{ color:'#7788aa', marginBottom:4 }}>Current appointment</div>
-                <div style={{ color:'#e8e0cc', fontWeight:600 }}>{svcList}</div>
-                <div style={{ color:'#556677', marginTop:2 }}>{rescheduleBooking.date} · {rescheduleBooking.time}</div>
-              </div>
-
-              <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-                <div>
-                  <label style={{ fontSize:12, color:'#c9a227', letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:'block', marginBottom:5 }}>NEW DATE *</label>
-                  <input type="date" min={todayStr}
-                    value={rescheduleForm.date}
-                    onChange={e => setRescheduleForm(f => ({ ...f, date: e.target.value }))}
-                    style={{ colorScheme:'dark', width:'100%', boxSizing:'border-box' }} />
-                </div>
-                <div>
-                  <label style={{ fontSize:12, color:'#c9a227', letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:'block', marginBottom:5 }}>NEW TIME *</label>
-                  <select value={rescheduleForm.time} onChange={e => setRescheduleForm(f => ({ ...f, time: e.target.value }))} style={{ width:'100%', boxSizing:'border-box' }}>
-                    {CLIENT_TIMES.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              <button
-                className="btn gold"
-                style={{ width:'100%', padding:'13px', fontSize:14, letterSpacing:1, marginTop:22 }}
-                disabled={!rescheduleForm.date || rescheduleStatus === 'submitting'}
-                onClick={submitReschedule}>
-                {rescheduleStatus === 'submitting' ? 'SENDING REQUEST…' : 'REQUEST NEW TIME'}
-              </button>
-              <div style={{ textAlign:'center', marginTop:14, fontSize:12, color:'#445566' }}>
-                Your request will be reviewed and confirmed by our team.
-              </div>
-            </>
-          )}
-
-          {rescheduleStatus === 'success' && (
-            <div style={{ textAlign:'center' }}>
-              <div style={{ fontSize:48, marginBottom:12 }}>✅</div>
-              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:'#22c55e', marginBottom:8 }}>REQUEST SENT!</div>
-              <div style={{ color:'#c8bfa8', fontSize:14, lineHeight:1.6, marginBottom:20 }}>
-                Your reschedule request for <strong style={{ color:'#f0c040' }}>{rescheduleForm.date}</strong> at <strong style={{ color:'#f0c040' }}>{rescheduleForm.time}</strong> has been received. We'll confirm your new time shortly.
-              </div>
-              <div style={{ fontSize:13, color:'#c9a227' }}>📞 (242) 805-0777 · info@ez-techgroup.com</div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   // ── Admin Password Gate ────────────────────────────────────────────────
   const AdminGate = () => (
@@ -2520,13 +2394,11 @@ export default function App() {
           {toast}
         </div>
       )}
-      {mode === "reschedule"
-        ? RescheduleView()
-        : mode === "subscriptions"
-          ? <SubscriptionsAdmin onGoClient={goClient} />
-          : mode === "admin"
-            ? (adminAuthed ? AdminView() : AdminGate())
-            : ClientView()
+      {mode === "subscriptions"
+        ? <SubscriptionsAdmin onGoClient={goClient} />
+        : mode === "admin"
+          ? (adminAuthed ? AdminView() : AdminGate())
+          : ClientView()
       }
     </div>
   );

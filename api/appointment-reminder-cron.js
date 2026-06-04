@@ -19,34 +19,9 @@ const fmtDate = isoStr => {
   return new Date(isoStr).toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
 };
 
-function parseTimeToHM(timeStr) {
-  const match = (timeStr || '').match(/(\d+):(\d+)\s*(AM|PM)/i);
-  if (!match) return { h: 0, m: 0 };
-  let h = parseInt(match[1]);
-  const m = parseInt(match[2]);
-  if (match[3].toUpperCase() === 'PM' && h !== 12) h += 12;
-  if (match[3].toUpperCase() === 'AM' && h === 12) h = 0;
-  return { h, m };
-}
-
-function buildGoogleCalUrl({ services, date, time, duration, notes }) {
-  const serviceList = Array.isArray(services) ? services.join(', ') : services;
-  const { h, m } = parseTimeToHM(time);
-  const pad = n => String(n).padStart(2, '0');
-  const [y, mo, d] = (date || '').split('-');
-  const startStr = `${y}${mo}${d}T${pad(h)}${pad(m)}00`;
-  const endDate = new Date(`${date}T${pad(h)}:${pad(m)}:00`);
-  endDate.setHours(endDate.getHours() + (duration || 1));
-  const endStr = `${endDate.getFullYear()}${pad(endDate.getMonth()+1)}${pad(endDate.getDate())}T${pad(endDate.getHours())}${pad(endDate.getMinutes())}00`;
-  const details = [`Services: ${serviceList}`, notes ? `Notes: ${notes}` : null, 'EZ Tech Solutions — (242) 805-0777'].filter(Boolean).join('\n');
-  const params = new URLSearchParams({ action:'TEMPLATE', text:`EZ Tech Solutions — ${serviceList}`, dates:`${startStr}/${endStr}`, ctz:'America/Nassau', details, location:'Nassau, Bahamas' });
-  return `https://calendar.google.com/calendar/render?${params.toString()}`;
-}
-
 function reminderEmail(booking) {
   const serviceList = Array.isArray(booking.service) ? booking.service.join(', ') : (booking.service || '—');
   const durationLabel = booking.duration ? `${booking.duration} hour${booking.duration > 1 ? 's' : ''}` : '—';
-  const calUrl = buildGoogleCalUrl({ services: booking.service, date: booking.date, time: booking.time, duration: booking.duration, notes: booking.notes });
 
   return {
     from: FROM,
@@ -80,20 +55,13 @@ function reminderEmail(booking) {
           </table>
         </div>
 
-        <div style="margin-bottom:24px;">
-          <p style="margin:0 0 10px;font-size:12px;color:#7788aa;">Add this appointment to your calendar:</p>
-          <a href="${calUrl}" target="_blank"
-            style="display:inline-block;padding:10px 20px;background:#c9a227;color:#050d1a;text-decoration:none;border-radius:4px;font-size:12px;font-weight:700;">
-            📅 Add to Google Calendar
+        <div style="padding:16px 20px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:6px;margin-bottom:24px;">
+          <div style="font-size:11px;color:#f59e0b;letter-spacing:1.5px;margin-bottom:8px;">NEED TO RESCHEDULE?</div>
+          <p style="margin:0 0 14px;font-size:13px;color:#c8bfa8;">Pick a new date and time and we'll review your request:</p>
+          <a href="https://booking.eztechbahamas.com/?reschedule=${booking.id}" target="_blank"
+            style="display:inline-block;padding:11px 24px;background:#f59e0b;color:#050d1a;text-decoration:none;border-radius:4px;font-size:13px;font-weight:700;letter-spacing:.5px;">
+            🔄 Request a New Time
           </a>
-        </div>
-
-        <div style="padding:16px 20px;background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.2);border-radius:6px;margin-bottom:24px;">
-          <div style="font-size:11px;color:#25d366;letter-spacing:1.5px;margin-bottom:8px;">NEED TO RESCHEDULE?</div>
-          <p style="margin:0 0 8px;font-size:13px;color:#c8bfa8;">Contact us as soon as possible and we'll find another time:</p>
-          <p style="margin:0 0 6px;font-size:14px;"><a href="https://wa.me/12428050777" style="color:#25d366;text-decoration:none;font-weight:600;">💬 WhatsApp: (242) 805-0777</a></p>
-          <p style="margin:0 0 6px;font-size:14px;"><a href="tel:+12428050777" style="color:#c9a227;text-decoration:none;">📞 Call: (242) 805-0777</a></p>
-          <p style="margin:0;font-size:14px;"><a href="mailto:info@ez-techgroup.com" style="color:#c9a227;text-decoration:none;">✉️ info@ez-techgroup.com</a></p>
         </div>
 
         <p style="margin:0;font-size:11px;color:#445566;text-align:center;">— EZ Tech Solutions · Providing Fast and Quality Services · Nassau, Bahamas</p>

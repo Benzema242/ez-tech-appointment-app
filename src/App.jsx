@@ -294,7 +294,7 @@ export default function App() {
   const submitBooking = async () => {
     if (submitting) return;
     setSubmitting(true);
-    const payload = { client: `${form.firstName} ${form.lastName}`.trim(), service: form.services, date: form.date, time: form.time, status: "pending", phone: form.phone, email: form.email, notes: form.notes, source: "website", duration: form.duration };
+    const payload = { client: `${form.firstName} ${form.lastName}`.trim(), service: form.services, date: form.date, time: form.time, status: "pending", phone: form.phone, email: form.email, notes: form.notes, source: "website", duration: form.duration, reminder_sent: false };
     const { data, error } = await supabase.from("bookings").insert(payload).select().single();
     if (error) { fire("❌ Error submitting booking"); setSubmitting(false); return; }
     setBookings(p => [...p, data]);
@@ -489,7 +489,7 @@ export default function App() {
   };
 
   const submitAdminBooking = async () => {
-    const payload = { client: adminForm.name, service: adminForm.services, date: adminForm.date, time: adminForm.time, status: adminForm.status, phone: adminForm.phone, email: adminForm.email, notes: adminForm.notes, source: adminForm.source, duration: adminForm.duration, paid: adminForm.paid };
+    const payload = { client: adminForm.name, service: adminForm.services, date: adminForm.date, time: adminForm.time, status: adminForm.status, phone: adminForm.phone, email: adminForm.email, notes: adminForm.notes, source: adminForm.source, duration: adminForm.duration, paid: adminForm.paid, reminder_sent: false };
     const { data, error } = await supabase.from("bookings").insert(payload).select().single();
     if (error) { fire(`❌ ${error.message}`); return; }
     setBookings(p => [...p, data]);
@@ -2266,7 +2266,7 @@ export default function App() {
                             const blockedByTime = blackoutDates.some(b => {
                               if (b.date !== form.date || !b.start_time) return false;
                               const h = timeToHour(t);
-                              return h >= timeToHour(b.start_time) && h <= timeToHour(b.end_time);
+                              return h >= timeToHour(b.start_time) && h < timeToHour(b.end_time);
                             });
                             const taken = booked || blockedByTime;
                             return <div key={t} className={"timeslot " + (form.time === t ? "sel" : "") + (taken ? " taken" : "")} onClick={() => !taken && setForm({...form, time:t})}>{t}</div>;

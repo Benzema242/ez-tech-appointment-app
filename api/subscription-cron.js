@@ -97,7 +97,7 @@ const clientEmail = ({ to, name, plan, expiration, days }) => {
 export default async function handler(req, res) {
   // Verify cron secret
   const secret = process.env.CRON_SECRET;
-  if (secret && req.headers.authorization !== `Bearer ${secret}`) {
+  if (!secret || req.headers.authorization !== `Bearer ${secret}`) {
     return res.status(401).end('Unauthorized');
   }
 

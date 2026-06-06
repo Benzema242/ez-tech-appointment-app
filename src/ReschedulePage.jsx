@@ -140,7 +140,7 @@ export default function ReschedulePage({ bookingId }) {
             <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
             <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 15, fontWeight: 700, color: "#22c55e", marginBottom: 8 }}>REQUEST SENT!</div>
             <div style={{ color: "#c8bfa8", fontSize: 14, lineHeight: 1.6, marginBottom: 20 }}>
-              Your reschedule request for <strong style={{ color: "#f0c040" }}>{form.date}</strong> at <strong style={{ color: "#f0c040" }}>{form.time}</strong> has been received. We'll confirm your new time shortly.
+              Your reschedule request for <strong style={{ color: "#f0c040" }}>{form.date}</strong> at <strong style={{ color: "#f0c040" }}>{form.time}</strong> has been received and is <strong style={{ color: "#fbbf24" }}>pending admin approval</strong>. We'll confirm your new time shortly.
             </div>
             <div style={{ fontSize: 13, color: "#c9a227" }}>📞 (242) 805-0777 · info@ez-techgroup.com</div>
           </div>

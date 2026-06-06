@@ -205,6 +205,12 @@ export default function App() {
   const [blackoutStartTime, setBlackoutStartTime] = useState("");
   const [blackoutEndTime, setBlackoutEndTime] = useState("");
   const [blackoutSaving, setBlackoutSaving] = useState(false);
+  const [editingBlackoutId, setEditingBlackoutId] = useState(null);
+  const [editBlackoutDate, setEditBlackoutDate] = useState("");
+  const [editBlackoutStartTime, setEditBlackoutStartTime] = useState("");
+  const [editBlackoutEndTime, setEditBlackoutEndTime] = useState("");
+  const [editBlackoutReason, setEditBlackoutReason] = useState("");
+  const [editBlackoutSaving, setEditBlackoutSaving] = useState(false);
 
   // ── Load bookings from Supabase ────────────────────────────────────────
   useEffect(() => {
@@ -243,6 +249,7 @@ export default function App() {
     const ch = supabase.channel("blackout-realtime")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "blackout_dates" }, ({ new: row }) => setBlackoutDates(p => [...p, row].sort((a,b) => a.date.localeCompare(b.date))))
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "blackout_dates" }, ({ old: row }) => setBlackoutDates(p => p.filter(b => b.id !== row.id)))
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "blackout_dates" }, ({ new: row }) => setBlackoutDates(p => p.map(b => b.id === row.id ? row : b).sort((a,b) => a.date.localeCompare(b.date))))
       .subscribe();
     return () => supabase.removeChannel(ch);
   }, []);
@@ -1716,17 +1723,77 @@ export default function App() {
             ) : (
               <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
                 {blackoutDates.map(b => (
-                  <div key={b.id} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"12px 14px", background:"rgba(239,68,68,.05)", border:"1px solid rgba(239,68,68,.18)", borderRadius:6, gap:10 }}>
-                    <div>
-                      <div style={{ fontWeight:600, color:"#f0c040", fontSize:15 }}>{b.date}</div>
-                      <div style={{ fontSize:13, color:"#c9a227", marginTop:2 }}>{b.start_time ? `${b.start_time} – ${b.end_time}` : "All day"}</div>
-                      {b.reason && <div style={{ fontSize:13, color:"#7788aa", marginTop:2 }}>{b.reason}</div>}
+                  editingBlackoutId === b.id ? (
+                    <div key={b.id} style={{ padding:"14px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.35)", borderRadius:6 }}>
+                      <div style={{ fontSize:11, color:"#f87171", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:12 }}>EDIT BLOCKED DATE</div>
+                      <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                        <div>
+                          <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>DATE *</div>
+                          <input type="date" value={editBlackoutDate} onChange={e => setEditBlackoutDate(e.target.value)} style={{ fontSize:15, padding:"10px", colorScheme:"dark", width:"100%", borderRadius:6, borderColor:"rgba(239,68,68,.3)" }} />
+                        </div>
+                        <div style={{ display:"flex", gap:10 }}>
+                          <div style={{ flex:1 }}>
+                            <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>START TIME</div>
+                            <select value={editBlackoutStartTime} onChange={e => { setEditBlackoutStartTime(e.target.value); if (!e.target.value) setEditBlackoutEndTime(""); }} style={{ fontSize:14, padding:"10px", width:"100%", borderRadius:6, background:"#0d1f33", color: editBlackoutStartTime ? "#e8e0cc" : "#7788aa", border:"1px solid rgba(239,68,68,.3)" }}>
+                              <option value="">All day</option>
+                              {CLIENT_TIMES.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                          </div>
+                          <div style={{ flex:1 }}>
+                            <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>END TIME</div>
+                            <select value={editBlackoutEndTime} onChange={e => setEditBlackoutEndTime(e.target.value)} disabled={!editBlackoutStartTime} style={{ fontSize:14, padding:"10px", width:"100%", borderRadius:6, background:"#0d1f33", color: editBlackoutEndTime ? "#e8e0cc" : "#7788aa", border:"1px solid rgba(239,68,68,.3)", opacity: editBlackoutStartTime ? 1 : 0.4 }}>
+                              <option value="">Select end</option>
+                              {CLIENT_TIMES.filter(t => timeToHour(t) > timeToHour(editBlackoutStartTime || "9:00 AM")).map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>REASON (OPTIONAL)</div>
+                          <input type="text" value={editBlackoutReason} onChange={e => setEditBlackoutReason(e.target.value)} placeholder="e.g. Travel, Public holiday, Team event…" style={{ fontSize:15, padding:"10px", width:"100%", borderRadius:6 }} />
+                        </div>
+                        <div style={{ display:"flex", gap:8 }}>
+                          <button
+                            className="btn"
+                            disabled={!editBlackoutDate || (editBlackoutStartTime && !editBlackoutEndTime) || editBlackoutSaving}
+                            style={{ flex:1, padding:"10px", fontSize:13, borderRadius:6, background:"rgba(239,68,68,.15)", border:"1px solid rgba(239,68,68,.35)", color:"#f87171" }}
+                            onClick={async () => {
+                              setEditBlackoutSaving(true);
+                              const { error } = await supabase.from("blackout_dates").update({
+                                date: editBlackoutDate,
+                                reason: editBlackoutReason.trim() || null,
+                                start_time: editBlackoutStartTime || null,
+                                end_time: editBlackoutEndTime || null,
+                              }).eq("id", b.id);
+                              if (error) { fire("❌ Error saving changes"); } else { setEditingBlackoutId(null); fire("✅ Blackout updated"); }
+                              setEditBlackoutSaving(false);
+                            }}
+                          >{editBlackoutSaving ? "SAVING…" : "SAVE CHANGES"}</button>
+                          <button
+                            style={{ padding:"10px 14px", fontSize:13, borderRadius:6, background:"none", border:"1px solid rgba(100,120,150,.3)", color:"#7788aa", cursor:"pointer" }}
+                            onClick={() => setEditingBlackoutId(null)}
+                          >CANCEL</button>
+                        </div>
+                      </div>
                     </div>
-                    <button
-                      onClick={async () => { await supabase.from("blackout_dates").delete().eq("id", b.id); fire("✅ Date unblocked"); }}
-                      style={{ background:"none", border:"1px solid rgba(239,68,68,.3)", color:"#f87171", fontSize:12, padding:"5px 10px", borderRadius:4, cursor:"pointer", flexShrink:0 }}
-                    >REMOVE</button>
-                  </div>
+                  ) : (
+                    <div key={b.id} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"12px 14px", background:"rgba(239,68,68,.05)", border:"1px solid rgba(239,68,68,.18)", borderRadius:6, gap:10 }}>
+                      <div>
+                        <div style={{ fontWeight:600, color:"#f0c040", fontSize:15 }}>{b.date}</div>
+                        <div style={{ fontSize:13, color:"#c9a227", marginTop:2 }}>{b.start_time ? `${b.start_time} – ${b.end_time}` : "All day"}</div>
+                        {b.reason && <div style={{ fontSize:13, color:"#7788aa", marginTop:2 }}>{b.reason}</div>}
+                      </div>
+                      <div style={{ display:"flex", gap:6, flexShrink:0 }}>
+                        <button
+                          onClick={() => { setEditingBlackoutId(b.id); setEditBlackoutDate(b.date); setEditBlackoutStartTime(b.start_time || ""); setEditBlackoutEndTime(b.end_time || ""); setEditBlackoutReason(b.reason || ""); }}
+                          style={{ background:"none", border:"1px solid rgba(201,162,39,.3)", color:"#c9a227", fontSize:12, padding:"5px 10px", borderRadius:4, cursor:"pointer" }}
+                        >EDIT</button>
+                        <button
+                          onClick={async () => { await supabase.from("blackout_dates").delete().eq("id", b.id); fire("✅ Date unblocked"); }}
+                          style={{ background:"none", border:"1px solid rgba(239,68,68,.3)", color:"#f87171", fontSize:12, padding:"5px 10px", borderRadius:4, cursor:"pointer" }}
+                        >REMOVE</button>
+                      </div>
+                    </div>
+                  )
                 ))}
               </div>
             )}

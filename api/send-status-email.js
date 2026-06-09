@@ -119,19 +119,33 @@ export default async function handler(req, res) {
             <p style="margin:0 0 4px;font-size:22px;font-weight:800;color:#e8e0cc;">${req.body.totalPrice ? '$' + req.body.totalPrice : '—'}</p>
             <p style="margin:0 0 16px;font-size:13px;color:#7788aa;">50% deposit required: <strong style="color:#34d399;">${req.body.depositAmount ? '$' + req.body.depositAmount : '—'}</strong></p>
             <p style="margin:0 0 12px;font-size:13px;color:#c8bfa8;">To confirm your appointment, please make your deposit by contacting us directly:</p>
-            <a href="tel:+12428050777" style="display:inline-block;padding:12px 28px;background:#34d399;color:#050d1a;text-decoration:none;border-radius:4px;font-size:14px;font-weight:800;letter-spacing:1px;">
-              📞 MAKE DEPOSIT — CALL US
-            </a>
-            <p style="margin:12px 0 0;font-size:12px;color:#7788aa;">Or reply to this email to arrange your deposit payment</p>
+            <table style="border-collapse:collapse;">
+              <tr>
+                <td style="padding-right:10px;">
+                  <a href="mailto:info@ez-techgroup.com?subject=Deposit%20Payment%20-%20${encodeURIComponent(name)}" style="display:inline-block;padding:12px 20px;background:#34d399;color:#050d1a;text-decoration:none;border-radius:4px;font-size:13px;font-weight:800;letter-spacing:1px;">✉️ EMAIL US</a>
+                </td>
+                <td>
+                  <a href="https://wa.me/12428050777" style="display:inline-block;padding:12px 20px;background:#25d366;color:#fff;text-decoration:none;border-radius:4px;font-size:13px;font-weight:800;letter-spacing:1px;">💬 WHATSAPP</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:12px 0 0;font-size:13px;color:#c8bfa8;">📞 Or call us directly: <strong style="color:#e8e0cc;">(242) 805-0777</strong></p>
           </div>` : ''}
           ${status === 'payment_due' ? `
           <div style="margin-top:24px;padding:20px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.4);border-radius:6px;text-align:center;">
             <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#f59e0b;">⚠️ Your Payment is Overdue</p>
             <p style="margin:0 0 16px;font-size:13px;color:#c8bfa8;">Please contact us immediately to settle your outstanding balance.</p>
-            <a href="tel:+12428050777" style="display:inline-block;padding:12px 28px;background:#f59e0b;color:#050d1a;text-decoration:none;border-radius:4px;font-size:14px;font-weight:800;letter-spacing:1px;">
-              📞 PAY NOW — CALL US
-            </a>
-            <p style="margin:12px 0 0;font-size:12px;color:#7788aa;">Or reply to this email to arrange payment</p>
+            <table style="border-collapse:collapse;">
+              <tr>
+                <td style="padding-right:10px;">
+                  <a href="mailto:info@ez-techgroup.com?subject=Payment%20-%20${encodeURIComponent(name)}" style="display:inline-block;padding:12px 20px;background:#f59e0b;color:#050d1a;text-decoration:none;border-radius:4px;font-size:13px;font-weight:800;letter-spacing:1px;">✉️ EMAIL US</a>
+                </td>
+                <td>
+                  <a href="https://wa.me/12428050777" style="display:inline-block;padding:12px 20px;background:#25d366;color:#fff;text-decoration:none;border-radius:4px;font-size:13px;font-weight:800;letter-spacing:1px;">💬 WHATSAPP</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:12px 0 0;font-size:13px;color:#c8bfa8;">📞 Or call us directly: <strong style="color:#e8e0cc;">(242) 805-0777</strong></p>
           </div>` : ''}
           <div style="margin-top:24px;padding:16px;background:rgba(201,162,39,.08);border:1px solid rgba(201,162,39,.2);border-radius:6px;">
             <p style="margin:0;font-size:13px;color:#c8bfa8;">Questions? Get in touch with us directly:</p>

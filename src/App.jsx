@@ -561,6 +561,32 @@ export default function App() {
       .ftr{background:#fff;padding:16px 36px;}
       .ftr-disclaimer{font-size:12px;color:#111;line-height:1.6;}
       .ftr-disclaimer strong{color:#111;}
+      /* ── Booking document ── */
+      .status-banner{padding:10px 16px;border-radius:4px;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+      .bk-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+      .bk-section{border:1px solid #e0d9c8;border-radius:6px;padding:14px 16px;}
+      .bk-section-title{font-size:11px;font-weight:800;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #ede9df;}
+      .bk-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:14px;border-bottom:1px solid #f5f2ec;}
+      .bk-row:last-child{border-bottom:none;}
+      .bk-row .bk-key{color:#888;font-weight:600;flex-shrink:0;}
+      .bk-row .bk-val{color:#1a1a2e;font-weight:500;text-align:right;max-width:62%;}
+      .svc-table{width:100%;border-collapse:collapse;margin-top:6px;margin-bottom:4px;}
+      .svc-table td{padding:9px 12px;font-size:14px;border-bottom:1px solid #f0ede5;background:transparent!important;width:auto!important;font-weight:400!important;color:#1a1a2e!important;}
+      .svc-table .svc-price{text-align:right;font-weight:600!important;width:100px!important;}
+      .svc-total td,.svc-dep td,.svc-bal td{border-top:2px solid #e0d9c8!important;border-bottom:none!important;font-weight:800!important;}
+      .svc-total td:first-child{font-size:13px;letter-spacing:1px;color:#050b1f!important;}
+      .svc-total .svc-price{font-size:18px!important;color:#050b1f!important;}
+      .svc-dep td:first-child{color:#16a34a!important;}
+      .svc-dep .svc-price{color:#16a34a!important;}
+      .svc-bal td:first-child{color:#c9a227!important;}
+      .svc-bal .svc-price{color:#c9a227!important;font-size:16px!important;}
+      .deposit-badge{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:6px;margin-top:16px;background:#f0fdf4;border:1px solid #86efac;}
+      .deposit-badge.pending{background:#fefce8;border-color:#fcd34d;}
+      .deposit-check{font-size:22px;color:#22c55e;font-weight:900;line-height:1.2;}
+      .deposit-title{font-size:11px;font-weight:800;letter-spacing:1.5px;color:#444;margin-bottom:4px;text-transform:uppercase;}
+      .deposit-detail{font-size:13px;color:#555;line-height:1.5;}
+      .bk-notes{margin-top:16px;border:1px solid #e0d9c8;border-radius:6px;padding:14px 16px;}
+      .bk-notes p{font-size:14px;color:#555;line-height:1.7;white-space:pre-wrap;margin:0;}
       @media print{@page{margin:0;size:letter}body{height:11in;min-height:unset;}button{display:none;}}
     </style></head><body>
       <div class="hdr">
@@ -587,7 +613,8 @@ export default function App() {
       </div>
       <div class="ftr">
         <div class="ftr-disclaimer">
-          <strong>CONFIDENTIALITY NOTICE:</strong> This document and the information contained herein are the exclusive property of EZ Tech Solutions and are intended solely for authorised internal use. Unauthorised reproduction, distribution, disclosure, or use of this document — in whole or in part — without the prior written consent of EZ Tech Solutions is strictly prohibited. Any person found to have misused, falsified, or unlawfully distributed information contained in this document will be subject to civil and criminal prosecution to the fullest extent permitted under the laws of The Commonwealth of The Bahamas. EZ Tech Solutions reserves the right to pursue all available legal remedies in the event of any breach. By handling this document, the recipient acknowledges and accepts these terms.
+          Thank you for choosing <strong>EZ Tech Solutions</strong>. We appreciate your business and look forward to serving you.<br/>
+          <strong>📞 (242) 805-0777</strong> &nbsp;·&nbsp; info@ez-techgroup.com &nbsp;·&nbsp; eztechbahamas.com &nbsp;·&nbsp; Nassau, Bahamas
         </div>
       </div>
       <script>setTimeout(()=>window.print(),400);</script>
@@ -1270,33 +1297,50 @@ export default function App() {
                         ← Back to list
                       </button>
                       <button onClick={() => {
-                        const services = Array.isArray(selected.service) ? selected.service.join(', ') : (selected.service || '—');
-                        const svcs = svcList(selected.service);
-                        const totalPrice = selected.price != null ? selected.price : svcs.reduce((s,sv) => s+(sv.price||0),0);
-                        const requiredDeposit = totalPrice > 0 ? Math.round(totalPrice * 0.5) : null;
-                        printDoc(`Booking — ${selected.client}`, `
-                          <table>
-                            <tr><th>Field</th><th>Details</th></tr>
-                            <tr><td>Client</td><td>${selected.client}</td></tr>
-                            <tr><td>Phone</td><td>${selected.phone || '—'}</td></tr>
-                            <tr><td>Email</td><td>${selected.email || '—'}</td></tr>
-                            <tr><td>Services</td><td>${services}</td></tr>
-                            <tr><td>Date</td><td>${selected.date}</td></tr>
-                            <tr><td>Time</td><td>${selected.time} (Nassau time)</td></tr>
-                            <tr><td>Duration</td><td>${selected.duration || 1} hour${(selected.duration||1)!==1?'s':''}</td></tr>
-                            <tr><td>Status</td><td>${selected.status}</td></tr>
-                            <tr><td>Price</td><td>${totalPrice ? '$'+totalPrice : '—'}</td></tr>
-                            <tr><td>Deposit Required (50%)</td><td>${requiredDeposit ? '$'+requiredDeposit : '—'}</td></tr>
-                            <tr><td>Deposit Status</td><td>${selected.deposit_paid ? '✓ Received' : 'Pending'}</td></tr>
-                            ${selected.deposit_paid ? `
-                            <tr><td>Deposit Amount</td><td>${selected.deposit_amount != null ? '$'+selected.deposit_amount : '—'}</td></tr>
-                            <tr><td>Deposit Date</td><td>${selected.deposit_date || '—'}</td></tr>
-                            <tr><td>Payment Method</td><td>${selected.deposit_method || '—'}</td></tr>
-                            ${selected.deposit_note ? `<tr><td>Deposit Note</td><td>${selected.deposit_note}</td></tr>` : ''}
-                            ` : ''}
-                            <tr><td>Paid in Full</td><td>${selected.paid ? 'Yes' : 'No'}</td></tr>
-                            <tr><td>Notes</td><td>${selected.notes || '—'}</td></tr>
-                          </table>`);
+                        const p2 = svcList(selected.service);
+                        const tot = selected.price != null ? selected.price : p2.reduce((s,sv) => s+(sv.price||0), 0);
+                        const dep50 = tot > 0 ? Math.round(tot * 0.5) : null;
+                        const depPaid = selected.deposit_paid;
+                        const depAmt  = selected.deposit_amount;
+                        const balDue  = depPaid && depAmt != null ? Math.max(0, tot - depAmt) : tot;
+                        const fmtD = iso => { if (!iso) return '—'; const d = new Date(iso + (iso.length===10?'T12:00:00':'')); return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}); };
+                        const SC = {pending:'#f59e0b',approved:'#22c55e',completed:'#06b6d4',cancelled:'#94a3b8',denied:'#ef4444',no_show:'#f97316',scheduled_call:'#3b82f6'};
+                        const SL = {pending:'PENDING APPROVAL',approved:'CONFIRMED',completed:'SERVICE COMPLETED',cancelled:'CANCELLED',denied:'DECLINED',no_show:'NO-SHOW',scheduled_call:'CALL SCHEDULED'};
+                        const sc = SC[selected.status] || '#888';
+                        const sl = SL[selected.status] || (selected.status||'').toUpperCase();
+                        const svcRows = p2.map(s => '<tr><td>' + (s.icon||'') + ' ' + s.label + '</td><td class="svc-price">' + (s.price > 0 ? '$' + s.price : (s.note || 'Free Consultation')) + '</td></tr>').join('');
+                        const totRows = tot > 0
+                          ? '<tr class="svc-total"><td>TOTAL</td><td class="svc-price">$' + tot + '</td></tr>'
+                            + (dep50 && !depPaid ? '<tr class="svc-dep"><td>Deposit Required (50%)</td><td class="svc-price">$' + dep50 + '</td></tr>' : '')
+                            + (depPaid && depAmt != null && balDue >= 0 ? '<tr class="svc-dep"><td>Deposit Received</td><td class="svc-price">−$' + depAmt + '</td></tr><tr class="svc-bal"><td>Balance Due</td><td class="svc-price">$' + balDue + '</td></tr>' : '')
+                            + (selected.paid ? '<tr class="svc-bal"><td>PAID IN FULL</td><td class="svc-price">✓</td></tr>' : '')
+                          : '';
+                        const depBlock = depPaid
+                          ? '<div class="deposit-badge"><span class="deposit-check">✓</span><div><div class="deposit-title">Deposit Received</div><div class="deposit-detail">'
+                            + [depAmt != null ? '$' + depAmt : '', selected.deposit_method||'', selected.deposit_date ? new Date(selected.deposit_date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '', selected.deposit_note||''].filter(Boolean).join(' &nbsp;·&nbsp; ')
+                            + '</div></div></div>'
+                          : (dep50 ? '<div class="deposit-badge pending"><span style="font-size:18px;">💰</span><div><div class="deposit-title">Deposit Required</div><div class="deposit-detail">$' + dep50 + ' (50% of total) is required to confirm your appointment. Please contact us to arrange payment.</div></div></div>' : '');
+                        const notesBlock = selected.notes ? '<div class="bk-notes"><div class="bk-section-title">Notes</div><p>' + String(selected.notes).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</p></div>' : '';
+                        const body =
+                          '<div class="status-banner" style="background:' + sc + '18;border-left:4px solid ' + sc + ';">'
+                          + '<span style="color:' + sc + ';font-weight:900;font-size:15px;letter-spacing:2px;">' + sl + '</span>'
+                          + '</div>'
+                          + '<div class="bk-grid">'
+                            + '<div class="bk-section"><div class="bk-section-title">Client Information</div>'
+                              + '<div class="bk-row"><span class="bk-key">Name</span><span class="bk-val">' + (selected.client||'—') + '</span></div>'
+                              + (selected.phone ? '<div class="bk-row"><span class="bk-key">Phone</span><span class="bk-val">' + selected.phone + '</span></div>' : '')
+                              + (selected.email ? '<div class="bk-row"><span class="bk-key">Email</span><span class="bk-val">' + selected.email + '</span></div>' : '')
+                            + '</div>'
+                            + '<div class="bk-section"><div class="bk-section-title">Appointment Details</div>'
+                              + '<div class="bk-row"><span class="bk-key">Date</span><span class="bk-val">' + fmtD(selected.date) + '</span></div>'
+                              + '<div class="bk-row"><span class="bk-key">Time</span><span class="bk-val">' + (selected.time||'—') + ' <span style="color:#aaa;font-size:12px;">(Nassau)</span></span></div>'
+                              + '<div class="bk-row"><span class="bk-key">Duration</span><span class="bk-val">' + (selected.duration||1) + ' hour' + ((selected.duration||1)!==1?'s':'') + '</span></div>'
+                            + '</div>'
+                          + '</div>'
+                          + '<div class="bk-section-title">Services</div>'
+                          + '<table class="svc-table"><tbody>' + svcRows + totRows + '</tbody></table>'
+                          + depBlock + notesBlock;
+                        printDoc('SERVICE BOOKING ORDER — ' + selected.client, body);
                       }} style={{ background:"none", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontSize:13, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", padding:"5px 10px", borderRadius:4 }}>🖨 Print</button>
                     </div>
 

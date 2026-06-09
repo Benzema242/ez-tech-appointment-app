@@ -132,13 +132,6 @@ export default function App() {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
-  useEffect(() => {
-    if (!notifOpen) return;
-    const close = (e) => { if (!e.target.closest("[data-notif-bell]")) setNotifOpen(false); };
-    document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
-  }, [notifOpen]);
-
 
   const goAdmin = () => { window.location.hash = "#/admin"; };
   const goClient = () => { window.location.hash = ""; resetClient(); };
@@ -252,6 +245,14 @@ export default function App() {
   // Keep refs in sync so realtime handlers always see latest state/functions
   bookingsRef.current = bookings;
   addNotifRef.current = addNotif;
+
+  // Close notification dropdown on click outside
+  useEffect(() => {
+    if (!notifOpen) return;
+    const close = (e) => { if (!e.target.closest("[data-notif-bell]")) setNotifOpen(false); };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [notifOpen]);
 
   // ── Load bookings from Supabase ────────────────────────────────────────
   useEffect(() => {

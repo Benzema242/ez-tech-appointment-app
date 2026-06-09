@@ -38,10 +38,10 @@ const STATUS_CONFIG = {
     message: 'This is a friendly reminder about your upcoming appointment with EZ Tech Solutions. See the details below.',
   },
   payment_due: {
-    subject: 'Payment Due — Action Required | EZ Tech Solutions',
-    headline: '💳 Payment Required',
+    subject: 'Payment Overdue — Action Required | EZ Tech Solutions',
+    headline: '💳 Payment Overdue',
     headlineColor: '#f59e0b',
-    message: 'Your appointment is coming up and we have not yet received payment. Please make payment as soon as possible to secure your booking. Failure to pay may result in your appointment being cancelled.',
+    message: 'Your service has been completed and payment is now overdue. Please make payment as soon as possible. Do not ignore this notice — continued non-payment may result in further action.',
   },
 };
 
@@ -109,8 +109,8 @@ export default async function handler(req, res) {
           </div>` : ''}
           ${status === 'payment_due' ? `
           <div style="margin-top:24px;padding:20px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.4);border-radius:6px;text-align:center;">
-            <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#f59e0b;">⚠️ Payment Required to Secure Your Appointment</p>
-            <p style="margin:0 0 16px;font-size:13px;color:#c8bfa8;">Please contact us immediately to complete your payment and avoid cancellation.</p>
+            <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#f59e0b;">⚠️ Your Payment is Overdue</p>
+            <p style="margin:0 0 16px;font-size:13px;color:#c8bfa8;">Please contact us immediately to settle your outstanding balance.</p>
             <a href="tel:+12428050777" style="display:inline-block;padding:12px 28px;background:#f59e0b;color:#050d1a;text-decoration:none;border-radius:4px;font-size:14px;font-weight:800;letter-spacing:1px;">
               📞 PAY NOW — CALL US
             </a>

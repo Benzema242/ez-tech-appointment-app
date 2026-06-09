@@ -178,6 +178,7 @@ export default function App() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [adminForm, setAdminForm] = useState({ name:"", email:"", phone:"", services:[], date:"", time:"", source:"call", status:"pending", duration:1, notes:"", paid:false });
   const [clientSuggestions, setClientSuggestions] = useState([]);
+  const [newBookingNotifs, setNewBookingNotifs] = useState([]);
   const [recurringOn, setRecurringOn] = useState(false);
   const [recurInterval, setRecurInterval] = useState(7);
   const [adminConfirmOverlap, setAdminConfirmOverlap] = useState(false);
@@ -240,6 +241,10 @@ export default function App() {
       .channel("bookings-realtime")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "bookings" }, ({ new: row }) => {
         setBookings(p => p.some(b => b.id === row.id) ? p : [...p, row].sort((a, b) => a.date.localeCompare(b.date)));
+        if (row.source === "website") {
+          setNewBookingNotifs(p => [...p, row]);
+          setTimeout(() => setNewBookingNotifs(p => p.filter(n => n.id !== row.id)), 12000);
+        }
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "bookings" }, ({ new: row }) => {
         setBookings(p => p.map(b => b.id === row.id ? row : b));
@@ -2672,6 +2677,42 @@ export default function App() {
           ? (adminAuthed ? AdminView() : AdminGate())
           : ClientView()
       }
+
+      {/* New booking toast notifications */}
+      {mode === "admin" && adminAuthed && newBookingNotifs.length > 0 && (
+        <div style={{ position:"fixed", top:20, right:20, zIndex:9999, display:"flex", flexDirection:"column", gap:10, maxWidth:340 }}>
+          {newBookingNotifs.map(notif => {
+            const svcs = svcList(notif.service);
+            const firstName = notif.client?.split(" ")[0] || "A client";
+            const serviceLabel = svcs[0]?.label || "a service";
+            const extra = svcs.length - 1;
+            return (
+              <div key={notif.id} style={{ background:"#0d1f35", border:"1px solid rgba(201,162,39,.5)", borderLeft:"4px solid #c9a227", borderRadius:8, padding:"14px 14px 14px 16px", boxShadow:"0 8px 30px rgba(0,0,0,.7)", display:"flex", flexDirection:"column", gap:8 }}>
+                <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:10 }}>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:12, color:"#c9a227", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:4 }}>🔔 NEW BOOKING</div>
+                    <div style={{ fontSize:15, fontWeight:700, color:"#e8e0cc" }}>{notif.client}</div>
+                    <div style={{ fontSize:13, color:"#7788aa", marginTop:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                      {serviceLabel}{extra > 0 ? ` +${extra} more` : ""} · {notif.date} {notif.time}
+                    </div>
+                  </div>
+                  <button onClick={() => setNewBookingNotifs(p => p.filter(n => n.id !== notif.id))} style={{ background:"none", border:"none", color:"#445566", fontSize:18, cursor:"pointer", lineHeight:1, flexShrink:0, padding:0 }}>✕</button>
+                </div>
+                <div style={{ display:"flex", gap:8 }}>
+                  <button onClick={() => { setAdminTab("bookings"); setSelected(notif); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); setDepositReminderConfirm(false); setCancelConfirm(false); setCancelReason(""); setNoShowConfirm(false); setHistoryExpanded(false); setNewBookingNotifs(p => p.filter(n => n.id !== notif.id)); }}
+                    style={{ flex:1, padding:"8px", borderRadius:6, background:"rgba(201,162,39,.15)", border:"1px solid rgba(201,162,39,.4)", color:"#f0c040", fontSize:12, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, cursor:"pointer" }}>
+                    VIEW BOOKING
+                  </button>
+                  <button onClick={() => { updateStatus(notif.id, "approved"); setNewBookingNotifs(p => p.filter(n => n.id !== notif.id)); fire("✅ Approved!"); }}
+                    style={{ padding:"8px 14px", borderRadius:6, background:"rgba(34,197,94,.15)", border:"1px solid rgba(34,197,94,.4)", color:"#22c55e", fontSize:12, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, cursor:"pointer" }}>
+                    ✅
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

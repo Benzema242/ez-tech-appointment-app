@@ -507,6 +507,15 @@ export default function App() {
     }).then(() => fire("📧 Reminder sent!")).catch(() => fire("❌ Failed to send reminder"));
   };
 
+  const sendPaymentReminder = (booking) => {
+    if (!booking?.email) return;
+    fetch("/api/send-status-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status:"payment_due", name:booking.client, email:booking.email, phone:booking.phone, services:booking.service, date:booking.date, time:booking.time, duration:booking.duration, notes:booking.notes }),
+    }).then(() => fire("💳 Payment reminder sent!")).catch(() => fire("❌ Failed to send payment reminder"));
+  };
+
   const sendConfirmation = (booking) => {
     if (!booking?.email) return;
     fetch("/api/send-booking-email", {
@@ -1461,11 +1470,13 @@ export default function App() {
                         <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ fontSize:15, padding:"13px 12px", borderRadius:8, background:"transparent", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", cursor:"pointer", textAlign:"center", textAlignLast:"center", width:"100%" }}>
                           {selected.email && <option value="confirmation">📧 Resend Confirmation</option>}
                           {selected.email && <option value="reminder">📧 Send Reminder</option>}
+                          {selected.email && <option value="payment_due">💳 Send Payment Due Reminder</option>}
                           {selected.phone && <option value="whatsapp">💬 WhatsApp Client</option>}
                         </select>
                         <button className="btn ghost" style={{ ...ab, padding:"13px 8px" }} onClick={() => {
                           if (contactAction === "confirmation") sendConfirmation(selected);
                           else if (contactAction === "reminder") sendReminder(selected);
+                          else if (contactAction === "payment_due") sendPaymentReminder(selected);
                           else if (contactAction === "whatsapp") window.open(`https://wa.me/${waPhone(selected.phone)}?text=${encodeURIComponent(`Hi ${selected.client}, this is EZ Tech Solutions. We're reaching out about your ${Array.isArray(selected.service) ? selected.service[0] : selected.service} appointment on ${selected.date} at ${selected.time}. Please let us know if you have any questions.`)}`, "_blank");
                         }}>SEND</button>
                         <button className="btn ghost" style={{ ...ab, gridColumn:"1/-1" }} onClick={() => downloadBookingIcs(selected)}>📅 DOWNLOAD .ICS</button>

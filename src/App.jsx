@@ -201,6 +201,7 @@ export default function App() {
   const [cancelConfirm, setCancelConfirm] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [noShowConfirm, setNoShowConfirm] = useState(false);
+  const [historyExpanded, setHistoryExpanded] = useState(false);
   const [contactAction, setContactAction] = useState("confirmation");
   const [editMode, setEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -1027,7 +1028,7 @@ export default function App() {
                   <div
                     key={b.id}
                     className={"row " + (!editMode && selected?.id === b.id ? "active" : "") + (editMode && selectedIds.has(b.id) ? " active" : "")}
-                    onClick={() => editMode ? toggleSelectId(b.id) : (() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); setDepositReminderConfirm(false); setCancelConfirm(false); setCancelReason(""); setNoShowConfirm(false); })()}
+                    onClick={() => editMode ? toggleSelectId(b.id) : (() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); setDepositReminderConfirm(false); setCancelConfirm(false); setCancelReason(""); setNoShowConfirm(false); setHistoryExpanded(false); })()}
                   >
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                       {editMode ? (
@@ -1111,7 +1112,7 @@ export default function App() {
 
                     {/* Mobile back button */}
                     <div className="mobile-back" style={{ marginBottom:14, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); setDepositReminderConfirm(false); setCancelConfirm(false); setCancelReason(""); setNoShowConfirm(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:14, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
+                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); setDepositReminderConfirm(false); setCancelConfirm(false); setCancelReason(""); setNoShowConfirm(false); setHistoryExpanded(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:14, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
                         ← Back to list
                       </button>
                       <button onClick={() => {
@@ -1359,15 +1360,46 @@ export default function App() {
 
                     {/* Client history */}
                     {(() => {
-                      const history = bookings.filter(b => b.id !== selected.id && (b.phone === selected.phone || (selected.email && b.email === selected.email)));
+                      const history = bookings
+                        .filter(b => b.id !== selected.id && (b.phone === selected.phone || (selected.email && b.email === selected.email)))
+                        .sort((a, b) => b.date.localeCompare(a.date));
                       if (history.length === 0) return null;
-                      const last = history.sort((a,b) => b.date.localeCompare(a.date))[0];
                       return (
-                        <div style={{ padding:"10px 12px", marginTop:10, background:"rgba(59,130,246,.06)", border:"1px solid rgba(59,130,246,.18)", borderRadius:4 }}>
-                          <div style={{ fontSize:12, color:"#60a5fa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:4 }}>CLIENT HISTORY</div>
-                          <div style={{ fontSize:14, color:"#93bbf0" }}>
-                            {history.length} previous booking{history.length !== 1 ? "s" : ""} — last on {last.date}
-                          </div>
+                        <div style={{ marginTop:10, background:"rgba(59,130,246,.06)", border:"1px solid rgba(59,130,246,.18)", borderRadius:8, overflow:"hidden" }}>
+                          <button onClick={() => setHistoryExpanded(p => !p)} style={{ width:"100%", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"10px 12px", background:"none", border:"none", cursor:"pointer" }}>
+                            <div style={{ fontSize:12, color:"#60a5fa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1 }}>CLIENT HISTORY</div>
+                            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                              <span style={{ fontSize:13, color:"#93bbf0" }}>{history.length} booking{history.length !== 1 ? "s" : ""}</span>
+                              <span style={{ fontSize:12, color:"#60a5fa" }}>{historyExpanded ? "▲" : "▼"}</span>
+                            </div>
+                          </button>
+                          {historyExpanded && (
+                            <div style={{ borderTop:"1px solid rgba(59,130,246,.18)", display:"flex", flexDirection:"column", gap:1 }}>
+                              {history.map(h => {
+                                const hSvcs = svcList(h.service);
+                                const hFirst = hSvcs[0] || { icon:"⚙️", label:"Unknown" };
+                                const hExtra = hSvcs.length - 1;
+                                const hSt = safeStatus(h.status);
+                                const hPrice = h.price != null ? h.price : hSvcs.reduce((s,sv) => s+(sv.price||0), 0);
+                                return (
+                                  <button key={h.id} onClick={() => { setSelected(h); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); setDepositReminderConfirm(false); setCancelConfirm(false); setCancelReason(""); setNoShowConfirm(false); setHistoryExpanded(false); }}
+                                    style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 12px", background:"none", border:"none", borderBottom:"1px solid rgba(59,130,246,.1)", cursor:"pointer", textAlign:"left", width:"100%" }}>
+                                    <span style={{ fontSize:18, flexShrink:0 }}>{hFirst.icon}</span>
+                                    <div style={{ flex:1, minWidth:0 }}>
+                                      <div style={{ fontSize:13, color:"#e8e0cc", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                                        {hFirst.label}{hExtra > 0 ? ` +${hExtra}` : ""}
+                                      </div>
+                                      <div style={{ fontSize:12, color:"#60a5fa", marginTop:2 }}>{h.date} · {h.time}</div>
+                                    </div>
+                                    <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:4, flexShrink:0 }}>
+                                      <span style={{ padding:"2px 6px", borderRadius:3, fontSize:10, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:.5, color:hSt.color, background:hSt.bg, border:`1px solid ${hSt.border}` }}>{hSt.label}</span>
+                                      {hPrice > 0 && <span style={{ fontSize:11, color: h.paid ? "#34d399" : "#7788aa" }}>{h.paid ? "✓" : ""} ${hPrice}</span>}
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       );
                     })()}

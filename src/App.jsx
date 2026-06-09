@@ -104,6 +104,8 @@ export default function App() {
   const [pwError, setPwError] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const pwRef = useRef(null);
+  const bookingsRef = useRef([]);
+  const addNotifRef = useRef(null);
   const [contactForm, setContactForm] = useState({ name:"", email:"", phone:"", message:"" });
   const [contactSubmitting, setContactSubmitting] = useState(false);
   const [contactSucceeded, setContactSucceeded] = useState(false);
@@ -129,6 +131,13 @@ export default function App() {
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
+
+  useEffect(() => {
+    if (!notifOpen) return;
+    const close = (e) => { if (!e.target.closest("[data-notif-bell]")) setNotifOpen(false); };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [notifOpen]);
 
 
   const goAdmin = () => { window.location.hash = "#/admin"; };
@@ -179,6 +188,24 @@ export default function App() {
   const [adminForm, setAdminForm] = useState({ name:"", email:"", phone:"", services:[], date:"", time:"", source:"call", status:"pending", duration:1, notes:"", paid:false });
   const [clientSuggestions, setClientSuggestions] = useState([]);
   const [newBookingNotifs, setNewBookingNotifs] = useState([]);
+
+  // ── Notification bell ──────────────────────────────────────────────────
+  const [notifications, setNotifications] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("ez_notifs") || "[]"); } catch { return []; }
+  });
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  const addNotif = (notif) => {
+    const n = { id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, timestamp: new Date().toISOString(), read: false, ...notif };
+    setNotifications(p => {
+      const updated = [n, ...p].slice(0, 60);
+      try { localStorage.setItem("ez_notifs", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+  const markAllRead = () => setNotifications(p => { const u = p.map(n => ({...n, read:true})); try { localStorage.setItem("ez_notifs", JSON.stringify(u)); } catch {} return u; });
+  const clearNotifs = () => { setNotifications([]); try { localStorage.removeItem("ez_notifs"); } catch {} };
+  const unreadCount = notifications.filter(n => !n.read).length;
   const [recurringOn, setRecurringOn] = useState(false);
   const [recurInterval, setRecurInterval] = useState(7);
   const [adminConfirmOverlap, setAdminConfirmOverlap] = useState(false);
@@ -222,6 +249,10 @@ export default function App() {
   const [editBlackoutReason, setEditBlackoutReason] = useState("");
   const [editBlackoutSaving, setEditBlackoutSaving] = useState(false);
 
+  // Keep refs in sync so realtime handlers always see latest state/functions
+  bookingsRef.current = bookings;
+  addNotifRef.current = addNotif;
+
   // ── Load bookings from Supabase ────────────────────────────────────────
   useEffect(() => {
     const timeout = setTimeout(() => setLoading(false), 8000);
@@ -244,9 +275,15 @@ export default function App() {
         if (row.source === "website") {
           setNewBookingNotifs(p => [...p, row]);
           setTimeout(() => setNewBookingNotifs(p => p.filter(n => n.id !== row.id)), 12000);
+          const svcLabel = (Array.isArray(row.service) ? row.service[0] : row.service) || "Service";
+          addNotifRef.current({ icon:"📋", title:`New booking: ${row.client}`, body:`${svcLabel} · ${row.date} at ${row.time}`, bookingId: row.id });
         }
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "bookings" }, ({ new: row }) => {
+        const old = bookingsRef.current.find(b => b.id === row.id);
+        if (old && !old.paid && row.paid) {
+          addNotifRef.current({ icon:"💰", title:`Payment received: ${row.client}`, body:`${row.date} · ${(Array.isArray(row.service) ? row.service[0] : row.service) || ""}`, bookingId: row.id });
+        }
         setBookings(p => p.map(b => b.id === row.id ? row : b));
         setSelected(sel => sel?.id === row.id ? row : sel);
       })
@@ -264,6 +301,21 @@ export default function App() {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "blackout_dates" }, ({ new: row }) => setBlackoutDates(p => [...p, row].sort((a,b) => a.date.localeCompare(b.date))))
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "blackout_dates" }, ({ old: row }) => setBlackoutDates(p => p.filter(b => b.id !== row.id)))
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "blackout_dates" }, ({ new: row }) => setBlackoutDates(p => p.map(b => b.id === row.id ? row : b).sort((a,b) => a.date.localeCompare(b.date))))
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+  }, []);
+
+  // Subscriptions realtime — notifications only (SubscriptionsAdmin has its own data channel)
+  useEffect(() => {
+    const ch = supabase.channel("notif-subs-realtime")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "subscriptions" }, ({ new: row }) => {
+        addNotifRef.current({ icon:"📱", title:`New subscription: ${row.name}`, body:`${row.plan || "Plan"} · Added ${new Date().toLocaleDateString()}`, subId: row.id });
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "subscriptions" }, ({ new: row }) => {
+        if (row.status === "expired") {
+          addNotifRef.current({ icon:"⚠️", title:`Subscription expired: ${row.name}`, body:`${row.plan || "Plan"} · Expired ${row.expiration || ""}`, subId: row.id });
+        }
+      })
       .subscribe();
     return () => supabase.removeChannel(ch);
   }, []);
@@ -919,7 +971,65 @@ export default function App() {
         <div style={{ position:"absolute", left:0, right:0, textAlign:"center", pointerEvents:"none" }}>
           <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:20, fontWeight:900, color:"#f0c040", letterSpacing:2 }}>BOOKING MANAGER</div>
         </div>
-        <div className="admin-hdr-btns" style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+        <div className="admin-hdr-btns" style={{ display:"flex", gap:8, flexWrap:"wrap", alignItems:"center" }}>
+          {/* Notification Bell */}
+          <div style={{ position:"relative" }} data-notif-bell>
+            <button onClick={() => { setNotifOpen(p => !p); if (!notifOpen) markAllRead(); }} style={{ position:"relative", background:"none", border:"1px solid rgba(201,162,39,.3)", borderRadius:8, padding:"8px 12px", cursor:"pointer", fontSize:20, lineHeight:1, color:"#c9a227" }}>
+              🔔
+              {unreadCount > 0 && (
+                <span style={{ position:"absolute", top:-6, right:-6, background:"#ef4444", color:"#fff", fontSize:10, fontWeight:900, fontFamily:"'Orbitron',sans-serif", borderRadius:"50%", minWidth:18, height:18, display:"flex", alignItems:"center", justifyContent:"center", padding:"0 4px", boxShadow:"0 2px 6px rgba(0,0,0,.5)" }}>
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </button>
+
+            {notifOpen && (
+              <div style={{ position:"absolute", top:"calc(100% + 8px)", right:0, width:340, maxHeight:480, background:"#0d1f35", border:"1px solid rgba(201,162,39,.35)", borderRadius:10, boxShadow:"0 12px 40px rgba(0,0,0,.7)", zIndex:9000, display:"flex", flexDirection:"column", overflow:"hidden" }}>
+                {/* Header */}
+                <div style={{ padding:"12px 14px", borderBottom:"1px solid rgba(201,162,39,.2)", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:12, letterSpacing:1.5, color:"#c9a227" }}>NOTIFICATIONS</div>
+                  <div style={{ display:"flex", gap:8 }}>
+                    {notifications.length > 0 && <button onClick={clearNotifs} style={{ background:"none", border:"none", fontSize:11, color:"#445566", cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>Clear all</button>}
+                    <button onClick={() => setNotifOpen(false)} style={{ background:"none", border:"none", color:"#445566", fontSize:16, cursor:"pointer", lineHeight:1 }}>✕</button>
+                  </div>
+                </div>
+
+                {/* List */}
+                <div style={{ overflowY:"auto", flex:1 }}>
+                  {notifications.length === 0 ? (
+                    <div style={{ padding:32, textAlign:"center", color:"#445566", fontSize:13, fontStyle:"italic" }}>No notifications yet</div>
+                  ) : notifications.map(n => {
+                    const ago = (() => {
+                      const diff = Date.now() - new Date(n.timestamp).getTime();
+                      const m = Math.floor(diff / 60000);
+                      if (m < 1) return "just now";
+                      if (m < 60) return `${m}m ago`;
+                      const h = Math.floor(m / 60);
+                      if (h < 24) return `${h}h ago`;
+                      return `${Math.floor(h / 24)}d ago`;
+                    })();
+                    return (
+                      <button key={n.id}
+                        onClick={() => {
+                          if (n.bookingId) { setAdminTab("bookings"); const b = bookings.find(x => x.id === n.bookingId); if (b) { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); setDepositReminderConfirm(false); setCancelConfirm(false); setCancelReason(""); setNoShowConfirm(false); setHistoryExpanded(false); } }
+                          if (n.subId) { window.location.hash = "#/subscriptions"; }
+                          setNotifOpen(false);
+                        }}
+                        style={{ display:"flex", gap:12, padding:"12px 14px", width:"100%", background: n.read ? "none" : "rgba(201,162,39,.04)", border:"none", borderBottom:"1px solid rgba(255,255,255,.05)", cursor:"pointer", textAlign:"left", alignItems:"flex-start" }}>
+                        <span style={{ fontSize:20, flexShrink:0, lineHeight:1.2 }}>{n.icon}</span>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontSize:13, fontWeight:700, color: n.read ? "#7788aa" : "#e8e0cc", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{n.title}</div>
+                          <div style={{ fontSize:12, color:"#556677", marginTop:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{n.body}</div>
+                        </div>
+                        <div style={{ fontSize:11, color:"#445566", flexShrink:0, paddingTop:2 }}>{ago}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
           <button className="btn ghost" style={{ padding:"8px 12px", fontSize:12 }} onClick={() => { setShowChangePwModal(true); setChangePwError(""); setChangePwForm({ old:"", newPw:"", confirm:"" }); }}>🔑 CHANGE PW</button>
           <button className="btn ghost" style={{ padding:"8px 12px", fontSize:12 }} onClick={() => { window.location.hash = "#/subscriptions"; }}>📱 SUBSCRIPTIONS</button>
           <button className="btn ghost" onClick={goClient}>👤 CLIENT VIEW</button>

@@ -177,6 +177,7 @@ export default function App() {
   const [selDay, setSelDay] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [adminForm, setAdminForm] = useState({ name:"", email:"", phone:"", services:[], date:"", time:"", source:"call", status:"pending", duration:1, notes:"", paid:false });
+  const [clientSuggestions, setClientSuggestions] = useState([]);
   const [recurringOn, setRecurringOn] = useState(false);
   const [recurInterval, setRecurInterval] = useState(7);
   const [adminConfirmOverlap, setAdminConfirmOverlap] = useState(false);
@@ -562,6 +563,7 @@ export default function App() {
     setShowAddModal(false);
     setRecurringOn(false);
     setAdminForm({ name:"", email:"", phone:"", services:[], date:"", time:"", source:"call", status:"pending", duration:1, notes:"", paid:false });
+    setClientSuggestions([]);
   };
 
   const updateBooking = async (id, updates) => {
@@ -2059,9 +2061,49 @@ export default function App() {
             </div>
 
             <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-              <div>
+              <div style={{ position:"relative" }}>
                 <label htmlFor="admin-name" style={{ fontSize:13, color:"#c9a227", letterSpacing:1, fontFamily:"'Orbitron',sans-serif", display:"block", marginBottom:5 }}>FULL NAME *</label>
-                <input id="admin-name" value={adminForm.name} onChange={e => setAdminForm({...adminForm, name:e.target.value})} placeholder="Client name" />
+                <input id="admin-name" value={adminForm.name} autoComplete="off"
+                  onChange={e => {
+                    const val = e.target.value;
+                    setAdminForm({...adminForm, name:val});
+                    if (val.trim().length < 2) { setClientSuggestions([]); return; }
+                    const q = val.trim().toLowerCase();
+                    const seen = new Set();
+                    const matches = bookings
+                      .filter(b => {
+                        const key = b.phone || b.email || b.client;
+                        if (seen.has(key)) return false;
+                        seen.add(key);
+                        return b.client?.toLowerCase().includes(q) || b.phone?.includes(q) || b.email?.toLowerCase().includes(q);
+                      })
+                      .sort((a,b) => b.date.localeCompare(a.date))
+                      .slice(0, 5);
+                    setClientSuggestions(matches);
+                  }}
+                  onBlur={() => setTimeout(() => setClientSuggestions([]), 150)}
+                  placeholder="Client name" />
+                {clientSuggestions.length > 0 && (
+                  <div style={{ position:"absolute", top:"100%", left:0, right:0, zIndex:999, background:"#0d1f35", border:"1px solid rgba(201,162,39,.4)", borderRadius:8, marginTop:4, overflow:"hidden", boxShadow:"0 8px 24px rgba(0,0,0,.6)" }}>
+                    {clientSuggestions.map(c => (
+                      <button key={c.id} type="button"
+                        onMouseDown={() => {
+                          setAdminForm(f => ({...f, name:c.client, phone:c.phone||"", email:c.email||""}));
+                          setClientSuggestions([]);
+                        }}
+                        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"10px 14px", background:"none", border:"none", borderBottom:"1px solid rgba(201,162,39,.12)", cursor:"pointer", textAlign:"left", gap:10 }}>
+                        <div style={{ minWidth:0 }}>
+                          <div style={{ fontSize:14, fontWeight:700, color:"#e8e0cc", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{c.client}</div>
+                          <div style={{ fontSize:12, color:"#7788aa", marginTop:2 }}>{c.phone}{c.email ? ` · ${c.email}` : ""}</div>
+                        </div>
+                        <div style={{ fontSize:11, color:"#445566", flexShrink:0, textAlign:"right" }}>
+                          <div style={{ color: safeStatus(c.status).color, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>{safeStatus(c.status).label}</div>
+                          <div style={{ marginTop:2 }}>{c.date}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                 <div>

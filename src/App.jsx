@@ -1207,6 +1207,11 @@ export default function App() {
                             💸 UNPAID
                           </span>
                         )}
+                        {(() => { const rc = (b.notes || '').split('\n').filter(l => l.startsWith('Rescheduled from')).length; return rc > 0 ? (
+                          <span style={{ padding:"3px 7px", borderRadius:3, fontSize:10, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:"#a78bfa", background:"rgba(167,139,250,.12)", border:"1px solid rgba(167,139,250,.35)", whiteSpace:"nowrap" }}>
+                            🔄 ×{rc}
+                          </span>
+                        ) : null; })()}
                         {!editMode && b.phone && (
                           <a href={`https://wa.me/${waNum(b.phone)}?text=${waBookingMsg(b)}`} target="_blank" rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}

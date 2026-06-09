@@ -83,6 +83,7 @@ const STATUS = {
   approved:       { label: "APPROVED",       color: "#22c55e", bg: "rgba(34,197,94,.15)",   border: "rgba(34,197,94,.4)" },
   denied:         { label: "DENIED",         color: "#ef4444", bg: "rgba(239,68,68,.15)",   border: "rgba(239,68,68,.4)" },
   scheduled_call: { label: "CALL SCHEDULED", color: "#3b82f6", bg: "rgba(59,130,246,.15)",  border: "rgba(59,130,246,.4)" },
+  completed:      { label: "COMPLETED",      color: "#06b6d4", bg: "rgba(6,182,212,.15)",   border: "rgba(6,182,212,.4)" },
 };
 const safeStatus = s => STATUS[s] || STATUS.pending;
 
@@ -286,6 +287,33 @@ export default function App() {
           time: booking.time,
           duration: booking.duration,
           notes: booking.notes,
+        }),
+      }).catch(() => {});
+    }
+  };
+
+  const markAsDone = async (booking) => {
+    const { error } = await supabase.from("bookings")
+      .update({ status: "completed", paid: true })
+      .eq("id", booking.id);
+    if (error) { fire("❌ Error marking as done"); return; }
+    setBookings(p => p.map(b => b.id === booking.id ? { ...b, status: "completed", paid: true } : b));
+    setSelected(s => s ? { ...s, status: "completed", paid: true } : null);
+    fire("✅ Marked as done!");
+    if (booking.email) {
+      fetch("/api/send-completion-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name:     booking.client,
+          email:    booking.email,
+          phone:    booking.phone,
+          services: booking.service,
+          date:     booking.date,
+          time:     booking.time,
+          duration: booking.duration,
+          price:    booking.price,
+          notes:    booking.notes,
         }),
       }).catch(() => {});
     }
@@ -560,7 +588,7 @@ export default function App() {
     });
   };
 
-  const statusCycle  = { pending:"approved", approved:"denied", denied:"pending", scheduled_call:"pending" };
+  const statusCycle  = { pending:"approved", approved:"denied", denied:"pending", scheduled_call:"pending", completed:"approved" };
   const waNum        = phone => { const d = (phone||"").replace(/\D/g,""); if(d.length===7) return `1242${d}`; if(d.length===10) return `1${d}`; return d; };
   const waBookingMsg = b => {
     const svcs = Array.isArray(b.service) ? b.service.join(", ") : (b.service || "Service");
@@ -867,11 +895,11 @@ export default function App() {
       {/* Stats Bar */}
       <div className="stats-bar" style={{ padding:"16px 24px", display:"flex", gap:12, flexWrap:"wrap", borderBottom:"1px solid rgba(201,162,39,.1)" }}>
         {[
-          { l:"TODAY",    v:todayCount,                                              c:"#a78bfa" },
-          { l:"TOTAL",    v:bookings.length,                                         c:"#c9a227" },
-          { l:"PENDING",  v:pendingCount,                                            c:"#f59e0b" },
-          { l:"APPROVED", v:bookings.filter(b=>b.status==="approved").length,        c:"#22c55e" },
-          { l:"CALLS",    v:bookings.filter(b=>b.status==="scheduled_call").length,  c:"#3b82f6" },
+          { l:"TODAY",    v:todayCount,                                               c:"#a78bfa" },
+          { l:"TOTAL",    v:bookings.length,                                          c:"#c9a227" },
+          { l:"PENDING",  v:pendingCount,                                             c:"#f59e0b" },
+          { l:"APPROVED", v:bookings.filter(b=>b.status==="approved").length,         c:"#22c55e" },
+          { l:"DONE",     v:bookings.filter(b=>b.status==="completed").length,        c:"#06b6d4" },
           { l:"REVENUE",  v:`$${revenue}`, sub: paidRevenue > 0 ? `$${paidRevenue} paid` : null, c:"#34d399" },
         ].map(s => (
           <div key={s.l} className="card stat-card" style={{ padding:"12px 18px", flex:"1 1 100px" }}>
@@ -910,13 +938,13 @@ export default function App() {
               <div style={{ display:"flex", gap:6, marginBottom:8, flexWrap:"wrap", alignItems:"center" }}>
                 {/* Desktop: filter buttons */}
                 <div className="filter-desktop-btns filter-row" style={{ display:"flex", gap:6, flexWrap:"wrap", flex:1, minWidth:0 }}>
-                  {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"]].map(([k,l]) => (
+                  {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"],["completed","DONE"]].map(([k,l]) => (
                     <button key={k} onClick={() => setFilter(k)} className="btn filter-btn" style={{ padding:"8px 13px", fontSize:14, background: filter===k ? "rgba(201,162,39,.2)" : "transparent", border:"1px solid rgba(201,162,39,.3)", color: filter===k ? "#f0c040" : "#7788aa" }}>{l}</button>
                   ))}
                 </div>
                 {/* Mobile: filter dropdown */}
                 <select className="filter-mobile-select" value={filter} onChange={e => setFilter(e.target.value)} style={{ padding:"9px 10px", fontSize:15, flex:1, minWidth:0, textAlign:"center", textAlignLast:"center" }}>
-                  {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"]].map(([k,l]) => (
+                  {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"],["completed","DONE"]].map(([k,l]) => (
                     <option key={k} value={k}>{l}</option>
                   ))}
                 </select>
@@ -1417,8 +1445,17 @@ export default function App() {
                             <button className="btn blue"   style={{ ...ab, gridColumn:"1/-1" }} onClick={() => updateStatus(selected.id, "scheduled_call")}>📞 SCHEDULE A CALL</button>
                             <button className="btn danger" style={{ ...ab, gridColumn:"1/-1" }} onClick={() => updateStatus(selected.id, "denied")}>❌ DENY BOOKING</button>
                           </>
+                        ) : selected.status === "completed" ? (
+                          <button className="btn ghost" style={{ ...ab, gridColumn:"1/-1" }} onClick={() => updateStatus(selected.id, "approved")}>↩ REOPEN BOOKING</button>
                         ) : (
-                          <button className="btn ghost" style={{ ...ab, gridColumn:"1/-1" }} onClick={() => updateStatus(selected.id, "pending")}>↩ RESET TO PENDING</button>
+                          <>
+                            <button
+                              style={{ ...ab, gridColumn:"1/-1", background:"rgba(6,182,212,.15)", border:"1px solid rgba(6,182,212,.45)", color:"#06b6d4", cursor:"pointer", borderRadius:8, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1 }}
+                              onClick={() => markAsDone(selected)}>
+                              ✅ MARK AS DONE
+                            </button>
+                            <button className="btn ghost" style={{ ...ab, gridColumn:"1/-1" }} onClick={() => updateStatus(selected.id, "pending")}>↩ RESET TO PENDING</button>
+                          </>
                         )}
                         {/* Contact dropdown — col 1 only, SEND in col 2 */}
                         <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ fontSize:15, padding:"13px 12px", borderRadius:8, background:"transparent", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", cursor:"pointer", textAlign:"center", textAlignLast:"center", width:"100%" }}>

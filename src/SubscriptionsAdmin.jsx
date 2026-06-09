@@ -121,6 +121,8 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const [calM, setCalM] = useState(new Date().getMonth());
   const [calY, setCalY] = useState(new Date().getFullYear());
   const [calDay, setCalDay] = useState(null);
+  const [statsFrom, setStatsFrom] = useState("");
+  const [statsTo, setStatsTo]     = useState("");
 
   const [payments, setPayments]               = useState([]);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
@@ -641,24 +643,41 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   };
 
   // ── Stats ─────────────────────────────────────────────────────────────────
-  const last12 = Array.from({ length: 12 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1);
-    return { key:`${d.getFullYear()}-${pad(d.getMonth()+1)}`, label:MONTHS_SHORT[d.getMonth()], year:d.getFullYear() };
-  });
-  const monthStats = last12.map(({ key, label, year }) => {
+  const statsMonths = (() => {
+    if (statsFrom && statsTo) {
+      const fromKey = statsFrom.slice(0, 7);
+      const toKey   = statsTo.slice(0, 7);
+      if (fromKey > toKey) return [];
+      const months = []; let d = new Date(fromKey + "-01");
+      while (true) {
+        const key = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+        months.push({ key, label:MONTHS_SHORT[d.getMonth()], year:d.getFullYear() });
+        if (key === toKey) break;
+        d.setMonth(d.getMonth() + 1);
+        if (months.length > 120) break;
+      }
+      return months;
+    }
+    return Array.from({ length: 12 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1);
+      return { key:`${d.getFullYear()}-${pad(d.getMonth()+1)}`, label:MONTHS_SHORT[d.getMonth()], year:d.getFullYear() };
+    });
+  })();
+  const monthStats = statsMonths.map(({ key, label, year }) => {
     const ms    = subs.filter(s => s.start_date?.startsWith(key) && s.status !== "cancelled");
     const iptv  = ms.filter(s => s.plan === "IPTV").reduce((sum, s) => sum + (s.price || 0), 0);
     const movie = ms.filter(s => s.plan === "Movies & TV").reduce((sum, s) => sum + (s.price || 0), 0);
     return { key, label, year, total:ms.length, iptv, movie, rev:iptv+movie };
   });
-  const maxRev     = Math.max(...monthStats.map(m => m.rev), 1);
-  const totalRev12 = monthStats.reduce((s, m) => s + m.rev, 0);
-  const avgRev     = Math.round(totalRev12 / 12);
-  const bestMonth  = monthStats.reduce((a, b) => b.rev > a.rev ? b : a, monthStats[0]);
-  const iptvSubs   = subs.filter(s => s.plan === "IPTV"        && s.status === "active" && daysUntil(s.expiration) > 0).length;
-  const movieSubs  = subs.filter(s => s.plan === "Movies & TV" && s.status === "active" && daysUntil(s.expiration) > 0).length;
-  const curMonthRev  = monthStats[11]?.rev ?? 0;
-  const prevMonthRev = monthStats[10]?.rev ?? 0;
+  const maxRev      = Math.max(...monthStats.map(m => m.rev), 1);
+  const totalRev12  = monthStats.reduce((s, m) => s + m.rev, 0);
+  const avgRev      = statsMonths.length > 0 ? Math.round(totalRev12 / statsMonths.length) : 0;
+  const bestMonth   = monthStats.reduce((a, b) => b.rev > a.rev ? b : a, monthStats[0] || { label:"—", rev:0 });
+  const iptvSubs    = subs.filter(s => s.plan === "IPTV"        && s.status === "active" && daysUntil(s.expiration) > 0).length;
+  const movieSubs   = subs.filter(s => s.plan === "Movies & TV" && s.status === "active" && daysUntil(s.expiration) > 0).length;
+  const lastIdx      = monthStats.length - 1;
+  const curMonthRev  = monthStats[lastIdx]?.rev ?? 0;
+  const prevMonthRev = monthStats[lastIdx - 1]?.rev ?? 0;
   const momPct = prevMonthRev > 0 ? Math.round(((curMonthRev - prevMonthRev) / prevMonthRev) * 100) : null;
 
   const projWindow = n => subs.filter(s => { const d = daysUntil(s.expiration); return s.status === "active" && d > 0 && d <= n; });
@@ -1087,6 +1106,56 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                       )}
                     </div>
 
+                    {/* Client Subscription History */}
+                    {(() => {
+                      const clientSubs = subs.filter(s =>
+                        s.id !== selected.id && (
+                          s.name?.toLowerCase() === selected.name?.toLowerCase() ||
+                          (selected.phone && s.phone && s.phone === selected.phone)
+                        )
+                      ).sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
+                      if (clientSubs.length === 0) return null;
+                      const lifetime = clientSubs.reduce((sum, s) => sum + (s.price||0), 0) + (selected.price||0);
+                      return (
+                        <div style={{ marginBottom:16, padding:12, background:"rgba(167,139,250,.04)", border:"1px solid rgba(167,139,250,.15)", borderRadius:4 }}>
+                          <div style={{ fontSize:12, color:"#a78bfa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:8 }}>
+                            SUBSCRIPTION HISTORY · {clientSubs.length} other record{clientSubs.length!==1?"s":""}
+                          </div>
+                          {clientSubs.map(s => {
+                            const ei2 = expiryInfo(s);
+                            return (
+                              <div key={s.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"7px 0", borderBottom:"1px solid rgba(167,139,250,.08)", cursor:"pointer" }}
+                                onClick={() => { setSelected(s); setDeleteConfirm(false); setEditNotes(false); setReminderConfirm(false); setShowPw(false); }}>
+                                <div>
+                                  <div style={{ display:"flex", gap:6, alignItems:"center" }}>
+                                    <span style={{ fontSize:12, padding:"1px 6px", borderRadius:2,
+                                      background: s.plan==="IPTV"?"rgba(59,130,246,.15)":"rgba(167,139,250,.15)",
+                                      border:`1px solid ${s.plan==="IPTV"?"rgba(59,130,246,.3)":"rgba(167,139,250,.3)"}`,
+                                      color: s.plan==="IPTV"?"#60a5fa":"#c4b5fd" }}>{s.plan}</span>
+                                    <span style={{ fontSize:13, color:"#7788aa" }}>{s.duration_months}mo · ${s.price}</span>
+                                    <span style={{ fontSize:11, padding:"1px 5px", borderRadius:2,
+                                      background: s.status==="active"?"rgba(34,197,94,.1)":s.status==="cancelled"?"rgba(119,136,170,.1)":"rgba(239,68,68,.1)",
+                                      color: s.status==="active"?"#4ade80":s.status==="cancelled"?"#7788aa":"#f87171" }}>
+                                      {(s.status||"active").toUpperCase()}
+                                    </span>
+                                  </div>
+                                  <div style={{ fontSize:12, color:ei2.color, marginTop:2 }}>{ei2.text}</div>
+                                </div>
+                                <div style={{ textAlign:"right", flexShrink:0 }}>
+                                  <div style={{ fontSize:12, color:"#7788aa" }}>{fmtDate(s.start_date)}</div>
+                                  <div style={{ fontSize:11, color:"#556677", marginTop:2 }}>tap to view →</div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          <div style={{ display:"flex", justifyContent:"space-between", paddingTop:8, marginTop:4, borderTop:"1px solid rgba(167,139,250,.15)" }}>
+                            <span style={{ fontSize:12, color:"#a78bfa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1 }}>CLIENT LIFETIME VALUE</span>
+                            <span style={{ fontSize:14, fontWeight:700, color:"#a78bfa" }}>${lifetime}</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     {/* Payment History */}
                     <div style={{ marginBottom:16, padding:12, background:"rgba(201,162,39,.04)", border:"1px solid rgba(201,162,39,.12)", borderRadius:4 }}>
                       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
@@ -1147,6 +1216,31 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     <button className="btn ok" style={{ width:"100%", padding:"11px", fontSize:13, marginBottom:10, letterSpacing:1 }}
                       onClick={() => openRenew(selected)}>
                       🔄 RENEW SUBSCRIPTION
+                    </button>
+
+                    {/* Duplicate */}
+                    <button className="btn ghost" style={{ width:"100%", padding:"11px", fontSize:13, marginBottom:10, letterSpacing:1, color:"#a78bfa", border:"1px solid rgba(167,139,250,.3)" }}
+                      onClick={() => {
+                        setForm({
+                          name:            selected.name,
+                          phone:           selected.phone || "",
+                          email:           selected.email || "",
+                          plan:            selected.plan || "IPTV",
+                          duration_months: selected.duration_months || 1,
+                          price:           String(selected.price || ""),
+                          devices:         selected.devices || 1,
+                          username:        selected.username || "",
+                          password:        selected.password || "",
+                          start_date:      todayStr(),
+                          expiration:      addMonthsToDate(todayStr(), selected.duration_months || 1),
+                          status:          "active",
+                          notes:           selected.notes || "",
+                          payment_method:  selected.payment_method || "Bank Transfer",
+                        });
+                        setEditId(null);
+                        setShowModal(true);
+                      }}>
+                      📋 DUPLICATE SUBSCRIPTION
                     </button>
 
                     {/* Send Reminder */}
@@ -1343,8 +1437,25 @@ export default function SubscriptionsAdmin({ onGoClient }) {
 
           // ── Stats tab ─────────────────────────────────────────────────────
           <div style={{ flex:1, padding:24, overflowY:"auto" }}>
-            <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>SUBSCRIPTION REVENUE — LAST 12 MONTHS</div>
-            <div style={{ fontSize:15, color:"#7788aa", marginBottom:20 }}>Blue = IPTV · Purple = Movies & TV</div>
+            <div style={{ display:"flex", flexWrap:"wrap", alignItems:"flex-end", justifyContent:"space-between", gap:12, marginBottom:16 }}>
+              <div>
+                <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:4 }}>
+                  SUBSCRIPTION REVENUE{statsFrom && statsTo ? "" : " — LAST 12 MONTHS"}
+                </div>
+                <div style={{ fontSize:13, color:"#7788aa" }}>Blue = IPTV · Purple = Movies & TV</div>
+              </div>
+              <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
+                <input type="date" value={statsFrom} onChange={e => setStatsFrom(e.target.value)}
+                  style={{ fontSize:13, padding:"7px 10px", colorScheme:"dark", borderRadius:4, border:"1px solid rgba(201,162,39,.25)", background:"#0d1f33", color:"#e8e0cc", width:140 }} />
+                <span style={{ color:"#556677", fontSize:13 }}>—</span>
+                <input type="date" value={statsTo} onChange={e => setStatsTo(e.target.value)} min={statsFrom}
+                  style={{ fontSize:13, padding:"7px 10px", colorScheme:"dark", borderRadius:4, border:"1px solid rgba(201,162,39,.25)", background:"#0d1f33", color:"#e8e0cc", width:140 }} />
+                {(statsFrom || statsTo) && (
+                  <button onClick={() => { setStatsFrom(""); setStatsTo(""); }}
+                    style={{ background:"none", border:"none", color:"#556677", fontSize:13, cursor:"pointer", padding:"4px 6px" }}>✕ Clear</button>
+                )}
+              </div>
+            </div>
 
             {/* Bar chart */}
             <div className="card" style={{ padding:"20px 16px 10px", marginBottom:20, overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
@@ -1369,7 +1480,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     </div>
                     <div style={{ fontSize:13, color:"#ffffff", fontFamily:"'Orbitron',sans-serif", textAlign:"center", letterSpacing:.3, marginTop:2 }}>{m.label}</div>
                     {m.total > 0 && <div style={{ fontSize:13, color:"#c9a227", textAlign:"center", fontWeight:700 }}>{m.total}</div>}
-                    {m.key === monthStats[11]?.key && momPct !== null && (
+                    {m.key === monthStats[lastIdx]?.key && momPct !== null && (
                       <div style={{ fontSize:11, textAlign:"center", color: momPct >= 0 ? "#22c55e" : "#ef4444", fontWeight:700 }}>
                         {momPct >= 0 ? "▲" : "▼"}{Math.abs(momPct)}%
                       </div>
@@ -1382,7 +1493,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
             {/* Summary cards */}
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))", gap:12, marginBottom:32 }}>
               {[
-                { l:"12-MONTH REVENUE",  v:`$${totalRev12}`,                       c:"#c9a227" },
+                { l: statsFrom && statsTo ? "RANGE REVENUE" : "12-MONTH REVENUE",  v:`$${totalRev12}`, c:"#c9a227" },
                 { l:"MONTHLY AVG",       v:`$${avgRev}`,                           c:"#a78bfa" },
                 { l:"VS LAST MONTH",     v: momPct !== null ? `${momPct >= 0 ? "+" : ""}${momPct}%` : "—", c: momPct === null ? "#7788aa" : momPct > 0 ? "#22c55e" : momPct < 0 ? "#ef4444" : "#7788aa" },
                 { l:"BEST MONTH",        v:`${bestMonth.label} $${bestMonth.rev}`, c:"#f0c040" },

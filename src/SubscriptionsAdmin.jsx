@@ -610,37 +610,98 @@ export default function SubscriptionsAdmin({ onGoClient }) {
     URL.revokeObjectURL(a.href);
   };
 
+  const printSubDoc = async (title, bodyHtml) => {
+    const docRef = `EZT-SUB-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+    const dateStr = new Date().toLocaleDateString("en-US", { weekday:"long", year:"numeric", month:"long", day:"numeric" });
+    let logoSrc = "";
+    try {
+      const res = await fetch("/assets/EZ Tech Logo 1200px X 495px.png");
+      const blob = await res.blob();
+      logoSrc = await new Promise(r => { const fr = new FileReader(); fr.onloadend = () => r(fr.result); fr.readAsDataURL(blob); });
+    } catch(e) {}
+    const win = window.open("", "_blank");
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>${title} — EZ Tech Solutions</title><style>
+      *{box-sizing:border-box;margin:0;padding:0;}
+      body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:16px;min-height:100vh;display:flex;flex-direction:column;}
+      .hdr{background:#fff;padding:24px 36px 0;display:flex;align-items:center;justify-content:space-between;}
+      .hdr-contact{text-align:right;font-size:14px;color:#444;line-height:2;}
+      .hdr-contact span{color:#c9a227;font-weight:700;}
+      .gold-rule{height:4px;background:linear-gradient(90deg,#c9a227,#f0c040,#c9a227);}
+      .blue-rule{height:4px;background:#3b82f6;}
+      .doc-bar{background:#f7f5ef;border-bottom:1px solid #e0d9c8;padding:13px 36px;display:flex;align-items:center;justify-content:space-between;}
+      .doc-title{font-size:20px;font-weight:800;color:#050b1f;letter-spacing:.5px;}
+      .doc-meta{font-size:14px;color:#888;text-align:right;line-height:1.7;}
+      .doc-ref{font-size:14px;font-weight:700;color:#c9a227;letter-spacing:1px;}
+      .body{flex:1;padding:28px 36px;}
+      table{width:100%;border-collapse:collapse;margin-top:4px;}
+      th{text-align:left;padding:11px 14px;background:#3b82f6;color:#fff;font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+      td{padding:10px 14px;font-size:14px;border-bottom:1px solid #eee;vertical-align:top;color:#1a1a2e;}
+      tr:last-child td{border-bottom:none;}
+      .status-banner{padding:10px 16px;border-radius:4px;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+      .bk-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+      .bk-section{border:1px solid #e0d9c8;border-radius:6px;padding:14px 16px;}
+      .bk-section-title{font-size:11px;font-weight:800;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #ede9df;}
+      .bk-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:14px;border-bottom:1px solid #f5f2ec;}
+      .bk-row:last-child{border-bottom:none;}
+      .bk-key{color:#888;font-weight:600;flex-shrink:0;}
+      .bk-val{color:#1a1a2e;font-weight:500;text-align:right;max-width:62%;}
+      .cred-section{background:#fafaf8;border:1px solid #e0d9c8;border-radius:6px;padding:14px 16px;margin-bottom:16px;}
+      .pay-table td{background:transparent!important;}
+      .pay-table tr:nth-child(even) td{background:#fafaf8!important;}
+      .pay-total{display:flex;justify-content:space-between;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:4px;font-weight:700;font-size:15px;margin-top:8px;}
+      .bk-notes{margin-top:16px;border:1px solid #e0d9c8;border-radius:6px;padding:14px 16px;}
+      .bk-notes p{font-size:14px;color:#555;line-height:1.7;white-space:pre-wrap;margin:0;}
+      .ftr-rules{margin-top:auto;}
+      .ftr-gold{height:4px;background:linear-gradient(90deg,#c9a227,#f0c040,#c9a227);}
+      .ftr-blue{height:4px;background:#3b82f6;}
+      .ftr{background:#fff;padding:16px 36px;}
+      .ftr-disclaimer{font-size:12px;color:#111;line-height:1.6;}
+      @media print{@page{margin:0;size:letter}body{height:11in;min-height:unset;}button{display:none;}}
+    </style></head><body>
+      <div class="hdr">
+        ${logoSrc ? `<img src="${logoSrc}" style="width:280px;height:auto;object-fit:contain;" />` : '<div style="font-size:22px;font-weight:900;color:#050b1f;letter-spacing:1px;">EZ TECH <span style=\'color:#c9a227;\'>SOLUTIONS</span></div>'}
+        <div class="hdr-contact">
+          <span>(242) 805-0777</span><br/>
+          info@ez-techgroup.com<br/>
+          eztechbahamas.com
+        </div>
+      </div>
+      <div class="gold-rule"></div>
+      <div class="blue-rule"></div>
+      <div class="doc-bar">
+        <div class="doc-title">${title}</div>
+        <div class="doc-meta">
+          <div class="doc-ref">REF: ${docRef}</div>
+          <div>${dateStr}</div>
+        </div>
+      </div>
+      <div class="body">${bodyHtml}</div>
+      <div class="ftr-rules"><div class="ftr-gold"></div><div class="ftr-blue"></div></div>
+      <div class="ftr">
+        <div class="ftr-disclaimer">
+          Thank you for choosing <strong>EZ Tech Solutions</strong>. We appreciate your business and look forward to serving you.<br/>
+          <strong>📞 (242) 805-0777</strong> &nbsp;·&nbsp; info@ez-techgroup.com &nbsp;·&nbsp; eztechbahamas.com &nbsp;·&nbsp; Nassau, Bahamas
+        </div>
+      </div>
+      <script>setTimeout(()=>window.print(),400);</script>
+    </body></html>`);
+    win.document.close();
+  };
+
   const printPaymentsPDF = () => {
     if (!selected || payments.length === 0) return;
     const total = payments.reduce((s, p) => s + (p.amount || 0), 0);
-    const rows = payments.map(p => `
-      <tr>
-        <td>${fmtDate(p.paid_at)}</td>
-        <td>${p.payment_method || "—"}</td>
-        <td>${p.note || "—"}</td>
-        <td style="text-align:right;font-weight:700;color:#16a34a">$${p.amount || 0}</td>
-      </tr>`).join("");
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Payment History – ${selected.name}</title>
-    <style>
-      body{font-family:Arial,sans-serif;padding:32px;color:#111;max-width:700px;margin:0 auto}
-      h2{margin:0 0 4px;font-size:20px}
-      .sub{font-size:13px;color:#555;margin-bottom:24px}
-      table{width:100%;border-collapse:collapse;margin-bottom:16px}
-      th{background:#1e3a5f;color:#fff;padding:9px 12px;text-align:left;font-size:13px}
-      td{padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:13px}
-      tr:last-child td{border-bottom:none}
-      .total{display:flex;justify-content:space-between;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:4px;font-weight:700;font-size:15px}
-      @media print{body{padding:0}}
-    </style></head><body>
-    <h2>Payment History</h2>
-    <div class="sub">${selected.name} · ${selected.plan} · Generated ${fmtDate(new Date().toISOString())}</div>
-    <table><thead><tr><th>Date</th><th>Method</th><th>Note</th><th style="text-align:right">Amount</th></tr></thead>
-    <tbody>${rows}</tbody></table>
-    <div class="total"><span>Lifetime Total</span><span>$${total}</span></div>
-    <script>setTimeout(()=>window.print(),300);</script></body></html>`;
-    const w = window.open("", "_blank");
-    w.document.write(html);
-    w.document.close();
+    const rows = payments.map(p =>
+      `<tr><td>${fmtDate(p.paid_at)}</td><td>${PAYMENT_EMOJI[p.payment_method]||""} ${p.payment_method||"—"}</td><td>${p.note||"—"}</td><td style="text-align:right;font-weight:700;color:#16a34a;">$${p.amount||0}</td></tr>`
+    ).join("");
+    printSubDoc(`Payment History — ${selected.name}`,
+      `<div class="bk-section-title" style="margin-bottom:14px;">${selected.name} &nbsp;·&nbsp; ${selected.plan}</div>
+      <table class="pay-table">
+        <thead><tr><th>Date</th><th>Method</th><th>Note</th><th style="text-align:right;">Amount</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="pay-total"><span>LIFETIME VALUE</span><span>$${total}</span></div>`
+    );
   };
 
   // ── Computed ──────────────────────────────────────────────────────────────
@@ -1114,6 +1175,43 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                           <span style={{ fontSize:15, color:ei.color, fontWeight:600 }}>{ei.text}</span>
                         </div>
                       </div>
+                      <button className="btn ghost" style={{ padding:"7px 12px", fontSize:12, flexShrink:0 }} onClick={async () => {
+                        const sc = selected.status === "active" ? "#22c55e" : selected.status === "expired" ? "#ef4444" : "#94a3b8";
+                        const sl = selected.status === "active" ? "ACTIVE" : selected.status === "expired" ? "EXPIRED" : "CANCELLED";
+                        const dl = daysUntil(selected.expiration);
+                        const expiryText = selected.status === "cancelled" ? "Cancelled"
+                          : dl <= 0 ? `Expired ${Math.abs(dl)}d ago`
+                          : `${fmtDate(selected.expiration)} (${dl} day${dl!==1?"s":""} remaining)`;
+                        const credBlock = (selected.username || selected.password)
+                          ? '<div class="cred-section"><div class="bk-section-title">Account Credentials</div>'
+                            + (selected.username ? '<div class="bk-row"><span class="bk-key">Username</span><span class="bk-val" style="font-family:monospace;">' + selected.username + '</span></div>' : '')
+                            + (selected.password ? '<div class="bk-row"><span class="bk-key">Password</span><span class="bk-val" style="font-family:monospace;">' + selected.password + '</span></div>' : '')
+                            + '</div>' : '';
+                        const notesBlock = selected.notes
+                          ? '<div class="bk-notes"><div class="bk-section-title">Notes</div><p>' + String(selected.notes).replace(/&/g,"&amp;").replace(/</g,"&lt;") + '</p></div>' : '';
+                        const body =
+                          '<div class="status-banner" style="background:' + sc + '18;border-left:4px solid ' + sc + ';">'
+                          + '<span style="color:' + sc + ';font-weight:900;font-size:15px;letter-spacing:2px;">' + sl + '</span>'
+                          + '</div>'
+                          + '<div class="bk-grid">'
+                            + '<div class="bk-section"><div class="bk-section-title">Client Information</div>'
+                              + '<div class="bk-row"><span class="bk-key">Name</span><span class="bk-val">' + (selected.name||"—") + '</span></div>'
+                              + (selected.phone ? '<div class="bk-row"><span class="bk-key">Phone</span><span class="bk-val">' + selected.phone + '</span></div>' : '')
+                              + (selected.email ? '<div class="bk-row"><span class="bk-key">Email</span><span class="bk-val">' + selected.email + '</span></div>' : '')
+                            + '</div>'
+                            + '<div class="bk-section"><div class="bk-section-title">Subscription Details</div>'
+                              + '<div class="bk-row"><span class="bk-key">Plan</span><span class="bk-val">' + (selected.plan||"—") + '</span></div>'
+                              + (selected.plan === "IPTV" && selected.devices > 1 ? '<div class="bk-row"><span class="bk-key">Devices</span><span class="bk-val">' + selected.devices + '</span></div>' : '')
+                              + '<div class="bk-row"><span class="bk-key">Duration</span><span class="bk-val">' + (selected.duration_months||1) + ' month' + ((selected.duration_months||1)!==1?"s":"") + '</span></div>'
+                              + '<div class="bk-row"><span class="bk-key">Price</span><span class="bk-val" style="color:#16a34a;font-weight:700;">$' + (selected.price||0) + '</span></div>'
+                              + '<div class="bk-row"><span class="bk-key">Start Date</span><span class="bk-val">' + fmtDate(selected.start_date) + '</span></div>'
+                              + '<div class="bk-row"><span class="bk-key">Expires</span><span class="bk-val">' + expiryText + '</span></div>'
+                              + (selected.payment_method ? '<div class="bk-row"><span class="bk-key">Payment Method</span><span class="bk-val">' + selected.payment_method + '</span></div>' : '')
+                            + '</div>'
+                          + '</div>'
+                          + credBlock + notesBlock;
+                        await printSubDoc("SUBSCRIPTION DETAILS — " + selected.name, body);
+                      }}>🖨 Print</button>
                       <button className="btn ghost" style={{ padding:"7px 12px", fontSize:12, flexShrink:0 }} onClick={() => openEdit(selected)}>✏️ EDIT</button>
                     </div>
 

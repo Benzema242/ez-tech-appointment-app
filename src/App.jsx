@@ -84,6 +84,8 @@ const STATUS = {
   denied:         { label: "DENIED",         color: "#ef4444", bg: "rgba(239,68,68,.15)",   border: "rgba(239,68,68,.4)" },
   scheduled_call: { label: "CALL SCHEDULED", color: "#3b82f6", bg: "rgba(59,130,246,.15)",  border: "rgba(59,130,246,.4)" },
   completed:      { label: "COMPLETED",      color: "#06b6d4", bg: "rgba(6,182,212,.15)",   border: "rgba(6,182,212,.4)" },
+  cancelled:      { label: "CANCELLED",      color: "#94a3b8", bg: "rgba(148,163,184,.15)",  border: "rgba(148,163,184,.4)" },
+  no_show:        { label: "NO-SHOW",        color: "#f97316", bg: "rgba(249,115,22,.15)",   border: "rgba(249,115,22,.4)" },
 };
 const safeStatus = s => STATUS[s] || STATUS.pending;
 
@@ -196,6 +198,9 @@ export default function App() {
   const [editingDeposit, setEditingDeposit] = useState(false);
   const [depositForm, setDepositForm] = useState({ amount:"", date:"", method:"Cash", note:"" });
   const [depositReminderConfirm, setDepositReminderConfirm] = useState(false);
+  const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [noShowConfirm, setNoShowConfirm] = useState(false);
   const [contactAction, setContactAction] = useState("confirmation");
   const [editMode, setEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -961,13 +966,13 @@ export default function App() {
               <div style={{ display:"flex", gap:6, marginBottom:8, flexWrap:"wrap", alignItems:"center" }}>
                 {/* Desktop: filter buttons */}
                 <div className="filter-desktop-btns filter-row" style={{ display:"flex", gap:6, flexWrap:"wrap", flex:1, minWidth:0 }}>
-                  {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"],["completed","DONE"]].map(([k,l]) => (
+                  {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"],["completed","DONE"],["cancelled","CANCELLED"],["no_show","NO-SHOW"]].map(([k,l]) => (
                     <button key={k} onClick={() => setFilter(k)} className="btn filter-btn" style={{ padding:"8px 13px", fontSize:14, background: filter===k ? "rgba(201,162,39,.2)" : "transparent", border:"1px solid rgba(201,162,39,.3)", color: filter===k ? "#f0c040" : "#7788aa" }}>{l}</button>
                   ))}
                 </div>
                 {/* Mobile: filter dropdown */}
                 <select className="filter-mobile-select" value={filter} onChange={e => setFilter(e.target.value)} style={{ padding:"9px 10px", fontSize:15, flex:1, minWidth:0, textAlign:"center", textAlignLast:"center" }}>
-                  {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"],["completed","DONE"]].map(([k,l]) => (
+                  {[["all","ALL"],["pending","PENDING"],["approved","APPROVED"],["scheduled_call","CALLS"],["denied","DENIED"],["completed","DONE"],["cancelled","CANCELLED"],["no_show","NO-SHOW"]].map(([k,l]) => (
                     <option key={k} value={k}>{l}</option>
                   ))}
                 </select>
@@ -1022,7 +1027,7 @@ export default function App() {
                   <div
                     key={b.id}
                     className={"row " + (!editMode && selected?.id === b.id ? "active" : "") + (editMode && selectedIds.has(b.id) ? " active" : "")}
-                    onClick={() => editMode ? toggleSelectId(b.id) : (() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); setDepositReminderConfirm(false); })()}
+                    onClick={() => editMode ? toggleSelectId(b.id) : (() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); setDepositReminderConfirm(false); setCancelConfirm(false); setCancelReason(""); setNoShowConfirm(false); })()}
                   >
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                       {editMode ? (
@@ -1106,7 +1111,7 @@ export default function App() {
 
                     {/* Mobile back button */}
                     <div className="mobile-back" style={{ marginBottom:14, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); setDepositReminderConfirm(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:14, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
+                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); setDepositReminderConfirm(false); setCancelConfirm(false); setCancelReason(""); setNoShowConfirm(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:14, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
                         ← Back to list
                       </button>
                       <button onClick={() => {
@@ -1491,6 +1496,8 @@ export default function App() {
                           </>
                         ) : selected.status === "completed" ? (
                           <button className="btn ghost" style={{ ...ab, gridColumn:"1/-1" }} onClick={() => updateStatus(selected.id, "approved")}>↩ REOPEN BOOKING</button>
+                        ) : selected.status === "cancelled" || selected.status === "no_show" ? (
+                          <button className="btn ghost" style={{ ...ab, gridColumn:"1/-1" }} onClick={() => { updateStatus(selected.id, "pending"); setCancelConfirm(false); setCancelReason(""); setNoShowConfirm(false); }}>↩ RESET TO PENDING</button>
                         ) : (
                           <>
                             <button
@@ -1500,6 +1507,47 @@ export default function App() {
                             </button>
                             <button className="btn ghost" style={{ ...ab, gridColumn:"1/-1" }} onClick={() => updateStatus(selected.id, "pending")}>↩ RESET TO PENDING</button>
                           </>
+                        )}
+                        {/* Cancel / No-Show — available on any non-terminal status */}
+                        {!["cancelled","no_show","completed"].includes(selected.status) && (
+                          <div style={{ gridColumn:"1/-1", display:"flex", flexDirection:"column", gap:8 }}>
+                            {!cancelConfirm && !noShowConfirm && (
+                              <div style={{ display:"flex", gap:8 }}>
+                                <button onClick={() => { setCancelConfirm(true); setNoShowConfirm(false); }} style={{ flex:1, ...ab, background:"rgba(148,163,184,.1)", border:"1px solid rgba(148,163,184,.3)", color:"#94a3b8", cursor:"pointer", borderRadius:8, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1 }}>🚫 CANCEL</button>
+                                <button onClick={() => { setNoShowConfirm(true); setCancelConfirm(false); }} style={{ flex:1, ...ab, background:"rgba(249,115,22,.1)", border:"1px solid rgba(249,115,22,.3)", color:"#f97316", cursor:"pointer", borderRadius:8, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1 }}>👻 NO-SHOW</button>
+                              </div>
+                            )}
+                            {cancelConfirm && (
+                              <div style={{ padding:12, background:"rgba(148,163,184,.06)", border:"1px solid rgba(148,163,184,.25)", borderRadius:8 }}>
+                                <div style={{ fontSize:12, color:"#94a3b8", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:8 }}>CANCEL REASON (OPTIONAL)</div>
+                                <input value={cancelReason} onChange={e => setCancelReason(e.target.value)} placeholder="e.g. Client requested, out of service area…" style={{ width:"100%", fontSize:13, padding:"8px 10px", borderRadius:6, background:"rgba(255,255,255,.05)", border:"1px solid rgba(148,163,184,.3)", color:"#e8e0cc", marginBottom:10, boxSizing:"border-box" }} />
+                                <div style={{ display:"flex", gap:8 }}>
+                                  <button onClick={async () => {
+                                    await updateBooking(selected.id, { status:"cancelled", admin_notes: cancelReason ? `[Cancelled] ${cancelReason}` : (selected.admin_notes || "") });
+                                    setSelected(s => s ? { ...s, status:"cancelled" } : null);
+                                    setCancelConfirm(false); setCancelReason("");
+                                    if (selected.email) fetch("/api/send-status-email", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ status:"cancelled", name:selected.client, email:selected.email, phone:selected.phone, services:selected.service, date:selected.date, time:selected.time, duration:selected.duration, notes:selected.notes }) });
+                                    fire("🚫 Booking cancelled");
+                                  }} style={{ flex:1, fontSize:13, padding:"9px", borderRadius:6, background:"rgba(148,163,184,.2)", border:"1px solid rgba(148,163,184,.4)", color:"#94a3b8", cursor:"pointer", fontFamily:"'Exo 2',sans-serif", fontWeight:700 }}>CONFIRM CANCEL</button>
+                                  <button onClick={() => { setCancelConfirm(false); setCancelReason(""); }} style={{ flex:1, fontSize:13, padding:"9px", borderRadius:6, background:"transparent", border:"1px solid rgba(100,116,139,.3)", color:"#7788aa", cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>BACK</button>
+                                </div>
+                              </div>
+                            )}
+                            {noShowConfirm && (
+                              <div style={{ padding:12, background:"rgba(249,115,22,.06)", border:"1px solid rgba(249,115,22,.25)", borderRadius:8 }}>
+                                <div style={{ fontSize:13, color:"#c8bfa8", marginBottom:10 }}>Mark <strong style={{ color:"#f97316" }}>{selected.client}</strong> as a no-show?</div>
+                                <div style={{ display:"flex", gap:8 }}>
+                                  <button onClick={async () => {
+                                    await updateBooking(selected.id, { status:"no_show" });
+                                    setSelected(s => s ? { ...s, status:"no_show" } : null);
+                                    setNoShowConfirm(false);
+                                    fire("👻 Marked as no-show");
+                                  }} style={{ flex:1, fontSize:13, padding:"9px", borderRadius:6, background:"rgba(249,115,22,.2)", border:"1px solid rgba(249,115,22,.4)", color:"#f97316", cursor:"pointer", fontFamily:"'Exo 2',sans-serif", fontWeight:700 }}>YES, NO-SHOW</button>
+                                  <button onClick={() => setNoShowConfirm(false)} style={{ flex:1, fontSize:13, padding:"9px", borderRadius:6, background:"transparent", border:"1px solid rgba(100,116,139,.3)", color:"#7788aa", cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>BACK</button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         )}
                         {/* Contact dropdown — col 1 only, SEND in col 2 */}
                         <select value={contactAction} onChange={e => setContactAction(e.target.value)} style={{ fontSize:15, padding:"13px 12px", borderRadius:8, background:"transparent", border:"1px solid rgba(201,162,39,.4)", color:"#c9a227", fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, boxShadow:"0 3px 8px rgba(0,0,0,0.35)", cursor:"pointer", textAlign:"center", textAlignLast:"center", width:"100%" }}>

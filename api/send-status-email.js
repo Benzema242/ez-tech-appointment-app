@@ -37,6 +37,12 @@ const STATUS_CONFIG = {
     headlineColor: '#c9a227',
     message: 'This is a friendly reminder about your upcoming appointment with EZ Tech Solutions. See the details below.',
   },
+  cancelled: {
+    subject: 'Your Booking Has Been Cancelled — EZ Tech Solutions',
+    headline: '🚫 Booking Cancelled',
+    headlineColor: '#94a3b8',
+    message: 'Your booking with EZ Tech Solutions has been cancelled. If you have any questions or would like to rebook, please don\'t hesitate to reach out.',
+  },
   deposit_reminder: {
     subject: 'Deposit Required to Secure Your Booking — EZ Tech Solutions',
     headline: '💰 Deposit Reminder',

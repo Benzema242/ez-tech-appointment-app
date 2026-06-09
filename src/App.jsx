@@ -282,8 +282,34 @@ export default function App() {
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "bookings" }, ({ new: row }) => {
         const old = bookingsRef.current.find(b => b.id === row.id);
-        if (old && !old.paid && row.paid) {
-          addNotifRef.current({ icon:"💰", title:`Payment received: ${row.client}`, body:`${row.date} · ${(Array.isArray(row.service) ? row.service[0] : row.service) || ""}`, bookingId: row.id });
+        if (old) {
+          const changes = [];
+          const svcStr = s => (Array.isArray(s) ? s.join(", ") : s) || "—";
+          if (old.status !== row.status)                           changes.push({ field:"Status",        from: old.status,                    to: row.status });
+          if (old.client !== row.client)                           changes.push({ field:"Name",           from: old.client,                    to: row.client });
+          if (old.phone  !== row.phone)                            changes.push({ field:"Phone",          from: old.phone  || "—",             to: row.phone  || "—" });
+          if (old.email  !== row.email)                            changes.push({ field:"Email",          from: old.email  || "—",             to: row.email  || "—" });
+          if (JSON.stringify(old.service) !== JSON.stringify(row.service)) changes.push({ field:"Services", from: svcStr(old.service), to: svcStr(row.service) });
+          if (old.date   !== row.date || old.time !== row.time)   changes.push({ field:"Schedule",       from: `${old.date} ${old.time}`,     to: `${row.date} ${row.time}` });
+          if (old.duration !== row.duration)                       changes.push({ field:"Duration",       from: `${old.duration}h`,            to: `${row.duration}h` });
+          if (old.price  !== row.price)                            changes.push({ field:"Price",          from: old.price != null ? `$${old.price}` : "—", to: row.price != null ? `$${row.price}` : "—" });
+          if (old.paid   !== row.paid)                             changes.push({ field:"Payment",        from: old.paid ? "Paid" : "Unpaid",  to: row.paid ? "Paid" : "Unpaid" });
+          if (old.deposit_paid !== row.deposit_paid)               changes.push({ field:"Deposit Status", from: old.deposit_paid ? "Received" : "Pending", to: row.deposit_paid ? "Received" : "Pending" });
+          if (old.deposit_amount !== row.deposit_amount)           changes.push({ field:"Deposit Amount", from: old.deposit_amount != null ? `$${old.deposit_amount}` : "—", to: row.deposit_amount != null ? `$${row.deposit_amount}` : "—" });
+          if (old.notes  !== row.notes)                            changes.push({ field:"Notes",          from: old.notes  || "—",             to: row.notes  || "—" });
+          if (changes.length > 0) {
+            const summary = changes.map(c => c.field).join(", ");
+            const icon = changes.some(c => c.field === "Status") ? "📋"
+                       : changes.some(c => c.field === "Payment") ? "💰"
+                       : changes.some(c => c.field === "Schedule") ? "📅"
+                       : "✏️";
+            addNotifRef.current({ icon, title:`${row.client} updated`, body:summary, bookingId: row.id });
+            fetch("/api/send-admin-change-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ booking: row, changes }),
+            }).catch(() => {});
+          }
         }
         setBookings(p => p.map(b => b.id === row.id ? row : b));
         setSelected(sel => sel?.id === row.id ? row : sel);

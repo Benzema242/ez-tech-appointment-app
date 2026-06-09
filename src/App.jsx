@@ -202,6 +202,8 @@ export default function App() {
   const [recurringOn, setRecurringOn] = useState(false);
   const [recurInterval, setRecurInterval] = useState(7);
   const [adminConfirmOverlap, setAdminConfirmOverlap] = useState(false);
+  const [statsDateFrom, setStatsDateFrom] = useState(() => { const d = new Date(now.getFullYear(), now.getMonth()-11, 1); return `${d.getFullYear()}-${pad(d.getMonth()+1)}`; });
+  const [statsDateTo,   setStatsDateTo]   = useState(() => `${now.getFullYear()}-${pad(now.getMonth()+1)}`);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [showChangePwModal, setShowChangePwModal] = useState(false);
   const [changePwForm, setChangePwForm] = useState({ old:"", newPw:"", confirm:"" });
@@ -2110,82 +2112,132 @@ export default function App() {
 
           // ── Stats Tab ────────────────────────────────────────────────
           (() => {
-            const last12 = Array.from({length:12}, (_, i) => {
-              const d = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1);
-              const key = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
-              return { key, label: MONTHS[d.getMonth()].slice(0,3), year: d.getFullYear() };
+            // Build dynamic month range from statsDateFrom → statsDateTo
+            const [fromY, fromM] = statsDateFrom.split('-').map(Number);
+            const [toY,   toM]   = statsDateTo.split('-').map(Number);
+            const dynMonths = [];
+            let dy = fromY, dm = fromM;
+            while (dy < toY || (dy === toY && dm <= toM)) {
+              dynMonths.push({ key:`${dy}-${pad(dm)}`, label:MONTHS[dm-1].slice(0,3), year:dy });
+              dm++; if (dm > 12) { dm = 1; dy++; }
+            }
+            const rangeMonths = dynMonths.slice(0, 60); // safety cap
+            const rangeBookings = bookings.filter(b => b.date && b.date >= `${statsDateFrom}-01` && b.date <= `${statsDateTo}-31`);
+
+            const monthStats = rangeMonths.map(({ key, label, year }) => {
+              const mb = rangeBookings.filter(b => b.date.startsWith(key));
+              const rev  = mb.filter(b => b.status === "approved").reduce((s,b) => s+(b.price != null ? b.price : svcList(b.service).reduce((s2,sv) => s2+(sv.price||0),0)), 0);
+              const paid = mb.filter(b => b.paid).reduce((s,b) => s+(b.price != null ? b.price : svcList(b.service).reduce((s2,sv) => s2+(sv.price||0),0)), 0);
+              return { key, label, year, total:mb.length, rev, paid };
             });
-            const monthStats = last12.map(({ key, label, year }) => {
-              const mb = bookings.filter(b => b.date && b.date.startsWith(key));
-              const rev = mb.filter(b => b.status === "approved").reduce((s, b) => s + (b.price != null ? b.price : svcList(b.service).reduce((s2,sv) => s2+(sv.price||0),0)), 0);
-              const paid = mb.filter(b => b.paid).reduce((s, b) => s + (b.price != null ? b.price : svcList(b.service).reduce((s2,sv) => s2+(sv.price||0),0)), 0);
-              return { key, label, year, total: mb.length, rev, paid };
-            });
-            const maxRev = Math.max(...monthStats.map(m => m.rev), 1);
-            const totalRev = monthStats.reduce((s,m) => s+m.rev, 0);
+            const maxRev    = Math.max(...monthStats.map(m => m.rev), 1);
+            const totalRev  = monthStats.reduce((s,m) => s+m.rev, 0);
             const totalPaid = monthStats.reduce((s,m) => s+m.paid, 0);
-            const avgRev = Math.round(totalRev / 12);
-            const bestMonth = monthStats.reduce((a,b) => b.rev > a.rev ? b : a, monthStats[0]);
-            const approvedCount = bookings.filter(b => b.status === "approved").length;
-            const approvalRate = bookings.length ? Math.round((approvedCount / bookings.length) * 100) : 0;
+            const avgRev    = rangeMonths.length ? Math.round(totalRev / rangeMonths.length) : 0;
+            const bestMonth = monthStats.reduce((a,b) => b.rev > a.rev ? b : a, monthStats[0] || { label:"—", rev:0 });
+            const approvedCount = rangeBookings.filter(b => b.status === "approved").length;
+            const approvalRate  = rangeBookings.length ? Math.round((approvedCount / rangeBookings.length) * 100) : 0;
+
+            // Service breakdown
+            const svcBreakdown = SERVICES.map(svc => {
+              const matching = rangeBookings.filter(b => (Array.isArray(b.service) ? b.service : [b.service]).includes(svc.id));
+              const rev = matching.reduce((s,b) => s+(b.price != null ? b.price : svcList(b.service).reduce((s2,sv) => s2+(sv.price||0),0)), 0);
+              return { ...svc, count: matching.length, rev };
+            }).filter(s => s.count > 0).sort((a,b) => b.count - a.count || b.rev - a.rev);
+            const maxSvcCount = Math.max(...svcBreakdown.map(s => s.count), 1);
+
             return (
               <div style={{ flex:1, padding:24, overflowY:"auto" }}>
-                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:4 }}>
-                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:700, color:"#f0c040", letterSpacing:1.5 }}>REVENUE — LAST 12 MONTHS</div>
+
+                {/* Date range controls */}
+                <div style={{ display:"flex", alignItems:"center", gap:12, flexWrap:"wrap", marginBottom:20 }}>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:700, color:"#f0c040", letterSpacing:1.5, flex:1, minWidth:180 }}>REVENUE STATS</div>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+                    <input type="month" value={statsDateFrom} onChange={e => setStatsDateFrom(e.target.value)} style={{ fontSize:13, padding:"7px 10px", borderRadius:6, background:"transparent", border:"1px solid rgba(201,162,39,.3)", color:"#e8e0cc", colorScheme:"dark" }} />
+                    <span style={{ color:"#445566", fontSize:13 }}>to</span>
+                    <input type="month" value={statsDateTo} onChange={e => setStatsDateTo(e.target.value)} style={{ fontSize:13, padding:"7px 10px", borderRadius:6, background:"transparent", border:"1px solid rgba(201,162,39,.3)", color:"#e8e0cc", colorScheme:"dark" }} />
+                    <button className="btn ghost" style={{ fontSize:12, padding:"7px 12px" }} onClick={() => { const d = new Date(now.getFullYear(), now.getMonth()-11, 1); setStatsDateFrom(`${d.getFullYear()}-${pad(d.getMonth()+1)}`); setStatsDateTo(`${now.getFullYear()}-${pad(now.getMonth()+1)}`); }}>Last 12 mo</button>
+                    <button className="btn ghost" style={{ fontSize:12, padding:"7px 12px" }} onClick={() => { setStatsDateFrom(`${now.getFullYear()}-01`); setStatsDateTo(`${now.getFullYear()}-12`); }}>This year</button>
+                  </div>
                   <button className="btn ghost" style={{ fontSize:14, padding:"6px 14px" }} onClick={() => {
                     const rows = monthStats.map(m => `<tr><td>${m.label} ${m.year}</td><td>${m.total}</td><td>$${m.rev}</td><td>$${m.paid}</td></tr>`).join('');
-                    printDoc('Revenue Report — Last 12 Months', `
+                    printDoc(`Revenue Report — ${statsDateFrom} to ${statsDateTo}`, `
                       <div class="stat-grid">
-                        <div class="stat-card"><div class="stat-label">12-MONTH REVENUE</div><div class="stat-val">$${totalRev}</div></div>
+                        <div class="stat-card"><div class="stat-label">TOTAL REVENUE</div><div class="stat-val">$${totalRev}</div></div>
                         <div class="stat-card"><div class="stat-label">TOTAL PAID</div><div class="stat-val">$${totalPaid}</div></div>
                         <div class="stat-card"><div class="stat-label">MONTHLY AVG</div><div class="stat-val">$${avgRev}</div></div>
                         <div class="stat-card"><div class="stat-label">BEST MONTH</div><div class="stat-val">${bestMonth.label} $${bestMonth.rev}</div></div>
                         <div class="stat-card"><div class="stat-label">APPROVAL RATE</div><div class="stat-val">${approvalRate}%</div></div>
-                        <div class="stat-card"><div class="stat-label">TOTAL BOOKINGS</div><div class="stat-val">${bookings.length}</div></div>
+                        <div class="stat-card"><div class="stat-label">TOTAL BOOKINGS</div><div class="stat-val">${rangeBookings.length}</div></div>
                       </div>
                       <table style="margin-top:24px"><tr><th>Month</th><th>Bookings</th><th>Revenue</th><th>Paid</th></tr>${rows}</table>`);
-                  }}>🖨 Print Report</button>
+                  }}>🖨 Print</button>
                 </div>
-                <div style={{ fontSize:16, color:"#7788aa", marginBottom:20 }}>Gold = approved revenue · Green overlay = paid</div>
 
-                {/* Bar chart — horizontally scrollable on mobile */}
+                <div style={{ fontSize:13, color:"#7788aa", marginBottom:16 }}>Gold = approved revenue · Green overlay = paid · {rangeMonths.length} month{rangeMonths.length !== 1 ? "s" : ""} · {rangeBookings.length} booking{rangeBookings.length !== 1 ? "s" : ""}</div>
+
+                {/* Monthly bar chart */}
                 <div className="card" style={{ padding:"20px 16px 10px", marginBottom:20, overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
-                  <div style={{ display:"flex", alignItems:"flex-end", gap:6, height:180, minWidth:660 }}>
+                  <div style={{ display:"flex", alignItems:"flex-end", gap:6, height:180, minWidth: Math.max(rangeMonths.length * 50, 300) }}>
                     {monthStats.map(m => (
                       <div key={m.key} style={{ flex:1, minWidth:44, display:"flex", flexDirection:"column", alignItems:"center", gap:3, height:"100%" }}>
                         <div style={{ flex:1, width:"100%", display:"flex", flexDirection:"column", justifyContent:"flex-end" }}>
-                          {m.rev > 0 && (
-                            <div style={{ fontSize:13, color:"#e8e0cc", textAlign:"center", marginBottom:4, fontFamily:"'Orbitron',sans-serif" }}>${m.rev >= 1000 ? `${(m.rev/1000).toFixed(1)}k` : m.rev}</div>
-                          )}
+                          {m.rev > 0 && <div style={{ fontSize:12, color:"#e8e0cc", textAlign:"center", marginBottom:4, fontFamily:"'Orbitron',sans-serif" }}>${m.rev >= 1000 ? `${(m.rev/1000).toFixed(1)}k` : m.rev}</div>}
                           <div style={{ width:"100%", height:`${Math.max((m.rev/maxRev)*130, m.rev > 0 ? 4 : 0)}px`, background:"rgba(201,162,39,.35)", borderRadius:"2px 2px 0 0", position:"relative", overflow:"hidden", transition:"height .3s" }}>
-                            {m.paid > 0 && (
-                              <div style={{ position:"absolute", bottom:0, width:"100%", height:`${(m.paid/m.rev)*100}%`, background:"rgba(52,211,153,.55)", borderRadius:"2px 2px 0 0" }} />
-                            )}
+                            {m.paid > 0 && <div style={{ position:"absolute", bottom:0, width:"100%", height:`${(m.paid/m.rev)*100}%`, background:"rgba(52,211,153,.55)", borderRadius:"2px 2px 0 0" }} />}
                           </div>
                         </div>
-                        <div style={{ fontSize:13, color:"#ffffff", fontFamily:"'Orbitron',sans-serif", textAlign:"center", letterSpacing:.3, marginTop:2 }}>{m.label}</div>
-                        {m.total > 0 && <div style={{ fontSize:13, color:"#c9a227", textAlign:"center", fontWeight:700 }}>{m.total}</div>}
+                        <div style={{ fontSize:12, color:"#fff", fontFamily:"'Orbitron',sans-serif", textAlign:"center", marginTop:2 }}>{m.label}</div>
+                        <div style={{ fontSize:11, color:"#556677", textAlign:"center" }}>{m.year}</div>
+                        {m.total > 0 && <div style={{ fontSize:12, color:"#c9a227", textAlign:"center", fontWeight:700 }}>{m.total}</div>}
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Summary cards */}
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))", gap:12 }}>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))", gap:12, marginBottom:28 }}>
                   {[
-                    { l:"12-MONTH REVENUE", v:`$${totalRev}`, c:"#c9a227" },
-                    { l:"TOTAL PAID",       v:`$${totalPaid}`, c:"#34d399" },
-                    { l:"MONTHLY AVG",      v:`$${avgRev}`, c:"#a78bfa" },
-                    { l:"BEST MONTH",       v:`${bestMonth.label} $${bestMonth.rev}`, c:"#f0c040" },
-                    { l:"APPROVAL RATE",    v:`${approvalRate}%`, c:"#22c55e" },
-                    { l:"TOTAL BOOKINGS",   v:bookings.length, c:"#c9a227" },
+                    { l:"TOTAL REVENUE",  v:`$${totalRev}`,  c:"#c9a227" },
+                    { l:"TOTAL PAID",     v:`$${totalPaid}`, c:"#34d399" },
+                    { l:"MONTHLY AVG",    v:`$${avgRev}`,    c:"#a78bfa" },
+                    { l:"BEST MONTH",     v:`${bestMonth.label} $${bestMonth.rev}`, c:"#f0c040" },
+                    { l:"APPROVAL RATE",  v:`${approvalRate}%`, c:"#22c55e" },
+                    { l:"BOOKINGS",       v:rangeBookings.length, c:"#c9a227" },
                   ].map(s => (
                     <div key={s.l} className="card" style={{ padding:"16px 18px" }}>
-                      <div style={{ fontSize:13, letterSpacing:1.5, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>{s.l}</div>
+                      <div style={{ fontSize:11, letterSpacing:1.5, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>{s.l}</div>
                       <div style={{ fontSize:24, fontWeight:900, color:s.c, fontFamily:"'Orbitron',sans-serif" }}>{s.v}</div>
                     </div>
                   ))}
                 </div>
+
+                {/* Service breakdown */}
+                {svcBreakdown.length > 0 && (
+                  <div>
+                    <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:14, fontWeight:700, color:"#f0c040", letterSpacing:1.5, marginBottom:14 }}>SERVICE BREAKDOWN</div>
+                    <div className="card" style={{ padding:"16px 20px", display:"flex", flexDirection:"column", gap:12 }}>
+                      {svcBreakdown.map(s => (
+                        <div key={s.id}>
+                          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:5 }}>
+                            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                              <span style={{ fontSize:16 }}>{s.icon}</span>
+                              <span style={{ fontSize:13, color:"#e8e0cc", fontWeight:600 }}>{s.label}</span>
+                            </div>
+                            <div style={{ display:"flex", gap:16, fontSize:12 }}>
+                              <span style={{ color:"#c9a227", fontFamily:"'Orbitron',sans-serif", fontWeight:700 }}>{s.count} booking{s.count !== 1 ? "s" : ""}</span>
+                              {s.rev > 0 && <span style={{ color:"#34d399" }}>${s.rev}</span>}
+                            </div>
+                          </div>
+                          <div style={{ height:8, borderRadius:4, background:"rgba(255,255,255,.06)", overflow:"hidden" }}>
+                            <div style={{ height:"100%", width:`${(s.count/maxSvcCount)*100}%`, background:"linear-gradient(90deg,rgba(201,162,39,.6),rgba(201,162,39,.3))", borderRadius:4, transition:"width .4s" }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
               </div>
             );
           })()

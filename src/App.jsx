@@ -195,6 +195,7 @@ export default function App() {
   const [adminNoteSending, setAdminNoteSending] = useState(false);
   const [editingDeposit, setEditingDeposit] = useState(false);
   const [depositForm, setDepositForm] = useState({ amount:"", date:"", method:"Cash", note:"" });
+  const [depositReminderConfirm, setDepositReminderConfirm] = useState(false);
   const [contactAction, setContactAction] = useState("confirmation");
   const [editMode, setEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -505,6 +506,18 @@ export default function App() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status:"reminder", name:booking.client, email:booking.email, phone:booking.phone, services:booking.service, date:booking.date, time:booking.time, duration:booking.duration, notes:booking.notes }),
     }).then(() => fire("📧 Reminder sent!")).catch(() => fire("❌ Failed to send reminder"));
+  };
+
+  const sendDepositReminder = (booking) => {
+    if (!booking?.email) return;
+    const svcs = svcList(booking.service);
+    const totalPrice = booking.price != null ? booking.price : svcs.reduce((s,sv) => s+(sv.price||0),0);
+    const depositAmount = totalPrice > 0 ? Math.round(totalPrice * 0.5) : null;
+    fetch("/api/send-status-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status:"deposit_reminder", name:booking.client, email:booking.email, phone:booking.phone, services:booking.service, date:booking.date, time:booking.time, duration:booking.duration, notes:booking.notes, totalPrice, depositAmount }),
+    }).then(() => fire("💰 Deposit reminder sent!")).catch(() => fire("❌ Failed to send deposit reminder"));
   };
 
   const sendPaymentReminder = (booking) => {
@@ -1008,7 +1021,7 @@ export default function App() {
                   <div
                     key={b.id}
                     className={"row " + (!editMode && selected?.id === b.id ? "active" : "") + (editMode && selectedIds.has(b.id) ? " active" : "")}
-                    onClick={() => editMode ? toggleSelectId(b.id) : (() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); })()}
+                    onClick={() => editMode ? toggleSelectId(b.id) : (() => { setSelected(b); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); setDepositReminderConfirm(false); })()}
                   >
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                       {editMode ? (
@@ -1087,7 +1100,7 @@ export default function App() {
 
                     {/* Mobile back button */}
                     <div className="mobile-back" style={{ marginBottom:14, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:14, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
+                      <button onClick={() => { setSelected(null); setDeleteConfirm(false); setEditingNotes(false); setEditingPrice(false); setEditingDetails(false); setEditingAdminNote(false); setAdminNoteInput(""); setEditingDeposit(false); setDepositReminderConfirm(false); }} style={{ background:"none", border:"none", color:"#c9a227", fontSize:14, cursor:"pointer", fontFamily:"'Exo 2',sans-serif", display:"flex", alignItems:"center", gap:6 }}>
                         ← Back to list
                       </button>
                       <button onClick={() => {
@@ -1306,11 +1319,27 @@ export default function App() {
                               <div style={{ marginTop:4, padding:"5px 10px", background:"rgba(52,211,153,.12)", border:"1px solid rgba(52,211,153,.3)", borderRadius:4, fontSize:12, color:"#34d399", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, display:"inline-block", alignSelf:"flex-start" }}>✓ DEPOSIT RECEIVED</div>
                             </div>
                           ) : (
-                            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                              <div style={{ fontSize:14, color:"#445566", fontStyle:"italic" }}>
-                                {requiredDeposit ? `50% deposit required: $${requiredDeposit}` : "No deposit recorded"}
+                            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                                <div style={{ fontSize:14, color:"#445566", fontStyle:"italic" }}>
+                                  {requiredDeposit ? `50% deposit required: $${requiredDeposit}` : "No deposit recorded"}
+                                </div>
+                                <span style={{ fontSize:12, color:"#ef4444", fontFamily:"'Orbitron',sans-serif", letterSpacing:1 }}>PENDING</span>
                               </div>
-                              <span style={{ fontSize:12, color:"#ef4444", fontFamily:"'Orbitron',sans-serif", letterSpacing:1 }}>PENDING</span>
+                              {selected.email && !depositReminderConfirm && (
+                                <button onClick={() => setDepositReminderConfirm(true)} style={{ fontSize:13, padding:"9px 12px", borderRadius:6, background:"rgba(52,211,153,.1)", border:"1px solid rgba(52,211,153,.3)", color:"#34d399", cursor:"pointer", fontFamily:"'Exo 2',sans-serif", fontWeight:700, letterSpacing:1 }}>
+                                  💰 SEND DEPOSIT REMINDER
+                                </button>
+                              )}
+                              {depositReminderConfirm && (
+                                <div style={{ padding:10, background:"rgba(52,211,153,.06)", border:"1px solid rgba(52,211,153,.25)", borderRadius:6 }}>
+                                  <div style={{ fontSize:13, color:"#c8bfa8", marginBottom:8 }}>Send deposit reminder to <strong style={{ color:"#34d399" }}>{selected.email}</strong>?</div>
+                                  <div style={{ display:"flex", gap:8 }}>
+                                    <button onClick={() => { sendDepositReminder(selected); setDepositReminderConfirm(false); }} style={{ flex:1, fontSize:13, padding:"8px", borderRadius:6, background:"rgba(52,211,153,.2)", border:"1px solid rgba(52,211,153,.4)", color:"#34d399", cursor:"pointer", fontFamily:"'Exo 2',sans-serif", fontWeight:700 }}>YES, SEND</button>
+                                    <button onClick={() => setDepositReminderConfirm(false)} style={{ flex:1, fontSize:13, padding:"8px", borderRadius:6, background:"transparent", border:"1px solid rgba(100,116,139,.3)", color:"#7788aa", cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>CANCEL</button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>

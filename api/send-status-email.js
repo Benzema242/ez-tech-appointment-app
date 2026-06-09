@@ -37,6 +37,12 @@ const STATUS_CONFIG = {
     headlineColor: '#c9a227',
     message: 'This is a friendly reminder about your upcoming appointment with EZ Tech Solutions. See the details below.',
   },
+  deposit_reminder: {
+    subject: 'Deposit Required to Secure Your Booking — EZ Tech Solutions',
+    headline: '💰 Deposit Reminder',
+    headlineColor: '#34d399',
+    message: 'Thank you for choosing EZ Tech Solutions! Your booking is pending and a deposit is required to confirm and secure your appointment. Please see your estimated cost below and make your deposit at your earliest convenience.',
+  },
   payment_due: {
     subject: 'Payment Overdue — Action Required | EZ Tech Solutions',
     headline: '💳 Payment Overdue',
@@ -106,6 +112,17 @@ export default async function handler(req, res) {
               style="display:inline-block;padding:10px 20px;background:#c9a227;color:#050d1a;text-decoration:none;border-radius:4px;font-size:12px;font-weight:700;margin-right:8px;">
               📅 Google Calendar
             </a>
+          </div>` : ''}
+          ${status === 'deposit_reminder' ? `
+          <div style="margin-top:20px;padding:18px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);border-radius:6px;">
+            <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#34d399;">Estimated Cost</p>
+            <p style="margin:0 0 4px;font-size:22px;font-weight:800;color:#e8e0cc;">${req.body.totalPrice ? '$' + req.body.totalPrice : '—'}</p>
+            <p style="margin:0 0 16px;font-size:13px;color:#7788aa;">50% deposit required: <strong style="color:#34d399;">${req.body.depositAmount ? '$' + req.body.depositAmount : '—'}</strong></p>
+            <p style="margin:0 0 12px;font-size:13px;color:#c8bfa8;">To confirm your appointment, please make your deposit by contacting us directly:</p>
+            <a href="tel:+12428050777" style="display:inline-block;padding:12px 28px;background:#34d399;color:#050d1a;text-decoration:none;border-radius:4px;font-size:14px;font-weight:800;letter-spacing:1px;">
+              📞 MAKE DEPOSIT — CALL US
+            </a>
+            <p style="margin:12px 0 0;font-size:12px;color:#7788aa;">Or reply to this email to arrange your deposit payment</p>
           </div>` : ''}
           ${status === 'payment_due' ? `
           <div style="margin-top:24px;padding:20px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.4);border-radius:6px;text-align:center;">

@@ -922,6 +922,7 @@ export default function App() {
           { l:"PENDING",  v:pendingCount,                                             c:"#f59e0b" },
           { l:"APPROVED", v:bookings.filter(b=>b.status==="approved").length,         c:"#22c55e" },
           { l:"DONE",     v:bookings.filter(b=>b.status==="completed").length,        c:"#06b6d4" },
+          { l:"UNPAID",   v:bookings.filter(b=>b.status==="completed" && !b.paid).length, c:"#f87171" },
           { l:"REVENUE",  v:`$${revenue}`, sub: paidRevenue > 0 ? `$${paidRevenue} paid` : null, c:"#34d399" },
         ].map(s => (
           <div key={s.l} className="card stat-card" style={{ padding:"12px 18px", flex:"1 1 100px" }}>
@@ -1046,6 +1047,11 @@ export default function App() {
                           style={{ padding:"3px 8px", borderRadius:3, fontSize:11, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:st.color, background:st.bg, border:`1px solid ${st.border}`, whiteSpace:"nowrap", cursor: editMode ? "default" : "pointer" }}>
                           {st.label}
                         </button>
+                        {b.status === "completed" && !b.paid && (
+                          <span style={{ padding:"3px 7px", borderRadius:3, fontSize:10, fontFamily:"'Orbitron',sans-serif", fontWeight:700, letterSpacing:1, color:"#f87171", background:"rgba(239,68,68,.12)", border:"1px solid rgba(239,68,68,.35)", whiteSpace:"nowrap" }}>
+                            💸 UNPAID
+                          </span>
+                        )}
                         {!editMode && b.phone && (
                           <a href={`https://wa.me/${waNum(b.phone)}?text=${waBookingMsg(b)}`} target="_blank" rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}

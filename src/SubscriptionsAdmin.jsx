@@ -137,6 +137,12 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const [bulkDelConfirm, setBulkDelConfirm] = useState(false);
   const [bulkReminding, setBulkReminding]   = useState(false);
 
+  const addSubNotifRef = useRef(null);
+  const [subNotifs, setSubNotifs] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("ez_sub_notifs") || "[]"); } catch { return []; }
+  });
+  const [subNotifOpen, setSubNotifOpen] = useState(false);
+
   useEffect(() => {
     if (!authed) return;
     supabase
@@ -176,10 +182,14 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       .channel("subscriptions-realtime")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "subscriptions" }, ({ new: row }) => {
         setSubs(p => p.some(s => s.id === row.id) ? p : [...p, row].sort((a, b) => new Date(a.expiration) - new Date(b.expiration)));
+        addSubNotifRef.current?.({ icon:"📱", title:`New: ${row.name}`, body:`${row.plan || "Plan"} · Expires ${fmtDate(row.expiration)}`, subId:row.id });
       })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "subscriptions" }, ({ new: row }) => {
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "subscriptions" }, ({ new: row, old }) => {
         setSubs(p => p.map(s => s.id === row.id ? row : s));
         setSelected(sel => sel?.id === row.id ? row : sel);
+        if (row.status === "expired" && old?.status !== "expired") {
+          addSubNotifRef.current?.({ icon:"⛔", title:`Expired: ${row.name}`, body:`${row.plan || "Plan"} subscription expired`, subId:row.id });
+        }
       })
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "subscriptions" }, ({ old: row }) => {
         setSubs(p => p.filter(s => s.id !== row.id));
@@ -189,7 +199,44 @@ export default function SubscriptionsAdmin({ onGoClient }) {
     return () => supabase.removeChannel(channel);
   }, [authed]);
 
+  // Seed expiry notifications once per day when data first loads
+  useEffect(() => {
+    if (loading || subs.length === 0) return;
+    const todayKey = new Date().toISOString().slice(0, 10);
+    if (localStorage.getItem("ez_sub_notifs_seeded") === todayKey) return;
+    localStorage.setItem("ez_sub_notifs_seeded", todayKey);
+    const expiring = subs.filter(s => {
+      const d = daysUntil(s.expiration);
+      return s.status === "active" && d !== null && d >= 0 && d <= 7;
+    });
+    expiring.forEach(s => {
+      const d = daysUntil(s.expiration);
+      const icon = d <= 2 ? "🚨" : "⚠️";
+      const dayText = d === 0 ? "expires TODAY" : d === 1 ? "expires tomorrow" : `expires in ${d} days`;
+      addSubNotifRef.current?.({ icon, title:s.name, body:`${s.plan} — ${dayText}`, subId:s.id });
+    });
+  }, [loading]);
+
+  // Close notification dropdown on click outside
+  useEffect(() => {
+    if (!subNotifOpen) return;
+    const close = e => { if (!e.target.closest("[data-sub-notif-bell]")) setSubNotifOpen(false); };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [subNotifOpen]);
+
   const fire = msg => { setToast(msg); setTimeout(() => setToast(null), 2500); };
+
+  const addSubNotif = notif => {
+    const n = { id:`${Date.now()}-${Math.random().toString(36).slice(2)}`, timestamp:new Date().toISOString(), read:false, ...notif };
+    setSubNotifs(prev => {
+      const updated = [n, ...prev].slice(0, 50);
+      try { localStorage.setItem("ez_sub_notifs", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+  const markSubNotifsRead = () => setSubNotifs(p => { const u = p.map(n => ({...n, read:true})); try { localStorage.setItem("ez_sub_notifs", JSON.stringify(u)); } catch {} return u; });
+  const clearSubNotifs    = () => { setSubNotifs([]); try { localStorage.removeItem("ez_sub_notifs"); } catch {} };
 
   const tryLogin = async () => {
     if (pwLoading) return;
@@ -439,6 +486,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
     setRenewing(false);
     setShowRenewModal(false);
     fire("🔄 Renewed!" + (selected.email ? " · Confirmation email sent" : ""));
+    addSubNotif({ icon:"🔄", title:`${selected.name} renewed`, body:`${selected.plan} · ${patch.duration_months}mo · New expiry: ${fmtDate(newExpiry)}`, subId:selected.id });
   };
 
   // ── Bulk actions ──────────────────────────────────────────────────────────
@@ -596,6 +644,9 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   };
 
   // ── Computed ──────────────────────────────────────────────────────────────
+  addSubNotifRef.current = addSubNotif;
+  const subUnreadCount = subNotifs.filter(n => !n.read).length;
+
   const now           = new Date();
   const activeCount   = subs.filter(s => s.status === "active" && daysUntil(s.expiration) > 0).length;
   const expiringCount = subs.filter(s => s.status === "active" && daysUntil(s.expiration) > 0 && daysUntil(s.expiration) <= 7).length;
@@ -776,7 +827,64 @@ export default function SubscriptionsAdmin({ onGoClient }) {
         <div style={{ position:"absolute", left:0, right:0, textAlign:"center", pointerEvents:"none" }}>
           <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:20, fontWeight:900, color:"#f0c040", letterSpacing:2 }}>SUBSCRIPTION MANAGER</div>
         </div>
-        <div className="admin-hdr-btns" style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+        <div className="admin-hdr-btns" style={{ display:"flex", gap:8, flexWrap:"wrap", alignItems:"center" }}>
+
+          {/* Notification Bell */}
+          <div style={{ position:"relative" }} data-sub-notif-bell>
+            <button
+              onClick={() => { setSubNotifOpen(p => !p); if (!subNotifOpen) markSubNotifsRead(); }}
+              style={{ position:"relative", background:"none", border:"1px solid rgba(201,162,39,.3)", borderRadius:8, padding:"8px 12px", cursor:"pointer", fontSize:20, lineHeight:1, color:"#c9a227" }}>
+              🔔
+              {subUnreadCount > 0 && (
+                <span style={{ position:"absolute", top:-6, right:-6, background:"#ef4444", color:"#fff", fontSize:10, fontWeight:900, fontFamily:"'Orbitron',sans-serif", borderRadius:"50%", minWidth:18, height:18, display:"flex", alignItems:"center", justifyContent:"center", padding:"0 4px", boxShadow:"0 2px 6px rgba(0,0,0,.5)" }}>
+                  {subUnreadCount > 99 ? "99+" : subUnreadCount}
+                </span>
+              )}
+            </button>
+
+            {subNotifOpen && (
+              <div style={{ position:"absolute", top:"calc(100% + 8px)", right:0, width:340, maxHeight:480, background:"#0d1f35", border:"1px solid rgba(201,162,39,.35)", borderRadius:10, boxShadow:"0 12px 40px rgba(0,0,0,.7)", zIndex:9000, display:"flex", flexDirection:"column", overflow:"hidden" }}>
+                <div style={{ padding:"12px 14px", borderBottom:"1px solid rgba(201,162,39,.2)", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:12, letterSpacing:1.5, color:"#c9a227" }}>SUBSCRIPTION ALERTS</div>
+                  <div style={{ display:"flex", gap:8 }}>
+                    {subNotifs.length > 0 && <button onClick={clearSubNotifs} style={{ background:"none", border:"none", fontSize:11, color:"#445566", cursor:"pointer", fontFamily:"'Exo 2',sans-serif" }}>Clear all</button>}
+                    <button onClick={() => setSubNotifOpen(false)} style={{ background:"none", border:"none", color:"#445566", fontSize:16, cursor:"pointer", lineHeight:1 }}>✕</button>
+                  </div>
+                </div>
+                <div style={{ overflowY:"auto", flex:1 }}>
+                  {subNotifs.length === 0 ? (
+                    <div style={{ padding:32, textAlign:"center", color:"#445566", fontSize:13, fontStyle:"italic" }}>No subscription alerts</div>
+                  ) : subNotifs.map(n => {
+                    const ago = (() => {
+                      const diff = Date.now() - new Date(n.timestamp).getTime();
+                      const m = Math.floor(diff / 60000);
+                      if (m < 1) return "just now";
+                      if (m < 60) return `${m}m ago`;
+                      const h = Math.floor(m / 60);
+                      if (h < 24) return `${h}h ago`;
+                      return `${Math.floor(h / 24)}d ago`;
+                    })();
+                    return (
+                      <button key={n.id}
+                        onClick={() => {
+                          if (n.subId) { const s = subs.find(x => x.id === n.subId); if (s) { setSelected(s); setTab("list"); setDeleteConfirm(false); setEditNotes(false); setReminderConfirm(false); setShowPw(false); } }
+                          setSubNotifOpen(false);
+                        }}
+                        style={{ display:"flex", gap:12, padding:"12px 14px", width:"100%", background:n.read?"none":"rgba(201,162,39,.04)", border:"none", borderBottom:"1px solid rgba(255,255,255,.05)", cursor:"pointer", textAlign:"left", alignItems:"flex-start" }}>
+                        <span style={{ fontSize:20, flexShrink:0, lineHeight:1.2 }}>{n.icon}</span>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontSize:13, fontWeight:700, color:n.read?"#7788aa":"#e8e0cc", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{n.title}</div>
+                          <div style={{ fontSize:12, color:"#556677", marginTop:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{n.body}</div>
+                        </div>
+                        <div style={{ fontSize:11, color:"#445566", flexShrink:0, paddingTop:2 }}>{ago}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
           <button className="btn ghost" style={{ padding:"8px 12px", fontSize:12 }} onClick={() => { window.location.hash = "#/admin"; }}>📋 BOOKINGS</button>
           <button className="btn ghost" onClick={onGoClient}>👤 CLIENT VIEW</button>
           <button className="btn danger" style={{ padding:"10px 14px", fontSize:12 }} onClick={doLogout}>LOGOUT</button>

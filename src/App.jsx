@@ -237,6 +237,9 @@ export default function App() {
   const [blackoutStartTime, setBlackoutStartTime] = useState("");
   const [blackoutEndTime, setBlackoutEndTime] = useState("");
   const [blackoutSaving, setBlackoutSaving] = useState(false);
+  const [blackoutMode, setBlackoutMode] = useState("single");
+  const [blackoutRangeTo, setBlackoutRangeTo] = useState("");
+  const [blackoutWeekday, setBlackoutWeekday] = useState("5");
   const [editingBlackoutId, setEditingBlackoutId] = useState(null);
   const [editBlackoutDate, setEditBlackoutDate] = useState("");
   const [editBlackoutStartTime, setEditBlackoutStartTime] = useState("");
@@ -1741,6 +1744,11 @@ export default function App() {
                           else if (contactAction === "whatsapp") window.open(`https://wa.me/${waPhone(selected.phone)}?text=${encodeURIComponent(`Hi ${selected.client}, this is EZ Tech Solutions. We're reaching out about your ${Array.isArray(selected.service) ? selected.service[0] : selected.service} appointment on ${selected.date} at ${selected.time}. Please let us know if you have any questions.`)}`, "_blank");
                         }}>SEND</button>
                         <button className="btn ghost" style={{ ...ab, gridColumn:"1/-1" }} onClick={() => downloadBookingIcs(selected)}>📅 DOWNLOAD .ICS</button>
+                        <button className="btn ghost" style={{ ...ab, gridColumn:"1/-1", color:"#a78bfa", border:"1px solid rgba(167,139,250,.3)" }} onClick={() => {
+                          setAdminForm({ name: selected.client, phone: selected.phone || "", email: selected.email || "", services: Array.isArray(selected.service) ? selected.service : [selected.service].filter(Boolean), date:"", time:"", source: selected.source || "call", status:"pending", duration: selected.duration || 1, notes: selected.notes || "", paid: false });
+                          setClientSuggestions([]);
+                          setShowAddModal(true);
+                        }}>📋 DUPLICATE BOOKING</button>
                         <div style={{ gridColumn:"1/-1" }}>
                           {deleteConfirm ? (
                             <div>
@@ -1969,58 +1977,149 @@ export default function App() {
             {/* Add form */}
             <div style={{ padding:16, background:"rgba(239,68,68,.05)", border:"1px solid rgba(239,68,68,.2)", borderRadius:8, marginBottom:20 }}>
               <div style={{ fontSize:12, color:"#f87171", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:12 }}>ADD BLOCKED DATE</div>
+
+              {/* Mode tabs */}
+              <div style={{ display:"flex", gap:6, marginBottom:14 }}>
+                {[["single","Single Date"],["range","Date Range"],["weekly","Weekly Repeat"]].map(([m,l]) => (
+                  <button key={m} onClick={() => { setBlackoutMode(m); setBlackoutInput(""); setBlackoutRangeTo(""); setBlackoutReason(""); setBlackoutStartTime(""); setBlackoutEndTime(""); }}
+                    style={{ flex:1, padding:"7px 4px", fontSize:11, borderRadius:6, fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, cursor:"pointer", background: blackoutMode===m ? "rgba(239,68,68,.2)" : "transparent", border: blackoutMode===m ? "1px solid rgba(239,68,68,.5)" : "1px solid rgba(239,68,68,.15)", color: blackoutMode===m ? "#f87171" : "#556677" }}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+
               <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-                <div>
-                  <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>DATE *</div>
-                  <input type="date" value={blackoutInput} onChange={e => setBlackoutInput(e.target.value)} style={{ fontSize:15, padding:"10px", colorScheme:"dark", width:"100%", borderRadius:6, borderColor:"rgba(239,68,68,.3)" }} />
-                </div>
-                <div style={{ display:"flex", gap:10 }}>
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>START TIME</div>
-                    <select value={blackoutStartTime} onChange={e => { setBlackoutStartTime(e.target.value); if (!e.target.value) setBlackoutEndTime(""); }} style={{ fontSize:14, padding:"10px", width:"100%", borderRadius:6, background:"#0d1f33", color: blackoutStartTime ? "#e8e0cc" : "#7788aa", border:"1px solid rgba(239,68,68,.3)" }}>
-                      <option value="">All day</option>
-                      {CLIENT_TIMES.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                {/* Single date */}
+                {blackoutMode === "single" && (
+                  <div>
+                    <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>DATE *</div>
+                    <input type="date" value={blackoutInput} onChange={e => setBlackoutInput(e.target.value)} style={{ fontSize:15, padding:"10px", colorScheme:"dark", width:"100%", borderRadius:6, borderColor:"rgba(239,68,68,.3)" }} />
                   </div>
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>END TIME</div>
-                    <select value={blackoutEndTime} onChange={e => setBlackoutEndTime(e.target.value)} disabled={!blackoutStartTime} style={{ fontSize:14, padding:"10px", width:"100%", borderRadius:6, background:"#0d1f33", color: blackoutEndTime ? "#e8e0cc" : "#7788aa", border:"1px solid rgba(239,68,68,.3)", opacity: blackoutStartTime ? 1 : 0.4 }}>
-                      <option value="">Select end</option>
-                      {CLIENT_TIMES.filter(t => timeToHour(t) > timeToHour(blackoutStartTime || "9:00 AM")).map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                )}
+
+                {/* Date range */}
+                {blackoutMode === "range" && (
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                    <div>
+                      <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>FROM *</div>
+                      <input type="date" value={blackoutInput} onChange={e => setBlackoutInput(e.target.value)} style={{ fontSize:14, padding:"10px", colorScheme:"dark", width:"100%", borderRadius:6, borderColor:"rgba(239,68,68,.3)" }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>TO *</div>
+                      <input type="date" value={blackoutRangeTo} onChange={e => setBlackoutRangeTo(e.target.value)} min={blackoutInput} style={{ fontSize:14, padding:"10px", colorScheme:"dark", width:"100%", borderRadius:6, borderColor:"rgba(239,68,68,.3)" }} />
+                    </div>
                   </div>
-                </div>
-                {blackoutStartTime && !blackoutEndTime && (
+                )}
+
+                {/* Weekly repeat */}
+                {blackoutMode === "weekly" && (
+                  <>
+                    <div>
+                      <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>DAY OF WEEK *</div>
+                      <select value={blackoutWeekday} onChange={e => setBlackoutWeekday(e.target.value)} style={{ fontSize:14, padding:"10px", width:"100%", borderRadius:6, background:"#0d1f33", color:"#e8e0cc", border:"1px solid rgba(239,68,68,.3)" }}>
+                        {["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"].map((d,i) => <option key={i} value={i}>{d}</option>)}
+                      </select>
+                    </div>
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                      <div>
+                        <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>FROM *</div>
+                        <input type="date" value={blackoutInput} onChange={e => setBlackoutInput(e.target.value)} style={{ fontSize:14, padding:"10px", colorScheme:"dark", width:"100%", borderRadius:6, borderColor:"rgba(239,68,68,.3)" }} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>UNTIL *</div>
+                        <input type="date" value={blackoutRangeTo} onChange={e => setBlackoutRangeTo(e.target.value)} min={blackoutInput} style={{ fontSize:14, padding:"10px", colorScheme:"dark", width:"100%", borderRadius:6, borderColor:"rgba(239,68,68,.3)" }} />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Time range (single mode only) */}
+                {blackoutMode === "single" && (
+                  <div style={{ display:"flex", gap:10 }}>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>START TIME</div>
+                      <select value={blackoutStartTime} onChange={e => { setBlackoutStartTime(e.target.value); if (!e.target.value) setBlackoutEndTime(""); }} style={{ fontSize:14, padding:"10px", width:"100%", borderRadius:6, background:"#0d1f33", color: blackoutStartTime ? "#e8e0cc" : "#7788aa", border:"1px solid rgba(239,68,68,.3)" }}>
+                        <option value="">All day</option>
+                        {CLIENT_TIMES.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </div>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>END TIME</div>
+                      <select value={blackoutEndTime} onChange={e => setBlackoutEndTime(e.target.value)} disabled={!blackoutStartTime} style={{ fontSize:14, padding:"10px", width:"100%", borderRadius:6, background:"#0d1f33", color: blackoutEndTime ? "#e8e0cc" : "#7788aa", border:"1px solid rgba(239,68,68,.3)", opacity: blackoutStartTime ? 1 : 0.4 }}>
+                        <option value="">Select end</option>
+                        {CLIENT_TIMES.filter(t => timeToHour(t) > timeToHour(blackoutStartTime || "9:00 AM")).map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                )}
+                {blackoutMode === "single" && blackoutStartTime && !blackoutEndTime && (
                   <div style={{ fontSize:12, color:"#f87171", opacity:0.8 }}>Select an end time to block a time range, or clear start time to block the whole day.</div>
                 )}
+
                 <div>
                   <div style={{ fontSize:12, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", letterSpacing:1, marginBottom:5 }}>REASON (OPTIONAL)</div>
                   <input type="text" value={blackoutReason} onChange={e => setBlackoutReason(e.target.value)} placeholder="e.g. Travel, Public holiday, Team event…" style={{ fontSize:15, padding:"10px", width:"100%", borderRadius:6 }} />
                 </div>
+
                 {(() => {
-                  const alreadyBlocked = blackoutInput && blackoutDates.some(b =>
+                  const alreadyBlocked = blackoutMode === "single" && blackoutInput && blackoutDates.some(b =>
                     b.date === blackoutInput &&
                     (b.start_time || null) === (blackoutStartTime || null) &&
                     (b.end_time || null) === (blackoutEndTime || null)
                   );
-                  const isValid = blackoutInput && (!blackoutStartTime || blackoutEndTime);
+                  const isValid = blackoutMode === "single"
+                    ? (blackoutInput && (!blackoutStartTime || blackoutEndTime))
+                    : (blackoutMode === "range" ? (blackoutInput && blackoutRangeTo && blackoutRangeTo >= blackoutInput)
+                    : (blackoutInput && blackoutRangeTo && blackoutRangeTo >= blackoutInput));
+
+                  // Preview count for range/weekly
+                  let previewCount = 0;
+                  if (blackoutMode === "range" && blackoutInput && blackoutRangeTo) {
+                    let d = new Date(blackoutInput + "T00:00:00"); const end = new Date(blackoutRangeTo + "T00:00:00");
+                    while (d <= end) { previewCount++; d.setDate(d.getDate()+1); }
+                  }
+                  if (blackoutMode === "weekly" && blackoutInput && blackoutRangeTo) {
+                    let d = new Date(blackoutInput + "T00:00:00"); const end = new Date(blackoutRangeTo + "T00:00:00"); const wd = parseInt(blackoutWeekday);
+                    while (d <= end) { if (d.getDay() === wd) previewCount++; d.setDate(d.getDate()+1); }
+                  }
+
                   return (
-                    <button
-                      className="btn"
-                      disabled={!isValid || blackoutSaving || alreadyBlocked}
-                      style={{ padding:"11px", fontSize:13, borderRadius:6, background: isValid ? "rgba(239,68,68,.15)" : "transparent", border:"1px solid rgba(239,68,68,.35)", color: isValid ? "#f87171" : "#556677" }}
-                      onClick={async () => {
-                        setBlackoutSaving(true);
-                        const { error } = await supabase.from("blackout_dates").insert({
-                          date: blackoutInput,
-                          reason: blackoutReason.trim() || null,
-                          start_time: blackoutStartTime || null,
-                          end_time: blackoutEndTime || null,
-                        });
-                        if (error) { fire("❌ Error blocking date"); } else { setBlackoutInput(""); setBlackoutReason(""); setBlackoutStartTime(""); setBlackoutEndTime(""); fire("⛔ Date blocked"); }
-                        setBlackoutSaving(false);
-                      }}
-                    >{blackoutSaving ? "SAVING…" : alreadyBlocked ? "ALREADY BLOCKED" : "⛔ BLOCK DATE"}</button>
+                    <>
+                      {previewCount > 0 && (
+                        <div style={{ fontSize:12, color:"#c9a227", padding:"6px 10px", background:"rgba(201,162,39,.08)", borderRadius:4 }}>
+                          Will block <strong>{previewCount}</strong> date{previewCount !== 1 ? "s" : ""}
+                        </div>
+                      )}
+                      <button
+                        className="btn"
+                        disabled={!isValid || blackoutSaving || alreadyBlocked}
+                        style={{ padding:"11px", fontSize:13, borderRadius:6, background: isValid ? "rgba(239,68,68,.15)" : "transparent", border:"1px solid rgba(239,68,68,.35)", color: isValid ? "#f87171" : "#556677" }}
+                        onClick={async () => {
+                          setBlackoutSaving(true);
+                          const reason = blackoutReason.trim() || null;
+                          const rows = [];
+
+                          if (blackoutMode === "single") {
+                            rows.push({ date: blackoutInput, reason, start_time: blackoutStartTime || null, end_time: blackoutEndTime || null });
+                          } else if (blackoutMode === "range") {
+                            let d = new Date(blackoutInput + "T00:00:00"); const end = new Date(blackoutRangeTo + "T00:00:00");
+                            while (d <= end) { rows.push({ date: d.toISOString().slice(0,10), reason, start_time:null, end_time:null }); d.setDate(d.getDate()+1); }
+                          } else {
+                            let d = new Date(blackoutInput + "T00:00:00"); const end = new Date(blackoutRangeTo + "T00:00:00"); const wd = parseInt(blackoutWeekday);
+                            while (d <= end) { if (d.getDay() === wd) rows.push({ date: d.toISOString().slice(0,10), reason, start_time:null, end_time:null }); d.setDate(d.getDate()+1); }
+                          }
+
+                          // Filter out already-blocked dates
+                          const toInsert = rows.filter(r => !blackoutDates.some(b => b.date === r.date && !b.start_time));
+                          if (toInsert.length === 0) { fire("⚠️ All dates already blocked"); setBlackoutSaving(false); return; }
+
+                          const { error } = await supabase.from("blackout_dates").insert(toInsert);
+                          if (error) { fire("❌ Error blocking dates"); }
+                          else { setBlackoutInput(""); setBlackoutRangeTo(""); setBlackoutReason(""); setBlackoutStartTime(""); setBlackoutEndTime(""); fire(`⛔ ${toInsert.length} date${toInsert.length !== 1 ? "s" : ""} blocked`); }
+                          setBlackoutSaving(false);
+                        }}
+                      >{blackoutSaving ? "SAVING…" : alreadyBlocked ? "ALREADY BLOCKED" : `⛔ BLOCK${previewCount > 1 ? ` ${previewCount} DATES` : " DATE"}`}</button>
+                    </>
                   );
                 })()}
               </div>

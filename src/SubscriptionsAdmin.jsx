@@ -347,9 +347,10 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       fire("✅ Updated");
     } else {
       const referredByCode = (form.referred_by || "").trim().toUpperCase();
+      const newReferralCode = genReferralCode();
       const { data, error } = await supabase
         .from("subscriptions")
-        .insert({ ...payload, reminded_7d: false, reminded_2d: false, reminded_expired: false, referral_code: genReferralCode(), referred_by: referredByCode || null })
+        .insert({ ...payload, reminded_7d: false, reminded_2d: false, reminded_expired: false, referral_code: newReferralCode, referred_by: referredByCode || null })
         .select()
         .single();
       if (error) { fire("❌ Error adding"); setSaving(false); return; }
@@ -390,7 +391,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
         fetch("/api/send-subscription-welcome", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({ ...payload, referral_code: newReferralCode }),
         }).catch(() => {});
       }
       if (!referredByCode || !subs.find(s => s.referral_code === referredByCode)) {

@@ -21,7 +21,7 @@ const fmtDate = isoStr => {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
-  const { name, email, phone, plan, duration_months, price, devices, username, password, start_date, expiration, payment_method } = req.body;
+  const { name, email, phone, plan, duration_months, price, devices, username, password, start_date, expiration, payment_method, referral_code } = req.body;
 
   if (!email) return res.status(400).json({ error: 'No email address provided' });
 
@@ -100,6 +100,17 @@ export default async function handler(req, res) {
               </tr>` : ''}
             </table>
             <p style="margin:12px 0 0;font-size:11px;color:#556677;">Keep these credentials safe — do not share them with others.</p>
+          </div>
+          ` : ''}
+
+          ${referral_code ? `
+          <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:6px;padding:20px;margin-bottom:20px;text-align:center;">
+            <div style="font-size:11px;color:#34d399;letter-spacing:2px;margin-bottom:10px;">YOUR REFERRAL CODE</div>
+            <div style="font-size:28px;font-weight:900;color:#22c55e;letter-spacing:4px;font-family:monospace;">${referral_code}</div>
+            <p style="margin:12px 0 0;font-size:13px;color:#c8bfa8;line-height:1.6;">
+              Share this code with friends &amp; family. When they sign up, you'll earn
+              <strong style="color:#f0c040;">$10 credit</strong> toward your next renewal — automatically!
+            </p>
           </div>
           ` : ''}
 

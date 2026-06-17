@@ -93,7 +93,7 @@ const BLANK = () => {
     username: "", password: "", start_date: sd,
     expiration: addMonthsToDate(sd, 1),
     status: "active", notes: "", payment_method: "Bank Transfer",
-    referred_by: "",
+    referred_by: "EZT-",
     referral_reward_name:  "Standard Referral",
     referral_reward_type:  "flat",
     referral_reward_value: "10",
@@ -2214,8 +2214,9 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     onChange={e => {
                       const v = e.target.value.toUpperCase();
                       setForm(f => ({ ...f, referred_by: v }));
-                      if (v.length >= 8) {
-                        const match = subs.find(s => s.referral_code === v);
+                      const trimmed = v.trim();
+                      if (trimmed.length >= 6 && trimmed !== "EZT-") {
+                        const match = subs.find(s => s.referral_code === trimmed);
                         setReferralLookup({ name: match ? match.name : null, notFound: !match });
                       } else {
                         setReferralLookup({ name: null, notFound: false });

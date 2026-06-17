@@ -145,6 +145,9 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const [showApplyCredit, setShowApplyCredit] = useState(false);
   const [applyCreditAmt, setApplyCreditAmt] = useState("");
   const [applyingCredit, setApplyingCredit] = useState(false);
+  const [editingReferralCode, setEditingReferralCode] = useState(false);
+  const [referralCodeInput, setReferralCodeInput] = useState("");
+  const [savingReferralCode, setSavingReferralCode] = useState(false);
 
   const [bulkSel, setBulkSel]               = useState(new Set());
   const [bulkDelConfirm, setBulkDelConfirm] = useState(false);
@@ -648,6 +651,24 @@ export default function SubscriptionsAdmin({ onGoClient }) {
     fire(`✅ $${amt} credit applied`);
   };
 
+  const saveReferralCode = async () => {
+    if (!selected || savingReferralCode) return;
+    const code = referralCodeInput.trim().toUpperCase();
+    if (!code) return;
+    if (subs.some(s => s.id !== selected.id && s.referral_code === code)) {
+      fire("❌ Code already in use"); return;
+    }
+    setSavingReferralCode(true);
+    const { error } = await supabase.from("subscriptions").update({ referral_code: code }).eq("id", selected.id);
+    if (error) { fire("❌ Error saving code"); setSavingReferralCode(false); return; }
+    const updated = { ...selected, referral_code: code };
+    setSubs(p => p.map(s => s.id === selected.id ? updated : s));
+    setSelected(updated);
+    setSavingReferralCode(false);
+    setEditingReferralCode(false);
+    fire("✅ Referral code updated");
+  };
+
   const exportPaymentsCSV = () => {
     if (!selected || payments.length === 0) return;
     const headers = ["Date","Amount","Method","Note"];
@@ -984,7 +1005,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                     return (
                       <button key={n.id}
                         onClick={() => {
-                          if (n.subId) { const s = subs.find(x => x.id === n.subId); if (s) { setSelected(s); setTab("list"); setDeleteConfirm(false); setEditNotes(false); setReminderConfirm(false); setShowPw(false); } }
+                          if (n.subId) { const s = subs.find(x => x.id === n.subId); if (s) { setSelected(s); setTab("list"); setDeleteConfirm(false); setEditNotes(false); setReminderConfirm(false); setShowPw(false); setEditingReferralCode(false); } }
                           setSubNotifOpen(false);
                         }}
                         style={{ display:"flex", gap:12, padding:"12px 14px", width:"100%", background:n.read?"none":"rgba(201,162,39,.04)", border:"none", borderBottom:"1px solid rgba(255,255,255,.05)", cursor:"pointer", textAlign:"left", alignItems:"flex-start" }}>
@@ -1141,7 +1162,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                 const ei = expiryInfo(sub);
                 return (
                   <div key={sub.id}
-                    onClick={() => { setSelected(sub); setDeleteConfirm(false); setEditNotes(false); setReminderConfirm(false); setShowPw(false); }}
+                    onClick={() => { setSelected(sub); setDeleteConfirm(false); setEditNotes(false); setReminderConfirm(false); setShowPw(false); setEditingReferralCode(false); }}
                     style={{ ...rowColor(sub), borderRadius:4, cursor:"pointer", padding:"12px 14px", marginBottom:8, transition:"all .15s", outline:selected?.id===sub.id?"2px solid rgba(201,162,39,.5)":"none" }}>
                     <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8 }}>
                       <input type="checkbox" checked={bulkSel.has(sub.id)}
@@ -1381,21 +1402,46 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                         <div style={{ marginBottom:16, padding:12, background:"rgba(34,197,94,.04)", border:"1px solid rgba(34,197,94,.15)", borderRadius:4 }}>
                           <div style={{ fontSize:12, color:"#34d399", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:8 }}>REFERRAL</div>
 
-                          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0", borderBottom:"1px solid rgba(34,197,94,.08)" }}>
-                            <span style={{ fontSize:14, color:"#7788aa" }}>Referral Code</span>
-                            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                              {selected.referral_code ? (
-                                <>
-                                  <span style={{ fontSize:13, color:"#e8e0cc", fontFamily:"monospace", letterSpacing:1 }}>{selected.referral_code}</span>
-                                  <button onClick={() => { navigator.clipboard.writeText(selected.referral_code); fire("📋 Code copied"); }}
-                                    style={{ background:"none", border:"1px solid rgba(34,197,94,.3)", borderRadius:3, color:"#34d399", fontSize:11, padding:"2px 7px", cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
-                                    COPY
-                                  </button>
-                                </>
-                              ) : (
-                                <span style={{ fontSize:13, color:"#445566", fontStyle:"italic" }}>Not assigned</span>
+                          <div style={{ padding:"6px 0", borderBottom:"1px solid rgba(34,197,94,.08)" }}>
+                            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                              <span style={{ fontSize:14, color:"#7788aa" }}>Referral Code</span>
+                              {!editingReferralCode && (
+                                <button onClick={() => { setReferralCodeInput(selected.referral_code || ""); setEditingReferralCode(true); }}
+                                  style={{ background:"none", border:"none", color:"#c9a227", fontSize:13, cursor:"pointer" }}>✏️ Edit</button>
                               )}
                             </div>
+                            {editingReferralCode ? (
+                              <div style={{ marginTop:8 }}>
+                                <input
+                                  value={referralCodeInput}
+                                  onChange={e => setReferralCodeInput(e.target.value.toUpperCase())}
+                                  placeholder="e.g. BATELCO or EZT-CUSTOM"
+                                  style={{ fontFamily:"monospace", letterSpacing:1, fontSize:14, marginBottom:8 }}
+                                  autoFocus
+                                  onKeyDown={e => { if (e.key === "Enter") saveReferralCode(); if (e.key === "Escape") setEditingReferralCode(false); }}
+                                />
+                                <div style={{ display:"flex", gap:8 }}>
+                                  <button className="btn ok" style={{ padding:"6px 14px", fontSize:12 }} onClick={saveReferralCode} disabled={savingReferralCode}>
+                                    {savingReferralCode ? "SAVING…" : "SAVE"}
+                                  </button>
+                                  <button className="btn ghost" style={{ padding:"6px 14px", fontSize:12 }} onClick={() => setEditingReferralCode(false)}>CANCEL</button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:4 }}>
+                                {selected.referral_code ? (
+                                  <>
+                                    <span style={{ fontSize:14, color:"#e8e0cc", fontFamily:"monospace", letterSpacing:1 }}>{selected.referral_code}</span>
+                                    <button onClick={() => { navigator.clipboard.writeText(selected.referral_code); fire("📋 Code copied"); }}
+                                      style={{ background:"none", border:"1px solid rgba(34,197,94,.3)", borderRadius:3, color:"#34d399", fontSize:11, padding:"2px 7px", cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
+                                      COPY
+                                    </button>
+                                  </>
+                                ) : (
+                                  <span style={{ fontSize:13, color:"#445566", fontStyle:"italic" }}>Not assigned</span>
+                                )}
+                              </div>
+                            )}
                           </div>
 
                           {selected.referred_by && (
@@ -1447,7 +1493,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                             const ei2 = expiryInfo(s);
                             return (
                               <div key={s.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"7px 0", borderBottom:"1px solid rgba(167,139,250,.08)", cursor:"pointer" }}
-                                onClick={() => { setSelected(s); setDeleteConfirm(false); setEditNotes(false); setReminderConfirm(false); setShowPw(false); }}>
+                                onClick={() => { setSelected(s); setDeleteConfirm(false); setEditNotes(false); setReminderConfirm(false); setShowPw(false); setEditingReferralCode(false); }}>
                                 <div>
                                   <div style={{ display:"flex", gap:6, alignItems:"center" }}>
                                     <span style={{ fontSize:12, padding:"1px 6px", borderRadius:2,

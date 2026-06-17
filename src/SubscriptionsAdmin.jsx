@@ -361,6 +361,19 @@ export default function SubscriptionsAdmin({ onGoClient }) {
           const newCredit = (referrer.referral_credit || 0) + REFERRAL_CREDIT;
           supabase.from("subscriptions").update({ referral_credit: newCredit }).eq("id", referrer.id).then(() => {});
           setSubs(p => p.map(s => s.id === referrer.id ? { ...s, referral_credit: newCredit } : s));
+          if (referrer.email) {
+            fetch("/api/send-referral-credit-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name:           referrer.name,
+                email:          referrer.email,
+                referred_name:  payload.name,
+                credit_earned:  REFERRAL_CREDIT,
+                credit_balance: newCredit,
+              }),
+            }).catch(() => {});
+          }
           fire(`✅ Subscription added · $${REFERRAL_CREDIT} credit issued to ${referrer.name}`);
         }
       }

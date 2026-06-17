@@ -1,5 +1,4 @@
--- Referral Program Migration
--- Run in Supabase SQL Editor
+-- Add Referral Program Columns
 
 ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS referral_code TEXT UNIQUE;
 ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS referred_by TEXT;

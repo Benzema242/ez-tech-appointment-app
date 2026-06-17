@@ -1,5 +1,4 @@
--- Backfill referral codes for existing subscribers that don't have one
--- Run in Supabase SQL Editor
+-- Backfill Referral Codes for Existing Subscribers
 
 DO $$
 DECLARE

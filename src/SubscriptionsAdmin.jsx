@@ -77,6 +77,14 @@ const fmtDate = isoStr => {
 const PAYMENT_METHODS = ["Cash", "Bank Transfer", "Island Luck", "Cash App", "PayPal"];
 const PAYMENT_EMOJI = { "Cash": "💵", "Bank Transfer": "🏦", "Island Luck": "🎰", "Cash App": "💸", "PayPal": "🅿️" };
 
+const REFERRAL_CREDIT = 10;
+const genReferralCode = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'EZT-';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+};
+
 const BLANK = () => {
   const sd = todayStr();
   return {
@@ -85,6 +93,7 @@ const BLANK = () => {
     username: "", password: "", start_date: sd,
     expiration: addMonthsToDate(sd, 1),
     status: "active", notes: "", payment_method: "Bank Transfer",
+    referred_by: "",
   };
 };
 
@@ -132,6 +141,10 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   const [editingPayment, setEditingPayment]   = useState(null);
   const [deletePayId, setDeletePayId]         = useState(null);
   const [showNameSuggestions, setShowNameSuggestions] = useState(false);
+  const [referralLookup, setReferralLookup] = useState({ name: null, notFound: false });
+  const [showApplyCredit, setShowApplyCredit] = useState(false);
+  const [applyCreditAmt, setApplyCreditAmt] = useState("");
+  const [applyingCredit, setApplyingCredit] = useState(false);
 
   const [bulkSel, setBulkSel]               = useState(new Set());
   const [bulkDelConfirm, setBulkDelConfirm] = useState(false);
@@ -254,7 +267,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
   };
 
   // ── Modal helpers ─────────────────────────────────────────────────────────
-  const openAdd = () => { setForm(BLANK()); setEditId(null); setShowModal(true); };
+  const openAdd = () => { setForm(BLANK()); setEditId(null); setReferralLookup({ name: null, notFound: false }); setShowModal(true); };
 
   const openEdit = sub => {
     setForm({
@@ -333,13 +346,24 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       if (selected?.id === editId) setSelected(s => ({ ...s, ...payload }));
       fire("✅ Updated");
     } else {
+      const referredByCode = (form.referred_by || "").trim().toUpperCase();
       const { data, error } = await supabase
         .from("subscriptions")
-        .insert({ ...payload, reminded_7d: false, reminded_2d: false, reminded_expired: false })
+        .insert({ ...payload, reminded_7d: false, reminded_2d: false, reminded_expired: false, referral_code: genReferralCode(), referred_by: referredByCode || null })
         .select()
         .single();
       if (error) { fire("❌ Error adding"); setSaving(false); return; }
       setSubs(p => [...p, data].sort((a, b) => new Date(a.expiration) - new Date(b.expiration)));
+      // Credit referrer if a valid referral code was used
+      if (referredByCode) {
+        const referrer = subs.find(s => s.referral_code === referredByCode);
+        if (referrer) {
+          const newCredit = (referrer.referral_credit || 0) + REFERRAL_CREDIT;
+          supabase.from("subscriptions").update({ referral_credit: newCredit }).eq("id", referrer.id).then(() => {});
+          setSubs(p => p.map(s => s.id === referrer.id ? { ...s, referral_credit: newCredit } : s));
+          fire(`✅ Subscription added · $${REFERRAL_CREDIT} credit issued to ${referrer.name}`);
+        }
+      }
       // Log initial payment
       supabase.from("payments").insert({
         subscription_id: data.id,
@@ -356,7 +380,9 @@ export default function SubscriptionsAdmin({ onGoClient }) {
           body: JSON.stringify(payload),
         }).catch(() => {});
       }
-      fire("✅ Subscription added" + (payload.email ? " · Welcome email sent" : ""));
+      if (!referredByCode || !subs.find(s => s.referral_code === referredByCode)) {
+        fire("✅ Subscription added" + (payload.email ? " · Welcome email sent" : ""));
+      }
     }
     setSaving(false);
     setShowModal(false);
@@ -590,6 +616,22 @@ export default function SubscriptionsAdmin({ onGoClient }) {
     setPayments(p => p.filter(pay => pay.id !== id));
     setDeletePayId(null);
     fire("🗑 Payment deleted");
+  };
+
+  const applyCredit = async () => {
+    if (!selected || applyingCredit) return;
+    const amt = parseFloat(applyCreditAmt) || 0;
+    if (amt <= 0) return;
+    setApplyingCredit(true);
+    const newCredit = Math.max(0, (selected.referral_credit || 0) - amt);
+    const { error } = await supabase.from("subscriptions").update({ referral_credit: newCredit }).eq("id", selected.id);
+    if (error) { fire("❌ Error applying credit"); setApplyingCredit(false); return; }
+    const updated = { ...selected, referral_credit: newCredit };
+    setSubs(p => p.map(s => s.id === selected.id ? updated : s));
+    setSelected(updated);
+    setApplyingCredit(false);
+    setShowApplyCredit(false);
+    fire(`✅ $${amt} credit applied`);
   };
 
   const exportPaymentsCSV = () => {
@@ -1312,6 +1354,66 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                       )}
                     </div>
 
+                    {/* Referral */}
+                    {(() => {
+                      const referralCount = selected.referral_code
+                        ? subs.filter(s => s.referred_by === selected.referral_code).length
+                        : 0;
+                      const referrer = selected.referred_by
+                        ? subs.find(s => s.referral_code === selected.referred_by)
+                        : null;
+                      const credit = selected.referral_credit || 0;
+                      return (
+                        <div style={{ marginBottom:16, padding:12, background:"rgba(34,197,94,.04)", border:"1px solid rgba(34,197,94,.15)", borderRadius:4 }}>
+                          <div style={{ fontSize:12, color:"#34d399", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:8 }}>REFERRAL</div>
+
+                          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0", borderBottom:"1px solid rgba(34,197,94,.08)" }}>
+                            <span style={{ fontSize:14, color:"#7788aa" }}>Referral Code</span>
+                            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                              {selected.referral_code ? (
+                                <>
+                                  <span style={{ fontSize:13, color:"#e8e0cc", fontFamily:"monospace", letterSpacing:1 }}>{selected.referral_code}</span>
+                                  <button onClick={() => { navigator.clipboard.writeText(selected.referral_code); fire("📋 Code copied"); }}
+                                    style={{ background:"none", border:"1px solid rgba(34,197,94,.3)", borderRadius:3, color:"#34d399", fontSize:11, padding:"2px 7px", cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5 }}>
+                                    COPY
+                                  </button>
+                                </>
+                              ) : (
+                                <span style={{ fontSize:13, color:"#445566", fontStyle:"italic" }}>Not assigned</span>
+                              )}
+                            </div>
+                          </div>
+
+                          {selected.referred_by && (
+                            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0", borderBottom:"1px solid rgba(34,197,94,.08)" }}>
+                              <span style={{ fontSize:14, color:"#7788aa" }}>Referred by</span>
+                              <span style={{ fontSize:14, color:"#34d399" }}>{referrer ? referrer.name : selected.referred_by}</span>
+                            </div>
+                          )}
+
+                          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0", borderBottom:"1px solid rgba(34,197,94,.08)" }}>
+                            <span style={{ fontSize:14, color:"#7788aa" }}>Referrals Made</span>
+                            <span style={{ fontSize:14, color: referralCount > 0 ? "#22c55e" : "#e8e0cc" }}>
+                              {referralCount} subscriber{referralCount !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+
+                          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0" }}>
+                            <span style={{ fontSize:14, color:"#7788aa" }}>Credit Balance</span>
+                            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                              <span style={{ fontSize:16, fontWeight:700, color: credit > 0 ? "#22c55e" : "#556677" }}>${credit}</span>
+                              {credit > 0 && (
+                                <button onClick={() => { setApplyCreditAmt(String(credit)); setShowApplyCredit(true); }}
+                                  style={{ padding:"4px 10px", borderRadius:3, fontSize:12, cursor:"pointer", fontFamily:"'Orbitron',sans-serif", letterSpacing:.5, background:"rgba(34,197,94,.12)", border:"1px solid rgba(34,197,94,.3)", color:"#22c55e" }}>
+                                  APPLY
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     {/* Client Subscription History */}
                     {(() => {
                       const clientSubs = subs.filter(s =>
@@ -1766,6 +1868,57 @@ export default function SubscriptionsAdmin({ onGoClient }) {
             ) : (
               <div style={{ padding:"20px", textAlign:"center", color:"#445566", fontSize:14 }}>No renewals due in the next 30 days</div>
             )}
+
+            {/* Referral Program */}
+            {(() => {
+              const referred = subs.filter(s => s.referred_by);
+              const totalCreditsOutstanding = subs.reduce((sum, s) => sum + (s.referral_credit || 0), 0);
+              const referrerMap = {};
+              referred.forEach(s => {
+                const referrer = subs.find(r => r.referral_code === s.referred_by);
+                if (referrer) {
+                  if (!referrerMap[referrer.id]) referrerMap[referrer.id] = { name: referrer.name, count: 0 };
+                  referrerMap[referrer.id].count++;
+                }
+              });
+              const topReferrers = Object.values(referrerMap).sort((a, b) => b.count - a.count).slice(0, 5);
+              return (
+                <>
+                  <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:17, fontWeight:700, color:"#34d399", letterSpacing:1.5, marginBottom:4, marginTop:32 }}>REFERRAL PROGRAM</div>
+                  <div style={{ fontSize:13, color:"#7788aa", marginBottom:16 }}>Subscribers who referred new sign-ups earn ${REFERRAL_CREDIT} credit per referral</div>
+
+                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))", gap:12, marginBottom:24 }}>
+                    {[
+                      { l:"TOTAL REFERRALS", v:referred.length, c:"#22c55e" },
+                      { l:"CREDITS OUTSTANDING", v:`$${totalCreditsOutstanding}`, c:"#f0c040" },
+                      { l:"ACTIVE REFERRERS", v:topReferrers.length, c:"#a78bfa" },
+                    ].map(s => (
+                      <div key={s.l} className="card" style={{ padding:"16px 18px" }}>
+                        <div style={{ fontSize:13, letterSpacing:1.5, color:"#7788aa", fontFamily:"'Orbitron',sans-serif", marginBottom:6 }}>{s.l}</div>
+                        <div style={{ fontSize:24, fontWeight:900, color:s.c, fontFamily:"'Orbitron',sans-serif" }}>{s.v}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {topReferrers.length > 0 ? (
+                    <div className="card" style={{ padding:"16px 20px" }}>
+                      <div style={{ fontSize:12, color:"#34d399", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:12 }}>TOP REFERRERS</div>
+                      {topReferrers.map((r, i) => (
+                        <div key={r.name} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"9px 0", borderBottom:"1px solid rgba(34,197,94,.08)" }}>
+                          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                            <span style={{ fontSize:15, color:i===0?"#f0c040":i===1?"#94a3b8":i===2?"#c9703c":"#556677", fontWeight:700, width:22, flexShrink:0 }}>#{i+1}</span>
+                            <span style={{ fontSize:14, color:"#e8e0cc" }}>{r.name}</span>
+                          </div>
+                          <span style={{ fontSize:14, color:"#22c55e", fontWeight:700 }}>{r.count} referral{r.count!==1?"s":""}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ padding:"20px", textAlign:"center", color:"#445566", fontSize:14 }}>No referrals recorded yet</div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
       </div>
@@ -1934,6 +2087,36 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                 <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes:e.target.value }))}
                   rows={2} placeholder="Optional notes…" style={{ resize:"vertical" }} />
               </div>
+
+              {/* Referred by — new subs only */}
+              {!editId && (
+                <div>
+                  {lbl("REFERRED BY (code)")}
+                  <input
+                    value={form.referred_by}
+                    onChange={e => {
+                      const v = e.target.value.toUpperCase();
+                      setForm(f => ({ ...f, referred_by: v }));
+                      if (v.length >= 8) {
+                        const match = subs.find(s => s.referral_code === v);
+                        setReferralLookup({ name: match ? match.name : null, notFound: !match });
+                      } else {
+                        setReferralLookup({ name: null, notFound: false });
+                      }
+                    }}
+                    placeholder="EZT-XXXXXX (optional)"
+                    style={{ fontFamily:"monospace", letterSpacing:1 }}
+                  />
+                  {referralLookup.name && (
+                    <div style={{ fontSize:12, color:"#22c55e", marginTop:4 }}>
+                      ✓ Referred by: <strong>{referralLookup.name}</strong> — ${REFERRAL_CREDIT} credit will be issued
+                    </div>
+                  )}
+                  {referralLookup.notFound && (
+                    <div style={{ fontSize:12, color:"#f87171", marginTop:4 }}>✗ Code not found</div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div style={{ display:"flex", gap:10, marginTop:22, justifyContent:"flex-end" }}>
@@ -2034,6 +2217,41 @@ export default function SubscriptionsAdmin({ onGoClient }) {
         </div>
       )}
       {/* Log / Edit Payment Modal */}
+      {/* Apply Referral Credit Modal */}
+      {showApplyCredit && selected && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.85)", zIndex:3000, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}
+          onClick={() => setShowApplyCredit(false)}>
+          <div className="card slide-in" style={{ width:"100%", maxWidth:360, padding:28 }} onClick={e => e.stopPropagation()}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+              <div style={{ fontFamily:"'Orbitron',sans-serif", fontSize:15, fontWeight:700, color:"#34d399", letterSpacing:1.5 }}>APPLY REFERRAL CREDIT</div>
+              <button className="btn ghost" style={{ padding:"4px 10px", fontSize:14 }} onClick={() => setShowApplyCredit(false)}>✕</button>
+            </div>
+
+            <div style={{ padding:"12px 16px", background:"rgba(34,197,94,.06)", border:"1px solid rgba(34,197,94,.2)", borderRadius:4, marginBottom:20 }}>
+              <div style={{ fontSize:13, color:"#7788aa", marginBottom:4 }}>{selected.name} — available balance</div>
+              <div style={{ fontSize:28, fontWeight:900, color:"#22c55e", fontFamily:"'Orbitron',sans-serif" }}>${selected.referral_credit || 0}</div>
+            </div>
+
+            {lbl("AMOUNT TO APPLY ($)")}
+            <input type="number" min="1" max={selected.referral_credit || 0} autoFocus
+              value={applyCreditAmt} onChange={e => setApplyCreditAmt(e.target.value)}
+              placeholder="0" style={{ marginBottom:6 }} />
+            <div style={{ fontSize:12, color:"#7788aa", marginBottom:20 }}>
+              Remaining after apply: ${Math.max(0, (selected.referral_credit || 0) - (parseFloat(applyCreditAmt) || 0))}
+            </div>
+
+            <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
+              <button className="btn ghost" onClick={() => setShowApplyCredit(false)}>CANCEL</button>
+              <button className="btn ok" style={{ padding:"9px 18px" }}
+                disabled={!applyCreditAmt || parseFloat(applyCreditAmt) <= 0 || applyingCredit}
+                onClick={applyCredit}>
+                {applyingCredit ? "APPLYING…" : "✓ APPLY CREDIT"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showLogPayment && selected && (
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.8)", zIndex:2000, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}
           onClick={() => { setShowLogPayment(false); setEditingPayment(null); }}>

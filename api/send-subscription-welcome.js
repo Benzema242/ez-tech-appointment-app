@@ -21,7 +21,7 @@ const fmtDate = isoStr => {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
-  const { name, email, phone, plan, duration_months, price, devices, username, password, start_date, expiration, payment_method, referral_code } = req.body;
+  const { name, email, phone, plan, duration_months, price, devices, username, password, start_date, expiration, payment_method, referral_code, referred_by_code, referred_by_name } = req.body;
 
   if (!email) return res.status(400).json({ error: 'No email address provided' });
 
@@ -103,13 +103,21 @@ export default async function handler(req, res) {
           </div>
           ` : ''}
 
+          ${referred_by_code ? `
+          <div style="background:rgba(201,162,39,.06);border-left:4px solid #c9a227;padding:14px 18px;border-radius:4px;margin-bottom:20px;">
+            <p style="margin:0;font-size:13px;color:#c8bfa8;line-height:1.6;">
+              🎟️ You signed up using referral code <strong style="color:#f0c040;font-family:monospace;letter-spacing:1px;">${referred_by_code}</strong>${referred_by_name ? ` from <strong style="color:#e8e0cc;">${referred_by_name}</strong>` : ''} and received a promotional discount. Thank you for being part of our community!
+            </p>
+          </div>
+          ` : ''}
+
           ${referral_code ? `
           <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:6px;padding:20px;margin-bottom:20px;text-align:center;">
             <div style="font-size:11px;color:#34d399;letter-spacing:2px;margin-bottom:10px;">YOUR REFERRAL CODE</div>
             <div style="font-size:28px;font-weight:900;color:#22c55e;letter-spacing:4px;font-family:monospace;">${referral_code}</div>
             <p style="margin:12px 0 0;font-size:13px;color:#c8bfa8;line-height:1.6;">
               Share this code with friends &amp; family. When they sign up, you'll earn
-              <strong style="color:#f0c040;">$10 credit</strong> toward your next renewal — automatically!
+              <strong style="color:#f0c040;">credit</strong> toward your next renewal — automatically!
             </p>
           </div>
           ` : ''}

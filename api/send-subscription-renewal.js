@@ -21,7 +21,7 @@ const fmtDate = isoStr => {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
-  const { name, email, phone, plan, duration_months, price, devices, expiration, payment_method } = req.body;
+  const { name, email, phone, plan, duration_months, price, devices, expiration, payment_method, referral_code } = req.body;
 
   if (!email) return res.status(400).json({ error: 'No email address provided' });
 
@@ -82,6 +82,19 @@ export default async function handler(req, res) {
               </tr>
             </table>
           </div>
+
+          ${referral_code ? `
+          <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:6px;padding:16px 20px;margin-bottom:20px;">
+            <div style="font-size:11px;color:#34d399;letter-spacing:2px;margin-bottom:8px;">EARN CREDIT — REFER A FRIEND</div>
+            <p style="margin:0 0 10px;font-size:13px;color:#c8bfa8;line-height:1.6;">
+              Know someone who'd love ${plan}? Share your personal referral code and earn credit every time they sign up!
+            </p>
+            <div style="text-align:center;padding:10px;background:rgba(34,197,94,.08);border-radius:4px;">
+              <div style="font-size:11px;color:#7788aa;letter-spacing:1px;margin-bottom:4px;">YOUR CODE</div>
+              <div style="font-size:22px;font-weight:900;color:#22c55e;letter-spacing:4px;font-family:monospace;">${referral_code}</div>
+            </div>
+          </div>
+          ` : ''}
 
           <div style="background:rgba(201,162,39,.06);border:1px solid rgba(201,162,39,.15);border-radius:6px;padding:16px 20px;margin-bottom:24px;">
             <div style="font-size:11px;color:#c9a227;letter-spacing:1.5px;margin-bottom:8px;">NEED HELP?</div>

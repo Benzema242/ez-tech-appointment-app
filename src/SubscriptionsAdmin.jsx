@@ -94,6 +94,9 @@ const BLANK = () => {
     expiration: addMonthsToDate(sd, 1),
     status: "active", notes: "", payment_method: "Bank Transfer",
     referred_by: "",
+    referral_reward_name:  "Standard Referral",
+    referral_reward_type:  "flat",
+    referral_reward_value: "10",
   };
 };
 
@@ -285,9 +288,12 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       password:        sub.password || "",
       start_date:      sub.start_date || todayStr(),
       expiration:      sub.expiration ? new Date(sub.expiration).toISOString().slice(0, 10) : "",
-      status:          sub.status || "active",
-      notes:           sub.notes || "",
-      payment_method:  sub.payment_method || "Bank Transfer",
+      status:               sub.status || "active",
+      notes:                sub.notes || "",
+      payment_method:       sub.payment_method || "Bank Transfer",
+      referral_reward_name:  sub.referral_reward_name  || "Standard Referral",
+      referral_reward_type:  sub.referral_reward_type  || "flat",
+      referral_reward_value: String(sub.referral_reward_value ?? 10),
     });
     setEditId(sub.id);
     setShowModal(true);
@@ -329,9 +335,12 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       password:        form.password.trim(),
       start_date:      form.start_date,
       expiration:      new Date(form.expiration + "T23:59:59").toISOString(),
-      status:          form.status,
-      notes:           form.notes.trim(),
-      payment_method:  form.payment_method || "Bank Transfer",
+      status:               form.status,
+      notes:                form.notes.trim(),
+      payment_method:       form.payment_method || "Bank Transfer",
+      referral_reward_name:  form.referral_reward_name?.trim() || "Standard Referral",
+      referral_reward_type:  form.referral_reward_type  || "flat",
+      referral_reward_value: parseFloat(form.referral_reward_value) || REFERRAL_CREDIT,
     };
     if (editId) {
       const existing = subs.find(s => s.id === editId);
@@ -362,7 +371,12 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       if (referredByCode) {
         const referrer = subs.find(s => s.referral_code === referredByCode);
         if (referrer) {
-          const newCredit = (referrer.referral_credit || 0) + REFERRAL_CREDIT;
+          const rewardType  = referrer.referral_reward_type  || "flat";
+          const rewardValue = referrer.referral_reward_value ?? REFERRAL_CREDIT;
+          const creditEarned = rewardType === "percent"
+            ? Math.round((payload.price * rewardValue) / 100)
+            : rewardValue;
+          const newCredit = (referrer.referral_credit || 0) + creditEarned;
           supabase.from("subscriptions").update({ referral_credit: newCredit }).eq("id", referrer.id).then(() => {});
           setSubs(p => p.map(s => s.id === referrer.id ? { ...s, referral_credit: newCredit } : s));
           if (referrer.email) {
@@ -373,12 +387,12 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                 name:           referrer.name,
                 email:          referrer.email,
                 referred_name:  payload.name,
-                credit_earned:  REFERRAL_CREDIT,
+                credit_earned:  creditEarned,
                 credit_balance: newCredit,
               }),
             }).catch(() => {});
           }
-          fire(`✅ Subscription added · $${REFERRAL_CREDIT} credit issued to ${referrer.name}`);
+          fire(`✅ Subscription added · $${creditEarned} credit issued to ${referrer.name}`);
         }
       }
       // Log initial payment
@@ -391,10 +405,16 @@ export default function SubscriptionsAdmin({ onGoClient }) {
       }).then(() => {});
       // Send welcome email if client has an email address
       if (payload.email) {
+        const referrer = referredByCode ? subs.find(s => s.referral_code === referredByCode) : null;
         fetch("/api/send-subscription-welcome", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...payload, referral_code: newReferralCode }),
+          body: JSON.stringify({
+            ...payload,
+            referral_code:      newReferralCode,
+            referred_by_code:   referredByCode || null,
+            referred_by_name:   referrer?.name || null,
+          }),
         }).catch(() => {});
       }
       if (!referredByCode || !subs.find(s => s.referral_code === referredByCode)) {
@@ -523,6 +543,7 @@ export default function SubscriptionsAdmin({ onGoClient }) {
           devices:         patch.devices,
           expiration:      newExpiry,
           payment_method:  renewForm.payment_method,
+          referral_code:   selected.referral_code || null,
         }),
       }).catch(() => {});
     }
@@ -2146,6 +2167,42 @@ export default function SubscriptionsAdmin({ onGoClient }) {
                 {lbl("NOTES")}
                 <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes:e.target.value }))}
                   rows={2} placeholder="Optional notes…" style={{ resize:"vertical" }} />
+              </div>
+
+              {/* Referral Reward Config */}
+              <div style={{ padding:"14px", background:"rgba(34,197,94,.04)", border:"1px solid rgba(34,197,94,.15)", borderRadius:6 }}>
+                <div style={{ fontSize:12, color:"#34d399", fontFamily:"'Orbitron',sans-serif", letterSpacing:1.5, marginBottom:12 }}>REFERRAL REWARD</div>
+                <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                  <div>
+                    {lbl("REWARD NAME")}
+                    <input
+                      value={form.referral_reward_name}
+                      onChange={e => setForm(f => ({ ...f, referral_reward_name: e.target.value }))}
+                      placeholder="e.g. Standard Referral, Fresh Partnership"
+                    />
+                  </div>
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                    <div>
+                      {lbl("TYPE")}
+                      <select value={form.referral_reward_type} onChange={e => setForm(f => ({ ...f, referral_reward_type: e.target.value }))}>
+                        <option value="flat">Flat ($)</option>
+                        <option value="percent">Percentage (%)</option>
+                      </select>
+                    </div>
+                    <div>
+                      {lbl(form.referral_reward_type === "percent" ? "% OF NEW SUB PRICE" : "CREDIT AMOUNT ($)")}
+                      <input type="number" min="0"
+                        value={form.referral_reward_value}
+                        onChange={e => setForm(f => ({ ...f, referral_reward_value: e.target.value }))}
+                        placeholder={form.referral_reward_type === "percent" ? "e.g. 15" : "e.g. 10"} />
+                    </div>
+                  </div>
+                  <div style={{ fontSize:12, color:"#7788aa" }}>
+                    {form.referral_reward_type === "percent"
+                      ? `Referrer earns ${form.referral_reward_value || 0}% of the new subscriber's price`
+                      : `Referrer earns $${form.referral_reward_value || 0} flat credit per referral`}
+                  </div>
+                </div>
               </div>
 
               {/* Referred by — new subs only */}
